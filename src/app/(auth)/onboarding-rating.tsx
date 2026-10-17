@@ -2,7 +2,7 @@ import Slider from '@react-native-community/slider';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
@@ -10,6 +10,9 @@ import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { playersService } from '@/services/players.service';
+
+const MIN_RATING = 1;
+const MAX_RATING = 2800;
 
 const PRESETS = [
   { label: 'Nunca jugué', value: 800 },
@@ -48,10 +51,6 @@ export default function OnboardingRatingScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.back}>{'‹'}</Text>
-        </Pressable>
-
         <View style={styles.progressRow}>
           <Text style={styles.progressLabel}>Paso 2 de 3</Text>
           <View style={styles.progressTrack}>
@@ -68,7 +67,17 @@ export default function OnboardingRatingScreen() {
         <Text style={styles.subtitle}>Desliza para indicar tu nivel actual</Text>
 
         <View style={styles.ratingCard}>
-          <Text style={styles.ratingValue}>{Math.round(rating)}</Text>
+          <TextInput
+            style={styles.ratingValue}
+            keyboardType="number-pad"
+            maxLength={4}
+            value={String(Math.round(rating))}
+            onChangeText={(text) => {
+              const parsed = parseInt(text.replace(/\D/g, ''), 10);
+              setRating(Number.isNaN(parsed) ? MIN_RATING : Math.min(parsed, MAX_RATING));
+            }}
+            onBlur={() => setRating((value) => Math.max(value, MIN_RATING))}
+          />
           <Text style={styles.ratingHint}>Toca para editar</Text>
           <View style={styles.presetRow}>
             {PRESETS.map((p) => (
@@ -88,8 +97,8 @@ export default function OnboardingRatingScreen() {
         </View>
 
         <Slider
-          minimumValue={1}
-          maximumValue={2800}
+          minimumValue={MIN_RATING}
+          maximumValue={MAX_RATING}
           step={10}
           value={rating}
           onValueChange={setRating}
@@ -145,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
-  ratingValue: { color: Brand.red, fontSize: 56, fontWeight: '800' },
+  ratingValue: { color: Brand.red, fontSize: 56, fontWeight: '800', textAlign: 'center', minWidth: 140 },
   ratingHint: { color: Brand.textSecondary, fontSize: 12 },
   presetRow: { flexDirection: 'row', gap: Spacing.two, flexWrap: 'wrap', justifyContent: 'center' },
   presetChip: {

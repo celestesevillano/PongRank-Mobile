@@ -9,10 +9,12 @@ import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { communitiesService } from '@/services/communities.service';
 import type { CommunityResponse } from '@/types/api';
+import { useToast } from '@/context/toast';
 import { toApiError } from '@/utils/api-error';
 
 export default function OnboardingCommunityScreen() {
   const { completeOnboarding } = useSession();
+  const { showToast } = useToast();
   const [query, setQuery] = useState('');
   const [communities, setCommunities] = useState<CommunityResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +49,7 @@ export default function OnboardingCommunityScreen() {
     try {
       await communitiesService.join(community.id);
       setJoinedIds((prev) => new Set(prev).add(community.id));
+      showToast(`Te uniste a ${community.name}.`);
     } catch (err) {
       setError(toApiError(err).message);
     } finally {
@@ -111,6 +114,10 @@ export default function OnboardingCommunityScreen() {
             }}
           />
         )}
+
+        <Pressable onPress={() => router.push('/(auth)/create-community')}>
+          <Text style={styles.skip}>+ Crear una nueva comunidad</Text>
+        </Pressable>
 
         <Text style={styles.footerHint}>
           Puedes jugar partidas, retar amigos y aparecer en el ranking general sin unirte a ninguna comunidad.
