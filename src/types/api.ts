@@ -92,3 +92,18 @@ export type TrainingSessionResponse = {
   createdAt: string;
   newPersonalBest: boolean;
 };
+
+export type MatchSet = {
+  id: number;
+  setNumber: number;
+  scorePlayer1: number;
+  scorePlayer2: number;
+  winnerPlayerNumber: 1 | 2;
+};
+
+export type MatchDetail = MatchResponse & {
+  disputeReason: string | null;
+  sets: MatchSet[];
+};
+
+export type SetScore = { setNumber: number; scorePlayer1: number; scorePlayer2: number };

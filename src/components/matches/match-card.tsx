@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Spacing } from '@/constants/theme';
 import type { MatchResponse } from '@/types/api';
@@ -19,7 +20,7 @@ export function MatchCard({ match, playerId }: { match: MatchResponse; playerId:
   const delta = match.player1.id === playerId ? match.ratingDeltaP1 : match.ratingDeltaP2;
 
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={() => router.push(`/match/${match.id}`)}>
       <View style={styles.row}>
         <Text style={styles.opponent}>vs {opponent?.name ?? 'Rival por definir'}</Text>
         <Text style={styles.status}>{STATUS_LABELS[match.status] ?? match.status}</Text>
@@ -38,7 +39,7 @@ export function MatchCard({ match, playerId }: { match: MatchResponse; playerId:
           {Math.round(delta)} rating
         </Text>
       )}
-    </View>
+    </Pressable>
   );
 }
 
