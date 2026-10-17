@@ -1,4 +1,7 @@
+import { router } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { AuthButton } from '@/components/auth/auth-button';
 
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
@@ -47,6 +50,11 @@ export default function DashboardScreen() {
           )}
         </View>
 
+        <View style={styles.actions}>
+          <AuthButton label="Nueva partida" onPress={() => router.push('/new-match')} />
+          <AuthButton label="Buscar partida" variant="ghost" onPress={() => router.push('/find-match')} />
+        </View>
+
         <Text style={styles.section}>Ranking {standing.data ? standing.data.communityName : ''}</Text>
         <ScreenState
           loading={standing.loading}
@@ -93,6 +101,7 @@ const styles = StyleSheet.create({
   rating: { color: Brand.red, fontSize: 52, fontWeight: '800' },
   position: { alignItems: 'flex-end', maxWidth: '50%' },
   positionValue: { color: Brand.text, fontWeight: '700', textAlign: 'right' },
+  actions: { gap: Spacing.one, marginTop: Spacing.two },
   section: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.three },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, borderBottomWidth: 1, borderBottomColor: Brand.border, paddingVertical: Spacing.two },
   rankPosition: { color: Brand.textSecondary, width: 24, fontWeight: '700' },

@@ -2,6 +2,15 @@ import { http } from '@/services/http';
 import type { MatchResponse, Page, PageParams } from '@/types/api';
 import { normalizePage } from '@/utils/pagination';
 
+export type Coordinates = { latitude: number; longitude: number };
+
+export type MatchCreateInput = {
+  matchType: 'FRIEND' | 'COMMUNITY' | 'LOCATION';
+  format: 'BO3' | 'BO5' | 'BO7';
+  opponentId?: number;
+  communityId?: number;
+} & Partial<Coordinates>;
+
 export const ACTIVE_STATUSES = ['CREATED', 'PROPOSED_P1', 'PROPOSED_P2'] as const;
 export const HISTORY_STATUSES = ['CONFIRMED', 'DISPUTED', 'CANCELLED', 'WALKOVER'] as const;
 
@@ -16,8 +25,11 @@ export const matchesService = {
     return pages.flatMap((page) => page.content).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
-  open: (location: { latitude: number; longitude: number }, signal?: AbortSignal) =>
+  open: (location: Coordinates, signal?: AbortSignal) =>
     http.get<MatchResponse[]>('/matches/open', { params: location, signal }).then((r) => r.data),
 
-  join: (matchId: number) => http.post<MatchResponse>(`/matches/${matchId}/join`, {}).then((r) => r.data),
+  create: (input: MatchCreateInput) => http.post<MatchResponse>('/matches', input).then((r) => r.data),
+
+  join: (matchId: number, location: Coordinates) =>
+    http.post<MatchResponse>(`/matches/${matchId}/join`, location).then((r) => r.data),
 };
