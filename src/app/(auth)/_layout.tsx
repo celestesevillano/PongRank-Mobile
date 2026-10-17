@@ -1,7 +1,10 @@
 import { Stack } from 'expo-router';
 
+import { RegistrationProvider } from '@/context/registration';
+
 export default function AuthLayout() {
   return (
+    <RegistrationProvider>
     <Stack
       initialRouteName="welcome"
       screenOptions={{
@@ -18,5 +21,6 @@ export default function AuthLayout() {
       <Stack.Screen name="onboarding-rating" />
       <Stack.Screen name="onboarding-community" />
     </Stack>
+    </RegistrationProvider>
   );
 }

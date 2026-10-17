@@ -7,20 +7,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
-import { useSession } from '@/context/session';
+import { useRegistration } from '@/context/registration';
 import { FieldError } from '@/components/auth/field-error';
-import { authService } from '@/services/auth.service';
-import { ApiError } from '@/utils/api-error';
 import { validateEmail, validateName, validatePassword } from '@/utils/validation';
 
 export default function RegisterScreen() {
-  const { signInWithAuthResponse } = useSession();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { draft, saveDraft } = useRegistration();
+  const [name, setName] = useState(draft?.name ?? '');
+  const [email, setEmail] = useState(draft?.email ?? '');
+  const [password, setPassword] = useState(draft?.password ?? '');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const [touched, setTouched] = useState({ name: false, email: false, password: false });
 
@@ -30,18 +26,9 @@ export default function RegisterScreen() {
   const canSubmit = !nameError && !emailError && !passwordError;
   const markTouched = (field: keyof typeof touched) => setTouched((prev) => ({ ...prev, [field]: true }));
 
-  const handleSubmit = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const auth = await authService.register({ name: name.trim(), email: email.trim(), password });
-      await signInWithAuthResponse(auth);
-      router.replace('/(auth)/onboarding-rating');
-    } catch (err) {
-      setError(err instanceof ApiError && err.status === 409 ? 'Ese correo ya tiene una cuenta. Inicia sesión.' : err instanceof ApiError ? err.message : 'No se pudo crear la cuenta. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = () => {
+    saveDraft({ name: name.trim(), email: email.trim(), password });
+    router.push('/(auth)/onboarding-rating');
   };
 
   return (
@@ -97,9 +84,7 @@ export default function RegisterScreen() {
           <Text style={styles.hint}>Mínimo 8 caracteres, una letra y un número.</Text>
         </View>
 
-        {error && <Text style={styles.error}>{error}</Text>}
-
-        <AuthButton label="Crear cuenta" disabled={!canSubmit} loading={loading} onPress={handleSubmit} />
+        <AuthButton label="Continuar" disabled={!canSubmit} onPress={handleSubmit} />
 
         <Pressable onPress={() => router.replace('/(auth)/login')}>
           <Text style={styles.loginLink}>Ya tengo cuenta</Text>

@@ -1,6 +1,6 @@
 import Slider from '@react-native-community/slider';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,8 +8,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
+import { useRegistration } from '@/context/registration';
 import { useSession } from '@/context/session';
-import { playersService } from '@/services/players.service';
+import { useToast } from '@/context/toast';
+import { authService } from '@/services/auth.service';
+import { ApiError, toApiError } from '@/utils/api-error';
 
 const MIN_RATING = 1;
 const MAX_RATING = 2800;
@@ -21,36 +24,45 @@ const PRESETS = [
 ];
 
 export default function OnboardingRatingScreen() {
-  const { player, updateLocalPlayer } = useSession();
+  const { signInWithAuthResponse } = useSession();
+  const { draft, clearDraft } = useRegistration();
+  const { showToast } = useToast();
   const [rating, setRating] = useState(1500);
   const [federated, setFederated] = useState(false);
   const [category, setCategory] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleContinue = async () => {
-    // Nota: el rating inicial es solo referencial en esta pantalla — el backend
-    // calcula el Glicko-2 real a partir de los partidos jugados, no hay un endpoint
-    // para fijarlo manualmente. Sí persistimos la declaración de federado.
-    if (player && federated) {
-      setSaving(true);
-      try {
-        const updated = await playersService.update(player.id, {
-          federatedDeclared: true,
-          categoryFdptm: category || undefined,
-        });
-        updateLocalPlayer(updated);
-      } catch {
-        // si falla, no bloqueamos el onboarding por esto
-      } finally {
-        setSaving(false);
-      }
+    if (!draft) return;
+    setSaving(true);
+    try {
+      const auth = await authService.register({
+        ...draft,
+        initialRating: Math.round(rating),
+        ...(federated ? { federatedDeclared: true, categoryFdptm: category || undefined } : {}),
+      });
+      await signInWithAuthResponse(auth);
+      clearDraft();
+      router.push('/(auth)/onboarding-community');
+    } catch (err) {
+      const message = err instanceof ApiError && err.status === 409 ? 'Ese correo ya tiene una cuenta. Inicia sesión.' : toApiError(err).message;
+      showToast(message, 'error');
+    } finally {
+      setSaving(false);
     }
-    router.push('/(auth)/onboarding-community');
   };
+
+  if (!draft) {
+    return <Redirect href="/(auth)/register" />;
+  }
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Text style={styles.back}>{'‹'}</Text>
+        </Pressable>
+
         <View style={styles.progressRow}>
           <Text style={styles.progressLabel}>Paso 2 de 3</Text>
           <View style={styles.progressTrack}>
@@ -127,7 +139,7 @@ export default function OnboardingRatingScreen() {
           <AuthInput placeholder="Categoría FDPTM" value={category} onChangeText={setCategory} />
         )}
 
-        <AuthButton label="Completar configuración" loading={saving} onPress={handleContinue} />
+        <AuthButton label="Crear cuenta" loading={saving} onPress={handleContinue} />
       </SafeAreaView>
     </View>
   );
