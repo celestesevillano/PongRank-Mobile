@@ -1,61 +1,110 @@
-import { Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { AuthButton } from '@/components/auth/auth-button';
+
+import { ScreenContainer } from '@/components/common/screen-container';
+import { ScreenState } from '@/components/common/screen-state';
+import { MatchCard } from '@/components/matches/match-card';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
+import { useFetch } from '@/hooks/use-fetch';
+import { communitiesService } from '@/services/communities.service';
+import { matchesService } from '@/services/matches.service';
+
+const TOP_SIZE = 5;
+const POSITION_LOOKUP_SIZE = 100;
 
 export default function DashboardScreen() {
-  const { player, signOut } = useSession();
+  const { player } = useSession();
+  const playerId = player?.id ?? 0;
+
+  const standing = useFetch(async (signal) => {
+    const [community] = await communitiesService.mine(signal);
+    if (!community) return null;
+    const page = await communitiesService.ranking(community.id, { page: 0, size: POSITION_LOOKUP_SIZE }, signal);
+    return {
+      communityName: community.name,
+      top: page.content.slice(0, TOP_SIZE),
+      position: page.content.find((entry) => entry.playerId === playerId)?.position ?? null,
+    };
+  }, [playerId]);
+
+  const recent = useFetch((signal) => matchesService.byPlayer(playerId, { page: 0, size: 3 }, signal), [playerId]);
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Hola, {player?.name?.split(' ')[0] ?? 'jugador'}</ThemedText>
+    <ScreenContainer title={`Hola, ${player?.name?.split(' ')[0] ?? 'jugador'}`}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.ratingCard}>
+          <View>
+            <Text style={styles.label}>Tu rating</Text>
+            <Text style={styles.rating}>{Math.round(player?.ratingGlicko ?? 1500)}</Text>
+          </View>
+          {standing.data?.position && (
+            <View style={styles.position}>
+              <Text style={styles.label}>Puesto</Text>
+              <Text style={styles.positionValue}>
+                #{standing.data.position} en {standing.data.communityName}
+              </Text>
+            </View>
+          )}
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.ratingCard}>
-          <ThemedText type="small" style={{ color: Brand.textSecondary }}>
-            Tu rating
-          </ThemedText>
-          <ThemedText type="title" style={{ color: Brand.red, fontSize: 48 }}>
-            {Math.round(player?.ratingGlicko ?? 1500)}
-          </ThemedText>
-        </ThemedView>
+        <View style={styles.actions}>
+          <AuthButton label="Nueva partida" onPress={() => router.push('/new-match')} />
+          <AuthButton label="Buscar partida" variant="ghost" onPress={() => router.push('/find-match')} />
+        </View>
 
-        <ThemedText type="small" style={{ color: Brand.textSecondary, textAlign: 'center' }}>
-          El resto del dashboard (partidas, ranking, buscar rival) viene en la siguiente pasada.
-        </ThemedText>
+        <Text style={styles.section}>Ranking {standing.data ? standing.data.communityName : ''}</Text>
+        <ScreenState
+          loading={standing.loading}
+          error={standing.error}
+          empty={standing.data === null}
+          emptyMessage="Únete a una comunidad para ver su ranking."
+          onRetry={standing.refetch}
+        />
+        {standing.data?.top.map((entry) => (
+          <View key={entry.playerId} style={styles.rankRow}>
+            <Text style={styles.rankPosition}>{entry.position}</Text>
+            <Text style={styles.rankName}>{entry.playerName}</Text>
+            <Text style={styles.rankRating}>{Math.round(entry.ratingGlicko)}</Text>
+          </View>
+        ))}
 
-        <Pressable style={styles.signOutButton} onPress={() => signOut()}>
-          <ThemedText style={{ color: Brand.red }}>Cerrar sesión</ThemedText>
-        </Pressable>
-      </SafeAreaView>
-    </ThemedView>
+        <Text style={styles.section}>Tu actividad</Text>
+        <ScreenState
+          loading={recent.loading}
+          error={recent.error}
+          empty={recent.data?.content.length === 0}
+          emptyMessage="Aún no juegas partidas."
+          onRetry={recent.refetch}
+        />
+        {recent.data?.content.map((match) => <MatchCard key={match.id} match={match} playerId={playerId} />)}
+      </ScrollView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.four,
-    paddingHorizontal: Spacing.four,
-  },
+  content: { gap: Spacing.two, paddingBottom: Spacing.five },
   ratingCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.six,
-    borderRadius: Spacing.four,
-    gap: Spacing.one,
+    backgroundColor: Brand.surface,
+    borderRadius: Spacing.three,
+    padding: Spacing.four,
+    borderWidth: 1,
+    borderColor: Brand.red,
   },
-  signOutButton: {
-    marginTop: Spacing.four,
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.four,
-  },
+  label: { color: Brand.textSecondary, fontSize: 13 },
+  rating: { color: Brand.red, fontSize: 52, fontWeight: '800' },
+  position: { alignItems: 'flex-end', maxWidth: '50%' },
+  positionValue: { color: Brand.text, fontWeight: '700', textAlign: 'right' },
+  actions: { gap: Spacing.one, marginTop: Spacing.two },
+  section: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.three },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, borderBottomWidth: 1, borderBottomColor: Brand.border, paddingVertical: Spacing.two },
+  rankPosition: { color: Brand.textSecondary, width: 24, fontWeight: '700' },
+  rankName: { color: Brand.text, flex: 1, fontWeight: '600' },
+  rankRating: { color: Brand.textSecondary, fontWeight: '700' },
 });

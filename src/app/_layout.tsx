@@ -4,17 +4,18 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { SessionProvider, useSession } from '@/context/session';
+import { ToastProvider } from '@/context/toast';
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
-  const { token, isLoading, onboardingComplete } = useSession();
+  const { isAuthenticated, isLoading, onboardingComplete } = useSession();
 
   if (isLoading) {
     return null;
   }
 
-  const showApp = !!token && onboardingComplete;
+  const showApp = isAuthenticated && onboardingComplete;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -34,7 +35,9 @@ export default function RootLayout() {
     <SessionProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AnimatedSplashOverlay />
-        <RootNavigator />
+        <ToastProvider>
+          <RootNavigator />
+        </ToastProvider>
       </ThemeProvider>
     </SessionProvider>
   );

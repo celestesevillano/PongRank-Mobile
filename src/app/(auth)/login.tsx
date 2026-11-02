@@ -8,7 +8,9 @@ import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
-import { ApiError, api } from '@/lib/api';
+import { authService } from '@/services/auth.service';
+import { ApiError } from '@/utils/api-error';
+import { validateEmail } from '@/utils/validation';
 
 export default function LoginScreen() {
   const { signInWithAuthResponse } = useSession();
@@ -18,13 +20,13 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = email.includes('@') && password.length > 0;
+  const canSubmit = validateEmail(email) === null && password.length > 0;
 
   const handleSubmit = async () => {
     setError(null);
     setLoading(true);
     try {
-      const auth = await api.login({ email: email.trim(), password });
+      const auth = await authService.login({ email: email.trim(), password });
       // Un usuario que ya inicia sesión no vuelve a pasar por el onboarding.
       await signInWithAuthResponse(auth, { skipOnboarding: true });
     } catch (err) {
@@ -70,6 +72,10 @@ export default function LoginScreen() {
         {error && <Text style={styles.error}>{error}</Text>}
 
         <AuthButton label="Iniciar sesión" disabled={!canSubmit} loading={loading} onPress={handleSubmit} />
+
+        <Pressable onPress={() => router.push('/(auth)/forgot-password')}>
+          <Text style={styles.registerLink}>¿Olvidaste tu contraseña?</Text>
+        </Pressable>
 
         <Pressable onPress={() => router.replace('/(auth)/register')}>
           <Text style={styles.registerLink}>¿No tienes cuenta? Crear una</Text>

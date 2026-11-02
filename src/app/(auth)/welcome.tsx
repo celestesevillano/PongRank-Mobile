@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { WelcomeIntro } from '@/components/welcome-intro';
 import { Brand, Spacing } from '@/constants/theme';
 
 const FEATURES = [
@@ -29,7 +30,7 @@ export default function WelcomeScreen() {
           style={styles.wordmark}
           contentFit="contain"
         />
-        <Text style={styles.tagline}>JUEGA. COMPITE. MEJORA.</Text>
+        <Text style={styles.tagline}>JUEGA. SUBE. COMPITE.</Text>
 
         <Text style={styles.title}>Encuentra tu próximo rival</Text>
 
@@ -48,6 +49,7 @@ export default function WelcomeScreen() {
           Ya tengo cuenta
         </Link>
       </SafeAreaView>
+      <WelcomeIntro />
     </View>
   );
 }

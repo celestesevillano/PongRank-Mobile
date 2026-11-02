@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 
-import { api, type AuthResponse, type PlayerResponse } from '@/lib/api';
-import { storage } from '@/lib/storage';
-
-const TOKEN_KEY = 'pongrank.accessToken';
+import { authService } from '@/services/auth.service';
+import { setSessionExpiredHandler } from '@/services/http';
+import { tokenStore } from '@/services/token-store';
+import type { AuthResponse, PlayerResponse } from '@/types/api';
 
 type SessionContextValue = {
-  token: string | null;
+  isAuthenticated: boolean;
   player: PlayerResponse | null;
   isLoading: boolean;
   /** false solo entre el registro y el fin del onboarding; true para login y sesiones restauradas. */
@@ -20,7 +20,6 @@ type SessionContextValue = {
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  const [token, setToken] = useState<string | null>(null);
   const [player, setPlayer] = useState<PlayerResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [onboardingComplete, setOnboardingComplete] = useState(true);
@@ -28,16 +27,14 @@ export function SessionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     (async () => {
       try {
-        const storedToken = await storage.getItem(TOKEN_KEY);
+        const storedToken = await tokenStore.load();
         if (storedToken) {
-          const me = await api.me(storedToken);
-          setToken(storedToken);
-          setPlayer(me);
+          setPlayer(await authService.me());
           setOnboardingComplete(true);
         }
       } catch {
         // Token vencido o inválido: seguimos como si no hubiera sesión.
-        await storage.deleteItem(TOKEN_KEY);
+        await tokenStore.clear();
       } finally {
         setIsLoading(false);
       }
@@ -45,8 +42,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   }, []);
 
   const signInWithAuthResponse = async (auth: AuthResponse, opts?: { skipOnboarding?: boolean }) => {
-    await storage.setItem(TOKEN_KEY, auth.token);
-    setToken(auth.token);
+    await tokenStore.save(auth.token, auth.refreshToken);
     setPlayer(auth.player);
     setOnboardingComplete(opts?.skipOnboarding ?? false);
   };
@@ -54,16 +50,20 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const completeOnboarding = () => setOnboardingComplete(true);
 
   const signOut = async () => {
-    await storage.deleteItem(TOKEN_KEY);
-    setToken(null);
+    await tokenStore.clear();
     setPlayer(null);
   };
+
+  useEffect(() => {
+    setSessionExpiredHandler(() => setPlayer(null));
+    return () => setSessionExpiredHandler(null);
+  }, []);
 
   const updateLocalPlayer = (updated: PlayerResponse) => setPlayer(updated);
 
   const value = useMemo(
     () => ({
-      token,
+      isAuthenticated: player !== null,
       player,
       isLoading,
       onboardingComplete,
@@ -72,7 +72,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       signOut,
       updateLocalPlayer,
     }),
-    [token, player, isLoading, onboardingComplete],
+    [player, isLoading, onboardingComplete],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

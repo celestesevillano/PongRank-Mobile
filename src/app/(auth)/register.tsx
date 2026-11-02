@@ -7,32 +7,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
-import { useSession } from '@/context/session';
-import { ApiError, api } from '@/lib/api';
+import { useRegistration } from '@/context/registration';
+import { FieldError } from '@/components/auth/field-error';
+import { validateEmail, validateName, validatePassword } from '@/utils/validation';
 
 export default function RegisterScreen() {
-  const { signInWithAuthResponse } = useSession();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { draft, saveDraft } = useRegistration();
+  const [name, setName] = useState(draft?.name ?? '');
+  const [email, setEmail] = useState(draft?.email ?? '');
+  const [password, setPassword] = useState(draft?.password ?? '');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const canSubmit = name.trim().length > 0 && email.includes('@') && password.length >= 8;
+  const [touched, setTouched] = useState({ name: false, email: false, password: false });
 
-  const handleSubmit = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const auth = await api.register({ name: name.trim(), email: email.trim(), password });
-      await signInWithAuthResponse(auth);
-      router.replace('/(auth)/onboarding-rating');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo crear la cuenta. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
+  const nameError = validateName(name);
+  const emailError = validateEmail(email);
+  const passwordError = validatePassword(password);
+  const canSubmit = !nameError && !emailError && !passwordError;
+  const markTouched = (field: keyof typeof touched) => setTouched((prev) => ({ ...prev, [field]: true }));
+
+  const handleSubmit = () => {
+    saveDraft({ name: name.trim(), email: email.trim(), password });
+    router.push('/(auth)/onboarding-rating');
   };
 
   return (
@@ -57,31 +53,38 @@ export default function RegisterScreen() {
         <Text style={styles.title}>Crea tu cuenta</Text>
 
         <View style={styles.form}>
-          <AuthInput placeholder="Nombre completo" autoCapitalize="words" value={name} onChangeText={setName} />
-          <AuthInput
-            placeholder="Correo"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
+          <View>
+            <AuthInput placeholder="Nombre completo" autoCapitalize="words" value={name} onChangeText={setName} onBlur={() => markTouched('name')} />
+            <FieldError message={touched.name ? nameError : null} />
+          </View>
+          <View>
+            <AuthInput
+              placeholder="Correo"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              onBlur={() => markTouched('email')}
+            />
+            <FieldError message={touched.email ? emailError : null} />
+          </View>
           <View>
             <AuthInput
               placeholder="Contraseña"
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
+              onBlur={() => markTouched('password')}
             />
             <Pressable style={styles.eyeButton} onPress={() => setShowPassword((s) => !s)}>
               <Text style={{ color: Brand.textSecondary }}>{showPassword ? '🙈' : '👁'}</Text>
             </Pressable>
           </View>
-          <Text style={styles.hint}>Mínimo 8 caracteres, una mayúscula y un número.</Text>
+          <FieldError message={touched.password ? passwordError : null} />
+          <Text style={styles.hint}>Mínimo 8 caracteres, una letra y un número.</Text>
         </View>
 
-        {error && <Text style={styles.error}>{error}</Text>}
-
-        <AuthButton label="Crear cuenta" disabled={!canSubmit} loading={loading} onPress={handleSubmit} />
+        <AuthButton label="Continuar" disabled={!canSubmit} onPress={handleSubmit} />
 
         <Pressable onPress={() => router.replace('/(auth)/login')}>
           <Text style={styles.loginLink}>Ya tengo cuenta</Text>

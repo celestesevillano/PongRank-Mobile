@@ -1,6 +1,5 @@
-import Slider from '@react-native-community/slider';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,42 +7,45 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
+import { useRegistration } from '@/context/registration';
 import { useSession } from '@/context/session';
-import { api } from '@/lib/api';
-
-const PRESETS = [
-  { label: 'Nunca jugué', value: 800 },
-  { label: 'Nivel intermedio', value: 1500 },
-  { label: 'Nivel avanzado', value: 2000 },
-];
+import { useToast } from '@/context/toast';
+import { authService } from '@/services/auth.service';
+import { ApiError, toApiError } from '@/utils/api-error';
+import { INITIAL_LEVELS, type InitialLevel } from '@/utils/levels';
 
 export default function OnboardingRatingScreen() {
-  const { token, player, updateLocalPlayer } = useSession();
-  const [rating, setRating] = useState(1500);
+  const { signInWithAuthResponse } = useSession();
+  const { draft, clearDraft } = useRegistration();
+  const { showToast } = useToast();
+  const [level, setLevel] = useState<InitialLevel>('INTERMEDIATE');
   const [federated, setFederated] = useState(false);
   const [category, setCategory] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleContinue = async () => {
-    // Nota: el rating inicial es solo referencial en esta pantalla — el backend
-    // calcula el Glicko-2 real a partir de los partidos jugados, no hay un endpoint
-    // para fijarlo manualmente. Sí persistimos la declaración de federado.
-    if (token && player && federated) {
-      setSaving(true);
-      try {
-        const updated = await api.updatePlayer(token, player.id, {
-          federatedDeclared: true,
-          categoryFdptm: category || undefined,
-        });
-        updateLocalPlayer(updated);
-      } catch {
-        // si falla, no bloqueamos el onboarding por esto
-      } finally {
-        setSaving(false);
-      }
+    if (!draft) return;
+    setSaving(true);
+    try {
+      const auth = await authService.register({
+        ...draft,
+        initialLevel: level,
+        ...(federated ? { federatedDeclared: true, categoryFdptm: category || undefined } : {}),
+      });
+      await signInWithAuthResponse(auth);
+      clearDraft();
+      router.push('/(auth)/onboarding-community');
+    } catch (err) {
+      const message = err instanceof ApiError && err.status === 409 ? 'Ese correo ya tiene una cuenta. Inicia sesión.' : toApiError(err).message;
+      showToast(message, 'error');
+    } finally {
+      setSaving(false);
     }
-    router.push('/(auth)/onboarding-community');
   };
+
+  if (!draft) {
+    return <Redirect href="/(auth)/register" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -64,42 +66,28 @@ export default function OnboardingRatingScreen() {
         <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
         <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
 
-        <Text style={styles.title}>Tu rating inicial</Text>
-        <Text style={styles.subtitle}>Desliza para indicar tu nivel actual</Text>
+        <Text style={styles.title}>Tu nivel inicial</Text>
+        <Text style={styles.subtitle}>Elige el que mejor te describe; tus partidas lo ajustarán</Text>
 
-        <View style={styles.ratingCard}>
-          <Text style={styles.ratingValue}>{Math.round(rating)}</Text>
-          <Text style={styles.ratingHint}>Toca para editar</Text>
-          <View style={styles.presetRow}>
-            {PRESETS.map((p) => (
+        <View style={styles.levels}>
+          {INITIAL_LEVELS.map((option) => {
+            const selected = option.value === level;
+            return (
               <Pressable
-                key={p.label}
-                style={[styles.presetChip, Math.round(rating) === p.value && styles.presetChipActive]}
-                onPress={() => setRating(p.value)}
+                key={option.value}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                style={[styles.levelCard, selected && styles.levelCardActive]}
+                onPress={() => setLevel(option.value)}
               >
-                <Text
-                  style={[styles.presetChipLabel, Math.round(rating) === p.value && styles.presetChipLabelActive]}
-                >
-                  {p.label}
-                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.levelLabel}>{option.label}</Text>
+                  <Text style={styles.levelHint}>{option.hint}</Text>
+                </View>
+                <Text style={styles.levelRating}>{option.rating}</Text>
               </Pressable>
-            ))}
-          </View>
-        </View>
-
-        <Slider
-          minimumValue={1}
-          maximumValue={2800}
-          step={10}
-          value={rating}
-          onValueChange={setRating}
-          minimumTrackTintColor={Brand.red}
-          maximumTrackTintColor={Brand.border}
-          thumbTintColor={Brand.red}
-        />
-        <View style={styles.sliderLabels}>
-          <Text style={styles.sliderLabel}>Nunca jugué</Text>
-          <Text style={styles.sliderLabel}>Avanzado</Text>
+            );
+          })}
         </View>
 
         <View style={styles.federatedRow}>
@@ -118,7 +106,7 @@ export default function OnboardingRatingScreen() {
           <AuthInput placeholder="Categoría FDPTM" value={category} onChangeText={setCategory} />
         )}
 
-        <AuthButton label="Completar configuración" loading={saving} onPress={handleContinue} />
+        <AuthButton label="Crear cuenta" loading={saving} onPress={handleContinue} />
       </SafeAreaView>
     </View>
   );
@@ -137,29 +125,20 @@ const styles = StyleSheet.create({
   wordmark: { width: 140, height: 28, alignSelf: 'center' },
   title: { color: Brand.text, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: Spacing.two },
   subtitle: { color: Brand.textSecondary, textAlign: 'center', fontSize: 13 },
-  ratingCard: {
-    borderWidth: 1,
-    borderColor: Brand.border,
-    borderRadius: Spacing.four,
-    padding: Spacing.four,
+  levels: { gap: Spacing.two },
+  levelCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
-  },
-  ratingValue: { color: Brand.red, fontSize: 56, fontWeight: '800' },
-  ratingHint: { color: Brand.textSecondary, fontSize: 12 },
-  presetRow: { flexDirection: 'row', gap: Spacing.two, flexWrap: 'wrap', justifyContent: 'center' },
-  presetChip: {
     borderWidth: 1,
     borderColor: Brand.border,
-    borderRadius: 999,
+    borderRadius: Spacing.three,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
+    paddingVertical: Spacing.two,
   },
-  presetChipActive: { backgroundColor: Brand.red, borderColor: Brand.red },
-  presetChipLabel: { color: Brand.textSecondary, fontSize: 12 },
-  presetChipLabelActive: { color: '#FFFFFF', fontWeight: '700' },
-  sliderLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: -Spacing.two },
-  sliderLabel: { color: Brand.textSecondary, fontSize: 11 },
+  levelCardActive: { borderColor: Brand.red, backgroundColor: 'rgba(232, 38, 47, 0.15)' },
+  levelLabel: { color: Brand.text, fontSize: 15, fontWeight: '700' },
+  levelHint: { color: Brand.textSecondary, fontSize: 12 },
+  levelRating: { color: Brand.red, fontSize: 14, fontWeight: '700' },
   federatedRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -33,7 +33,13 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "PongRank usa tu ubicación para encontrar partidas cerca de ti y publicar la tuya."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
