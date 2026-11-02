@@ -1,12 +1,13 @@
 import { http } from '@/services/http';
 import type { AuthResponse, PlayerResponse } from '@/types/api';
+import type { InitialLevel } from '@/utils/levels';
 
 export const authService = {
   register: (input: {
     name: string;
     email: string;
     password: string;
-    initialRating?: number;
+    initialLevel?: InitialLevel;
     federatedDeclared?: boolean;
     categoryFdptm?: string;
   }) =>
