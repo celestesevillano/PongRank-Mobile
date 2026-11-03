@@ -67,10 +67,11 @@ export default function OnboardingCommunityScreen() {
         </Pressable>
 
         <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Paso 3 de 3</Text>
+          <Text style={styles.progressLabel}>Paso 4 de 4</Text>
           <View style={styles.progressTrack}>
-            <View style={styles.progressFillEmpty} />
-            <View style={styles.progressFillEmpty} />
+            <View style={[styles.progressFill, { flex: 1 }]} />
+            <View style={[styles.progressFill, { flex: 1 }]} />
+            <View style={[styles.progressFill, { flex: 1 }]} />
             <View style={[styles.progressFill, { flex: 1 }]} />
           </View>
         </View>

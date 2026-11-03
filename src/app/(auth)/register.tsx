@@ -29,7 +29,7 @@ export default function RegisterScreen() {
 
   const handleSubmit = () => {
     saveDraft({ name: name.trim(), email: email.trim(), password });
-    router.push('/(auth)/onboarding-rating');
+    router.push('/(auth)/about-you');
   };
 
   return (
@@ -40,9 +40,10 @@ export default function RegisterScreen() {
         </Pressable>
 
         <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Paso 1 de 3</Text>
+          <Text style={styles.progressLabel}>Paso 1 de 4</Text>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { flex: 1 }]} />
+            <View style={styles.progressFillEmpty} />
             <View style={styles.progressFillEmpty} />
             <View style={styles.progressFillEmpty} />
           </View>

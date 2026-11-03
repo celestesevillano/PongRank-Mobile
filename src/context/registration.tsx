@@ -1,10 +1,18 @@
 import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
 
-export type RegistrationDraft = { name: string; email: string; password: string };
+import type { Gender } from '@/types/api';
+
+export type RegistrationDraft = {
+  name: string;
+  email: string;
+  password: string;
+  birthDate?: string;
+  gender?: Gender;
+};
 
 type RegistrationContextValue = {
   draft: RegistrationDraft | null;
-  saveDraft: (draft: RegistrationDraft) => void;
+  saveDraft: (patch: Partial<RegistrationDraft>) => void;
   clearDraft: () => void;
 };
 
@@ -13,7 +21,15 @@ const RegistrationContext = createContext<RegistrationContextValue | undefined>(
 export function RegistrationProvider({ children }: PropsWithChildren) {
   const [draft, setDraft] = useState<RegistrationDraft | null>(null);
 
-  const value = useMemo(() => ({ draft, saveDraft: setDraft, clearDraft: () => setDraft(null) }), [draft]);
+  const value = useMemo(
+    () => ({
+      draft,
+      saveDraft: (patch: Partial<RegistrationDraft>) =>
+        setDraft((prev) => ({ name: '', email: '', password: '', ...prev, ...patch })),
+      clearDraft: () => setDraft(null),
+    }),
+    [draft],
+  );
 
   return <RegistrationContext.Provider value={value}>{children}</RegistrationContext.Provider>;
 }
