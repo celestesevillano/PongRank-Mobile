@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { MatchResponse, Page, PageParams } from '@/types/api';
+import type { MatchDetail, MatchResponse, Page, PageParams, SetScore } from '@/types/api';
 import { normalizePage } from '@/utils/pagination';
 
 export type Coordinates = { latitude: number; longitude: number };
@@ -27,6 +27,16 @@ export const matchesService = {
 
   open: (location: Coordinates, signal?: AbortSignal) =>
     http.get<MatchResponse[]>('/matches/open', { params: location, signal }).then((r) => r.data),
+
+  get: (matchId: number, signal?: AbortSignal) => http.get<MatchDetail>(`/matches/${matchId}`, { signal }).then((r) => r.data),
+
+  submitScore: (matchId: number, sets: SetScore[]) =>
+    http.post<MatchDetail>(`/matches/${matchId}/submit`, { sets }).then((r) => r.data),
+
+  confirm: (matchId: number) => http.put<MatchDetail>(`/matches/${matchId}/confirm`).then((r) => r.data),
+
+  dispute: (matchId: number, reason: string) =>
+    http.put<MatchDetail>(`/matches/${matchId}/dispute`, { reason }).then((r) => r.data),
 
   create: (input: MatchCreateInput) => http.post<MatchResponse>('/matches', input).then((r) => r.data),
 

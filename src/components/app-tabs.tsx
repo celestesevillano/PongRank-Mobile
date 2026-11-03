@@ -28,6 +28,7 @@ export default function AppTabs() {
       ))}
       <Tabs.Screen name="find-match" options={{ href: null }} />
       <Tabs.Screen name="new-match" options={{ href: null }} />
+      <Tabs.Screen name="match/[id]" options={{ href: null }} />
     </Tabs>
   );
 }
