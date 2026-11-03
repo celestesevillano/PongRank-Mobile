@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { AuthResponse, PlayerResponse } from '@/types/api';
+import type { AuthResponse, Gender, PlayerResponse } from '@/types/api';
 import type { InitialLevel } from '@/utils/levels';
 
 export const authService = {
@@ -7,6 +7,8 @@ export const authService = {
     name: string;
     email: string;
     password: string;
+    gender: Gender;
+    birthDate?: string;
     initialLevel?: InitialLevel;
     federatedDeclared?: boolean;
     categoryFdptm?: string;

@@ -24,11 +24,13 @@ export default function OnboardingRatingScreen() {
   const [saving, setSaving] = useState(false);
 
   const handleContinue = async () => {
-    if (!draft) return;
+    if (!draft?.gender) return;
+    const { gender } = draft;
     setSaving(true);
     try {
       const auth = await authService.register({
         ...draft,
+        gender,
         initialLevel: level,
         ...(federated ? { federatedDeclared: true, categoryFdptm: category || undefined } : {}),
       });
@@ -46,6 +48,9 @@ export default function OnboardingRatingScreen() {
   if (!draft) {
     return <Redirect href="/(auth)/register" />;
   }
+  if (!draft.gender) {
+    return <Redirect href="/(auth)/about-you" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -55,9 +60,10 @@ export default function OnboardingRatingScreen() {
         </Pressable>
 
         <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Paso 2 de 3</Text>
+          <Text style={styles.progressLabel}>Paso 3 de 4</Text>
           <View style={styles.progressTrack}>
-            <View style={styles.progressFillEmpty} />
+            <View style={[styles.progressFill, { flex: 1 }]} />
+            <View style={[styles.progressFill, { flex: 1 }]} />
             <View style={[styles.progressFill, { flex: 1 }]} />
             <View style={styles.progressFillEmpty} />
           </View>
@@ -106,7 +112,7 @@ export default function OnboardingRatingScreen() {
           <AuthInput placeholder="Categoría FDPTM" value={category} onChangeText={setCategory} />
         )}
 
-        <AuthButton label="Crear cuenta" loading={saving} onPress={handleContinue} />
+        <AuthButton label="Completar configuración" loading={saving} onPress={handleContinue} />
       </SafeAreaView>
     </View>
   );

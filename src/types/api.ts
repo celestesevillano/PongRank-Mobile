@@ -1,7 +1,11 @@
+export type Gender = 'FEMALE' | 'MALE' | 'PREFER_NOT_TO_SAY';
+
 export type PlayerResponse = {
   id: number;
   name: string;
   email: string;
+  birthDate?: string | null;
+  gender?: Gender | null;
   whatsapp: string | null;
   shareContact: boolean;
   categoryFdptm: string | null;
