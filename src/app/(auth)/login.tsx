@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -51,6 +51,7 @@ export default function LoginScreen() {
 
         <View style={styles.form}>
           <AuthInput
+            icon={Mail}
             placeholder="Correo"
             autoCapitalize="none"
             keyboardType="email-address"
@@ -59,6 +60,7 @@ export default function LoginScreen() {
           />
           <View>
             <AuthInput
+              icon={Lock}
               placeholder="Contraseña"
               secureTextEntry={!showPassword}
               value={password}

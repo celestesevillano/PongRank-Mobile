@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,7 +38,7 @@ export default function ForgotPasswordScreen() {
         </Pressable>
         <Text style={styles.title}>Recupera tu contraseña</Text>
         <Text style={styles.subtitle}>Te enviaremos un enlace a tu correo.</Text>
-        <AuthInput placeholder="Correo" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+        <AuthInput icon={Mail} placeholder="Correo" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
         <AuthButton label="Enviar enlace" disabled={validateEmail(email) !== null} loading={loading} onPress={submit} />
       </SafeAreaView>
     </View>
