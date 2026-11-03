@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 2,
     fontSize: 12,
-    marginTop: -Spacing.two,
+    marginTop: Spacing.two,
   },
   title: {
     color: Brand.text,
