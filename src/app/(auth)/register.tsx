@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,11 +56,12 @@ export default function RegisterScreen() {
 
         <View style={styles.form}>
           <View>
-            <AuthInput placeholder="Nombre completo" autoCapitalize="words" value={name} onChangeText={setName} onBlur={() => markTouched('name')} />
+            <AuthInput icon={User} placeholder="Nombre completo" autoCapitalize="words" value={name} onChangeText={setName} onBlur={() => markTouched('name')} />
             <FieldError message={touched.name ? nameError : null} />
           </View>
           <View>
             <AuthInput
+              icon={Mail}
               placeholder="Correo"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -72,6 +73,7 @@ export default function RegisterScreen() {
           </View>
           <View>
             <AuthInput
+              icon={Lock}
               placeholder="Contraseña"
               secureTextEntry={!showPassword}
               value={password}
@@ -112,5 +114,5 @@ const styles = StyleSheet.create({
   eyeButton: { position: 'absolute', right: Spacing.three, top: 0, bottom: 0, justifyContent: 'center' },
   hint: { color: Brand.textSecondary, fontSize: 12 },
   error: { color: Brand.red, fontSize: 13 },
-  loginLink: { color: Brand.textSecondary, textAlign: 'center', marginTop: Spacing.two, marginBottom: Spacing.three },
+  loginLink: { color: Brand.textSecondary, textAlign: 'center', textDecorationLine: 'underline', marginTop: Spacing.two, marginBottom: Spacing.three },
 });
