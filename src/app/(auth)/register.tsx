@@ -8,8 +8,10 @@ import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
+import { FieldError } from '@/components/auth/field-error';
 import { authService } from '@/services/auth.service';
 import { ApiError } from '@/utils/api-error';
+import { validateEmail, validateName, validatePassword } from '@/utils/validation';
 
 export default function RegisterScreen() {
   const { signInWithAuthResponse } = useSession();
@@ -20,7 +22,13 @@ export default function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = name.trim().length > 0 && email.includes('@') && password.length >= 8;
+  const [touched, setTouched] = useState({ name: false, email: false, password: false });
+
+  const nameError = validateName(name);
+  const emailError = validateEmail(email);
+  const passwordError = validatePassword(password);
+  const canSubmit = !nameError && !emailError && !passwordError;
+  const markTouched = (field: keyof typeof touched) => setTouched((prev) => ({ ...prev, [field]: true }));
 
   const handleSubmit = async () => {
     setError(null);
@@ -30,7 +38,7 @@ export default function RegisterScreen() {
       await signInWithAuthResponse(auth);
       router.replace('/(auth)/onboarding-rating');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'No se pudo crear la cuenta. Intenta de nuevo.');
+      setError(err instanceof ApiError && err.status === 409 ? 'Ese correo ya tiene una cuenta. Inicia sesión.' : err instanceof ApiError ? err.message : 'No se pudo crear la cuenta. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -58,26 +66,35 @@ export default function RegisterScreen() {
         <Text style={styles.title}>Crea tu cuenta</Text>
 
         <View style={styles.form}>
-          <AuthInput placeholder="Nombre completo" autoCapitalize="words" value={name} onChangeText={setName} />
-          <AuthInput
-            placeholder="Correo"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
+          <View>
+            <AuthInput placeholder="Nombre completo" autoCapitalize="words" value={name} onChangeText={setName} onBlur={() => markTouched('name')} />
+            <FieldError message={touched.name ? nameError : null} />
+          </View>
+          <View>
+            <AuthInput
+              placeholder="Correo"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              onBlur={() => markTouched('email')}
+            />
+            <FieldError message={touched.email ? emailError : null} />
+          </View>
           <View>
             <AuthInput
               placeholder="Contraseña"
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
+              onBlur={() => markTouched('password')}
             />
             <Pressable style={styles.eyeButton} onPress={() => setShowPassword((s) => !s)}>
               <Text style={{ color: Brand.textSecondary }}>{showPassword ? '🙈' : '👁'}</Text>
             </Pressable>
           </View>
-          <Text style={styles.hint}>Mínimo 8 caracteres, una mayúscula y un número.</Text>
+          <FieldError message={touched.password ? passwordError : null} />
+          <Text style={styles.hint}>Mínimo 8 caracteres, una letra y un número.</Text>
         </View>
 
         {error && <Text style={styles.error}>{error}</Text>}
