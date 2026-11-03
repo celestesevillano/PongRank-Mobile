@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { House, Trophy, Swords, CircleUser } from 'lucide-react-native';
 
 import { Brand } from '@/constants/theme';
 
 const tabs = [
-  { name: 'index', title: 'Inicio', icon: '🏠' },
-  { name: 'ranking', title: 'Ranking', icon: '🏆' },
-  { name: 'matches', title: 'Partidas', icon: '🏓' },
-  { name: 'profile', title: 'Perfil', icon: '👤' },
+  { name: 'index', title: 'Inicio', Icon: House },
+  { name: 'ranking', title: 'Ranking', Icon: Trophy },
+  { name: 'matches', title: 'Partidas', Icon: Swords },
+  { name: 'profile', title: 'Perfil', Icon: CircleUser },
 ] as const;
 
 export default function AppTabs() {
@@ -19,11 +19,11 @@ export default function AppTabs() {
         tabBarInactiveTintColor: Brand.textSecondary,
         tabBarStyle: { backgroundColor: Brand.background, borderTopColor: Brand.border },
       }}>
-      {tabs.map(({ name, title, icon }) => (
+      {tabs.map(({ name, title, Icon }) => (
         <Tabs.Screen
           key={name}
           name={name}
-          options={{ title, tabBarIcon: ({ focused }) => <Text style={{ opacity: focused ? 1 : 0.6 }}>{icon}</Text> }}
+          options={{ title, tabBarIcon: ({ color, focused }) => <Icon color={color} size={24} strokeWidth={focused ? 2.4 : 1.8} /> }}
         />
       ))}
       <Tabs.Screen name="find-match" options={{ href: null }} />
