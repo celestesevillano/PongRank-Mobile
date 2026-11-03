@@ -26,6 +26,8 @@ export default function AppTabs() {
           options={{ title, tabBarIcon: ({ focused }) => <Text style={{ opacity: focused ? 1 : 0.6 }}>{icon}</Text> }}
         />
       ))}
+      <Tabs.Screen name="find-match" options={{ href: null }} />
+      <Tabs.Screen name="new-match" options={{ href: null }} />
     </Tabs>
   );
 }
