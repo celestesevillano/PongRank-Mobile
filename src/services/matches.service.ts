@@ -40,6 +40,8 @@ export const matchesService = {
 
   create: (input: MatchCreateInput) => http.post<MatchResponse>('/matches', input).then((r) => r.data),
 
+  cancel: (matchId: number) => http.put<MatchResponse>(`/matches/${matchId}/cancel`).then((r) => r.data),
+
   join: (matchId: number, location: Coordinates) =>
     http.post<MatchResponse>(`/matches/${matchId}/join`, location).then((r) => r.data),
 };
