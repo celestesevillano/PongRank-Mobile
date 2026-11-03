@@ -4,13 +4,13 @@ import { Brand, Spacing } from '@/constants/theme';
 import type { MatchResponse } from '@/types/api';
 
 const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Pendiente',
-  OPEN: 'Abierta',
-  IN_PROGRESS: 'En juego',
-  PENDING_CONFIRMATION: 'Por confirmar',
+  CREATED: 'Esperando rival',
+  PROPOSED_P1: 'Por confirmar',
+  PROPOSED_P2: 'Por confirmar',
   CONFIRMED: 'Confirmada',
   DISPUTED: 'En disputa',
   CANCELLED: 'Cancelada',
+  WALKOVER: 'Walkover',
 };
 
 export function MatchCard({ match, playerId }: { match: MatchResponse; playerId: number }) {
