@@ -1,9 +1,15 @@
 import { http } from '@/services/http';
-import type { CommunityResponse, Page, PageParams } from '@/types/api';
+import type { CommunityResponse, Page, PageParams, RankingEntry } from '@/types/api';
+import { normalizePage } from '@/utils/pagination';
 
 export const communitiesService = {
   search: (params: PageParams & { name?: string }, signal?: AbortSignal) =>
-    http.get<Page<CommunityResponse>>('/communities', { params, signal }).then((r) => r.data),
+    http.get('/communities', { params, signal }).then((r) => normalizePage<CommunityResponse>(r.data)),
+
+  mine: (signal?: AbortSignal) => http.get<CommunityResponse[]>('/communities/me', { signal }).then((r) => r.data),
+
+  ranking: (communityId: number, params: PageParams, signal?: AbortSignal): Promise<Page<RankingEntry>> =>
+    http.get(`/communities/${communityId}/ranking`, { params, signal }).then((r) => normalizePage<RankingEntry>(r.data)),
 
   join: (communityId: number) => http.post<unknown>(`/communities/${communityId}/members`, {}).then((r) => r.data),
 };

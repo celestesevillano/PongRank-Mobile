@@ -1,61 +1,64 @@
-import { Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { ScreenContainer } from '@/components/common/screen-container';
+import { ScreenState } from '@/components/common/screen-state';
+import { MatchCard } from '@/components/matches/match-card';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
+import { useFetch } from '@/hooks/use-fetch';
+import { communitiesService } from '@/services/communities.service';
+import { matchesService } from '@/services/matches.service';
 
 export default function DashboardScreen() {
-  const { player, signOut } = useSession();
+  const { player } = useSession();
+  const playerId = player?.id ?? 0;
+
+  const communities = useFetch((signal) => communitiesService.mine(signal), []);
+  const recent = useFetch((signal) => matchesService.byPlayer(playerId, { page: 0, size: 3 }, signal), [playerId]);
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Hola, {player?.name?.split(' ')[0] ?? 'jugador'}</ThemedText>
+    <ScreenContainer title={`Hola, ${player?.name?.split(' ')[0] ?? 'jugador'}`}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.ratingCard}>
+          <Text style={styles.label}>Tu rating</Text>
+          <Text style={styles.rating}>{Math.round(player?.ratingGlicko ?? 1500)}</Text>
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.ratingCard}>
-          <ThemedText type="small" style={{ color: Brand.textSecondary }}>
-            Tu rating
-          </ThemedText>
-          <ThemedText type="title" style={{ color: Brand.red, fontSize: 48 }}>
-            {Math.round(player?.ratingGlicko ?? 1500)}
-          </ThemedText>
-        </ThemedView>
+        <Text style={styles.section}>Tus comunidades</Text>
+        <ScreenState
+          loading={communities.loading}
+          error={communities.error}
+          empty={communities.data?.length === 0}
+          emptyMessage="Todavía no te unes a ninguna comunidad."
+          onRetry={communities.refetch}
+        />
+        {communities.data?.map((community) => (
+          <View key={community.id} style={styles.communityRow}>
+            <Text style={styles.communityName}>{community.name}</Text>
+            <Text style={styles.label}>{community.memberCount} miembros</Text>
+          </View>
+        ))}
 
-        <ThemedText type="small" style={{ color: Brand.textSecondary, textAlign: 'center' }}>
-          El resto del dashboard (partidas, ranking, buscar rival) viene en la siguiente pasada.
-        </ThemedText>
-
-        <Pressable style={styles.signOutButton} onPress={() => signOut()}>
-          <ThemedText style={{ color: Brand.red }}>Cerrar sesión</ThemedText>
-        </Pressable>
-      </SafeAreaView>
-    </ThemedView>
+        <Text style={styles.section}>Últimas partidas</Text>
+        <ScreenState
+          loading={recent.loading}
+          error={recent.error}
+          empty={recent.data?.content.length === 0}
+          emptyMessage="Aún no juegas partidas."
+          onRetry={recent.refetch}
+        />
+        {recent.data?.content.map((match) => <MatchCard key={match.id} match={match} playerId={playerId} />)}
+      </ScrollView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.four,
-    paddingHorizontal: Spacing.four,
-  },
-  ratingCard: {
-    alignItems: 'center',
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.six,
-    borderRadius: Spacing.four,
-    gap: Spacing.one,
-  },
-  signOutButton: {
-    marginTop: Spacing.four,
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.four,
-  },
+  content: { gap: Spacing.two, paddingBottom: Spacing.five },
+  ratingCard: { alignItems: 'center', backgroundColor: Brand.surface, borderRadius: Spacing.three, padding: Spacing.four, borderWidth: 1, borderColor: Brand.border },
+  label: { color: Brand.textSecondary, fontSize: 13 },
+  rating: { color: Brand.red, fontSize: 52, fontWeight: '800' },
+  section: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.three },
+  communityRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: Brand.surface, borderRadius: Spacing.three, padding: Spacing.three },
+  communityName: { color: Brand.text, fontWeight: '600' },
 });

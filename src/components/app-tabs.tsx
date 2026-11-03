@@ -1,32 +1,31 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { Brand } from '@/constants/theme';
+
+const tabs = [
+  { name: 'index', title: 'Inicio', icon: '🏠' },
+  { name: 'ranking', title: 'Ranking', icon: '🏆' },
+  { name: 'matches', title: 'Partidas', icon: '🏓' },
+  { name: 'profile', title: 'Perfil', icon: '👤' },
+] as const;
 
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: Brand.red,
+        tabBarInactiveTintColor: Brand.textSecondary,
+        tabBarStyle: { backgroundColor: Brand.background, borderTopColor: Brand.border },
+      }}>
+      {tabs.map(({ name, title, icon }) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{ title, tabBarIcon: ({ focused }) => <Text style={{ opacity: focused ? 1 : 0.6 }}>{icon}</Text> }}
         />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      ))}
+    </Tabs>
   );
 }
