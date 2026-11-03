@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -77,7 +78,7 @@ export default function RegisterScreen() {
               onBlur={() => markTouched('password')}
             />
             <Pressable style={styles.eyeButton} onPress={() => setShowPassword((s) => !s)}>
-              <Text style={{ color: Brand.textSecondary }}>{showPassword ? '🙈' : '👁'}</Text>
+              {showPassword ? <EyeOff color={Brand.textSecondary} size={20} /> : <Eye color={Brand.textSecondary} size={20} />}
             </Pressable>
           </View>
           <FieldError message={touched.password ? passwordError : null} />

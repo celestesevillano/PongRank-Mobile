@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
+import { Target, TrendingUp, Users } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -18,9 +19,9 @@ import { Brand, Spacing } from '@/constants/theme';
 import { useEffect, useState } from 'react';
 
 const FEATURES = [
-  { icon: '👥', label: 'Compite en tu\ncomunidad' },
-  { icon: '📈', label: 'Mejora tu\nranking' },
-  { icon: '🎯', label: 'Reta a jugadores\nde tu nivel' },
+  { Icon: Users, label: 'Compite en tu\ncomunidad' },
+  { Icon: TrendingUp, label: 'Mejora tu\nranking' },
+  { Icon: Target, label: 'Reta a jugadores\nde tu nivel' },
 ];
 
 export default function WelcomeScreen() {
@@ -68,7 +69,7 @@ export default function WelcomeScreen() {
         <View style={styles.features}>
           {FEATURES.map((f, index) => (
             <Animated.View key={f.label} entering={enter(2 + index)} style={styles.featureItem}>
-              <Text style={styles.featureIcon}>{f.icon}</Text>
+              <f.Icon color={Brand.red} size={28} strokeWidth={1.8} />
               <Text style={styles.featureLabel}>{f.label}</Text>
             </Animated.View>
           ))}
@@ -135,9 +136,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: Spacing.one,
-  },
-  featureIcon: {
-    fontSize: 22,
   },
   featureLabel: {
     color: Brand.textSecondary,
