@@ -1,5 +1,7 @@
+import Slider from '@react-native-community/slider';
 import { Image } from 'expo-image';
 import { Redirect, router } from 'expo-router';
+import { Trophy } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +20,9 @@ export default function OnboardingRatingScreen() {
   const { signInWithAuthResponse } = useSession();
   const { draft, clearDraft } = useRegistration();
   const { showToast } = useToast();
-  const [level, setLevel] = useState<InitialLevel>('INTERMEDIATE');
+  const [levelIndex, setLevelIndex] = useState(2);
+  const selected = INITIAL_LEVELS[levelIndex];
+  const level: InitialLevel = selected.value;
   const [federated, setFederated] = useState(false);
   const [category, setCategory] = useState('');
   const [saving, setSaving] = useState(false);
@@ -73,27 +77,36 @@ export default function OnboardingRatingScreen() {
         <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
 
         <Text style={styles.title}>Tu nivel inicial</Text>
-        <Text style={styles.subtitle}>Elige el que mejor te describe; tus partidas lo ajustarán</Text>
+        <Text style={styles.subtitle}>Desliza hasta el nivel que más se parece a ti</Text>
 
-        <View style={styles.levels}>
-          {INITIAL_LEVELS.map((option) => {
-            const selected = option.value === level;
-            return (
-              <Pressable
-                key={option.value}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                style={[styles.levelCard, selected && styles.levelCardActive]}
-                onPress={() => setLevel(option.value)}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.levelLabel}>{option.label}</Text>
-                  <Text style={styles.levelHint}>{option.hint}</Text>
-                </View>
-                <Text style={styles.levelRating}>{option.rating}</Text>
-              </Pressable>
-            );
-          })}
+        <View style={styles.levelCard}>
+          <Text style={styles.levelCaption}>TU NIVEL</Text>
+          <Text style={styles.levelName}>{selected.label}</Text>
+          <Text style={styles.levelHint}>{selected.hint}</Text>
+        </View>
+
+        <View>
+          <Slider
+            accessibilityLabel="Nivel inicial"
+            minimumValue={0}
+            maximumValue={INITIAL_LEVELS.length - 1}
+            step={1}
+            value={levelIndex}
+            onValueChange={(value) => setLevelIndex(Math.round(value))}
+            minimumTrackTintColor={Brand.red}
+            maximumTrackTintColor={Brand.border}
+            thumbTintColor="#FFFFFF"
+          />
+          <View style={styles.ticks}>
+            {INITIAL_LEVELS.map((option, index) => (
+              <View key={option.value} style={[styles.tick, index === levelIndex && styles.tickActive]} />
+            ))}
+          </View>
+          <View style={styles.levelLabels}>
+            <Text style={styles.levelLabel}>{INITIAL_LEVELS[0].label}</Text>
+            <Text style={[styles.levelLabel, styles.levelLabelActive]}>{selected.label}</Text>
+            <Text style={styles.levelLabel}>{INITIAL_LEVELS[INITIAL_LEVELS.length - 1].label}</Text>
+          </View>
         </View>
 
         <View style={styles.federatedRow}>
@@ -109,7 +122,7 @@ export default function OnboardingRatingScreen() {
         </View>
 
         {federated && (
-          <AuthInput placeholder="Categoría FDPTM" value={category} onChangeText={setCategory} />
+          <AuthInput icon={Trophy} placeholder="Categoría FDPTM" value={category} onChangeText={setCategory} />
         )}
 
         <AuthButton label="Completar configuración" loading={saving} onPress={handleContinue} />
@@ -130,21 +143,26 @@ const styles = StyleSheet.create({
   icon: { width: 48, height: 48, alignSelf: 'center' },
   wordmark: { width: 140, height: 28, alignSelf: 'center' },
   title: { color: Brand.text, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: Spacing.two },
-  subtitle: { color: Brand.textSecondary, textAlign: 'center', fontSize: 13 },
-  levels: { gap: Spacing.two },
+  subtitle: { color: Brand.textSecondary, textAlign: 'center', fontSize: 14 },
   levelCard: {
-    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Brand.border,
+    gap: Spacing.one,
+    borderWidth: 1.5,
+    borderColor: Brand.red,
     borderRadius: Spacing.three,
+    backgroundColor: 'rgba(232, 38, 47, 0.10)',
+    paddingVertical: Spacing.three,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
   },
-  levelCardActive: { borderColor: Brand.red, backgroundColor: 'rgba(232, 38, 47, 0.15)' },
-  levelLabel: { color: Brand.text, fontSize: 15, fontWeight: '700' },
-  levelHint: { color: Brand.textSecondary, fontSize: 12 },
-  levelRating: { color: Brand.red, fontSize: 14, fontWeight: '700' },
+  levelCaption: { color: Brand.textSecondary, fontSize: 13, letterSpacing: 1.5, fontWeight: '700' },
+  levelName: { color: Brand.red, fontSize: 36, fontWeight: '800' },
+  levelHint: { color: Brand.textSecondary, fontSize: 14 },
+  ticks: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 14, marginTop: -4 },
+  tick: { width: 6, height: 6, borderRadius: 3, backgroundColor: Brand.border },
+  tickActive: { width: 8, height: 8, borderRadius: 4, backgroundColor: Brand.red },
+  levelLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.two },
+  levelLabel: { color: Brand.textSecondary, fontSize: 13 },
+  levelLabelActive: { color: Brand.red, fontWeight: '700' },
   federatedRow: {
     flexDirection: 'row',
     alignItems: 'center',
