@@ -11,7 +11,7 @@ import { useFetch } from '@/hooks/use-fetch';
 import { usePaginated } from '@/hooks/use-paginated';
 import { matchesService } from '@/services/matches.service';
 
-type Tab = 'active' | 'history';
+type Tab = 'active' | 'history' | 'tournaments';
 
 export default function MatchesScreen() {
   const { player } = useSession();
@@ -19,12 +19,15 @@ export default function MatchesScreen() {
   const [tab, setTab] = useState<Tab>('active');
 
   return (
-    <ScreenContainer title="Mis partidas">
+    <ScreenContainer title="Partidas">
       <View style={styles.tabs}>
         <TabButton label="Activas" selected={tab === 'active'} onPress={() => setTab('active')} />
         <TabButton label="Historial" selected={tab === 'history'} onPress={() => setTab('history')} />
+        <TabButton label="Torneos" selected={tab === 'tournaments'} onPress={() => setTab('tournaments')} />
       </View>
-      {tab === 'active' ? <ActiveMatches playerId={playerId} /> : <MatchHistory playerId={playerId} />}
+      {tab === 'active' && <ActiveMatches playerId={playerId} />}
+      {tab === 'history' && <MatchHistory playerId={playerId} />}
+      {tab === 'tournaments' && <TournamentsPlaceholder />}
     </ScreenContainer>
   );
 }
@@ -64,6 +67,10 @@ function MatchHistory({ playerId }: { playerId: number }) {
       )}
     </>
   );
+}
+
+function TournamentsPlaceholder() {
+  return <Text style={styles.hint}>Aquí verás los torneos de tus clubes: próximos e historial.</Text>;
 }
 
 function TabButton({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
