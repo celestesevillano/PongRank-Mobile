@@ -4,7 +4,9 @@ import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { ScreenContainer } from '@/components/common/screen-container';
+import { PLAN_LABEL } from '@/constants/plans';
 import { Brand, Spacing } from '@/constants/theme';
+import { usePlan } from '@/context/plan';
 import { useSession } from '@/context/session';
 import { useToast } from '@/context/toast';
 import { useFetch } from '@/hooks/use-fetch';
@@ -42,6 +44,7 @@ function computeStats(matches: MatchResponse[], playerId: number) {
 export default function ProfileScreen() {
   const { player, signOut, updateLocalPlayer } = useSession();
   const { showToast } = useToast();
+  const { plan, openPlans } = usePlan();
   const playerId = player?.id ?? 0;
   const [savingContact, setSavingContact] = useState(false);
 
@@ -103,6 +106,33 @@ export default function ProfileScreen() {
             <Text style={styles.label}>Mejor victoria</Text>
             <Text style={styles.value}>{stats.best ? `${stats.best.name} · ${Math.round(stats.best.rating)}` : 'Aún sin victorias'}</Text>
           </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Mi plan</Text>
+          <View style={styles.line}>
+            <Text style={styles.value}>Plan {PLAN_LABEL[plan?.plan ?? 'FREEMIUM']}</Text>
+            {plan?.endDate ? <Text style={styles.label}>Vence el {new Date(plan.endDate).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}</Text> : null}
+          </View>
+          {plan && (
+            <>
+              <View style={styles.line}>
+                <Text style={styles.label}>Comunidades creadas</Text>
+                <Text style={styles.value}>hasta {plan.maxCommunitiesCreated}</Text>
+              </View>
+              <View style={styles.line}>
+                <Text style={styles.label}>Comunidades en total</Text>
+                <Text style={styles.value}>hasta {plan.maxCommunitiesTotal}</Text>
+              </View>
+              <View style={styles.line}>
+                <Text style={styles.label}>Clubes en total</Text>
+                <Text style={styles.value}>{plan.maxClubsTotal === 0 ? 'No incluye' : `hasta ${plan.maxClubsTotal}`}</Text>
+              </View>
+            </>
+          )}
+          <Pressable style={styles.join} onPress={openPlans} hitSlop={8}>
+            <Text style={styles.joinLabel}>Cambiar de plan</Text>
+          </Pressable>
         </View>
 
         <View style={styles.card}>

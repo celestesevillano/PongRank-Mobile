@@ -111,3 +111,18 @@ export type MatchDetail = MatchResponse & {
 };
 
 export type SetScore = { setNumber: number; scorePlayer1: number; scorePlayer2: number };
+
+export type MembershipPlan = 'FREEMIUM' | 'BASIC' | 'PRO' | 'ENTERPRISE';
+
+export type MyPlanResponse = {
+  plan: MembershipPlan;
+  /** null en el plan gratuito */
+  endDate: string | null;
+  coachAccess: boolean;
+  canCreateClub: boolean;
+  maxCommunitiesCreated: number;
+  maxCommunitiesTotal: number;
+  maxClubsTotal: number;
+};
+
+export type PaymentPreference = { initPoint: string; preferenceId: string };
