@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { House, Trophy, Swords, CircleUser } from 'lucide-react-native';
+import { House, Trophy, Swords, Users, CircleUser } from 'lucide-react-native';
 
 import { Brand } from '@/constants/theme';
 
@@ -7,6 +7,7 @@ const tabs = [
   { name: 'index', title: 'Inicio', Icon: House },
   { name: 'ranking', title: 'Ranking', Icon: Trophy },
   { name: 'matches', title: 'Partidas', Icon: Swords },
+  { name: 'social', title: 'Social', Icon: Users },
   { name: 'profile', title: 'Perfil', Icon: CircleUser },
 ] as const;
 
