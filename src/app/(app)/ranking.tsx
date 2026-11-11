@@ -1,6 +1,10 @@
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Search } from 'lucide-react-native';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AuthButton } from '@/components/auth/auth-button';
+import { RankingPosition } from '@/components/communities/ranking-position';
 import { PaginationBar } from '@/components/common/pagination-bar';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
@@ -12,10 +16,14 @@ import { communitiesService } from '@/services/communities.service';
 
 export default function RankingScreen() {
   const { player } = useSession();
+  const { communityId: requested } = useLocalSearchParams<{ communityId?: string }>();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const communities = useFetch((signal) => communitiesService.mine(signal), []);
-  const communityId = selectedId ?? communities.data?.[0]?.id ?? null;
+  useFocusEffect(communities.refetch);
+  const requestedId = Number(requested);
+  const preferred = requested ? requestedId : selectedId;
+  const communityId = communities.data?.find((community) => community.id === preferred)?.id ?? communities.data?.[0]?.id ?? null;
 
   const ranking = usePaginated(
     (params, signal) => (communityId ? communitiesService.ranking(communityId, params, signal) : Promise.reject(new Error('no community'))),
@@ -35,6 +43,8 @@ export default function RankingScreen() {
         onRetry={communities.refetch}
       />
 
+      {noCommunities && <AuthButton label="Explorar comunidades" icon={Search} onPress={() => router.navigate('/social/explore')} />}
+
       {communityId !== null && (
         <>
           <FlatList
@@ -48,6 +58,7 @@ export default function RankingScreen() {
               <Pressable
                 onPress={() => {
                   setSelectedId(item.id);
+                  if (requested) router.setParams({ communityId: String(item.id) });
                   ranking.setPage(0);
                 }}
                 style={[styles.chip, item.id === communityId && styles.chipActive]}>
@@ -66,7 +77,7 @@ export default function RankingScreen() {
               ListFooterComponent={<PaginationBar page={ranking.data} onPageChange={ranking.setPage} />}
               renderItem={({ item }) => (
                 <View style={[styles.row, item.playerId === player?.id && styles.rowMe]}>
-                  <Text style={styles.position}>{item.position}</Text>
+                  <RankingPosition position={item.position} />
                   <Text style={styles.name}>{item.playerName}</Text>
                   <Text style={styles.rating}>{Math.round(item.ratingGlicko)}</Text>
                 </View>
@@ -87,7 +98,6 @@ const styles = StyleSheet.create({
   chipLabel: { color: Brand.text, fontWeight: '600' },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, backgroundColor: Brand.surface, borderRadius: Spacing.three, padding: Spacing.three },
   rowMe: { borderWidth: 1, borderColor: Brand.red },
-  position: { color: Brand.textSecondary, width: 28, fontWeight: '700' },
   name: { color: Brand.text, flex: 1, fontWeight: '600' },
   rating: { color: Brand.red, fontWeight: '800' },
 });

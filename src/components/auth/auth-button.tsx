@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
 
 import { Brand, Spacing } from '@/constants/theme';
@@ -5,13 +6,17 @@ import { Brand, Spacing } from '@/constants/theme';
 type AuthButtonProps = PressableProps & {
   label: string;
   loading?: boolean;
+  icon?: LucideIcon;
+  hideChevron?: boolean;
   variant?: 'primary' | 'ghost';
 };
 
-export function AuthButton({ label, loading, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
+export function AuthButton({ label, loading, icon: Icon, hideChevron, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
   const isPrimary = variant === 'primary';
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.base,
@@ -26,8 +31,9 @@ export function AuthButton({ label, loading, variant = 'primary', disabled, styl
         <ActivityIndicator color={isPrimary ? '#FFFFFF' : Brand.red} />
       ) : (
         <>
+          {Icon && <Icon size={18} color={Brand.text} />}
           <Text style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelGhost]}>{label}</Text>
-          {isPrimary && <Text style={[styles.label, styles.labelPrimary]}>{'  >'}</Text>}
+          {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, styles.labelPrimary]}>{'  >'}</Text>}
         </>
       )}
     </Pressable>
@@ -37,6 +43,9 @@ export function AuthButton({ label, loading, variant = 'primary', disabled, styl
 const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
+    gap: Spacing.two,
+    minHeight: 44,
+    paddingHorizontal: Spacing.two,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.three,
@@ -55,6 +64,8 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   label: {
+    flexShrink: 1,
+    textAlign: 'center',
     fontSize: 16,
     fontWeight: '700',
   },
