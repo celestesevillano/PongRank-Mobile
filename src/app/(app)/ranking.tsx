@@ -1,6 +1,8 @@
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AuthButton } from '@/components/auth/auth-button';
 import { PaginationBar } from '@/components/common/pagination-bar';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
@@ -12,10 +14,14 @@ import { communitiesService } from '@/services/communities.service';
 
 export default function RankingScreen() {
   const { player } = useSession();
+  const { communityId: requested } = useLocalSearchParams<{ communityId?: string }>();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const communities = useFetch((signal) => communitiesService.mine(signal), []);
-  const communityId = selectedId ?? communities.data?.[0]?.id ?? null;
+  useFocusEffect(communities.refetch);
+  const requestedId = Number(requested);
+  const preferred = requested ? requestedId : selectedId;
+  const communityId = communities.data?.find((community) => community.id === preferred)?.id ?? communities.data?.[0]?.id ?? null;
 
   const ranking = usePaginated(
     (params, signal) => (communityId ? communitiesService.ranking(communityId, params, signal) : Promise.reject(new Error('no community'))),
@@ -35,6 +41,8 @@ export default function RankingScreen() {
         onRetry={communities.refetch}
       />
 
+      {noCommunities && <AuthButton label="Explorar comunidades" onPress={() => router.navigate('/social/explore')} />}
+
       {communityId !== null && (
         <>
           <FlatList
@@ -48,6 +56,7 @@ export default function RankingScreen() {
               <Pressable
                 onPress={() => {
                   setSelectedId(item.id);
+                  if (requested) router.setParams({ communityId: String(item.id) });
                   ranking.setPage(0);
                 }}
                 style={[styles.chip, item.id === communityId && styles.chipActive]}>

@@ -144,7 +144,7 @@ export default function ProfileScreen() {
             </View>
           ))}
           {communities.data?.length === 0 && <Text style={styles.label}>Aún no estás en ninguna comunidad.</Text>}
-          <Pressable style={styles.join} onPress={() => router.push('/(auth)/onboarding-community')} hitSlop={8}>
+          <Pressable style={styles.join} onPress={() => router.push('/social/explore')} hitSlop={8}>
             <Plus color={CYAN} size={14} />
             <Text style={styles.joinLabel}>Unirme a otra</Text>
           </Pressable>

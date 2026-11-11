@@ -6,7 +6,13 @@ export type CommunityType = CommunityResponse['communityType'];
 
 export type CommunityCreateInput = { name: string; description?: string; communityType: CommunityType };
 
+type CommunityDetail = CommunityResponse & { creatorName: string | null; isMember: boolean; myRole: 'MEMBER' | 'COMMUNITY_ADMIN' | null };
+
 export const communitiesService = {
+  detail: (id: number, signal?: AbortSignal) =>
+    http.get<CommunityDetail>(`/communities/${id}`, { signal }).then((r) => r.data),
+
+  leave: (id: number, playerId: number) => http.delete(`/communities/${id}/members/${playerId}`),
   create: (input: CommunityCreateInput) => http.post<CommunityResponse>('/communities', input).then((r) => r.data),
 
   search: (params: PageParams & { name?: string }, signal?: AbortSignal) =>
