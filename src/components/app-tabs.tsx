@@ -1,5 +1,8 @@
 import { Tabs } from 'expo-router';
-import { House, Trophy, Swords, Users, CircleUser } from 'lucide-react-native';
+import { House, Trophy, Swords, Users, CircleUser, type LucideIcon } from 'lucide-react-native';
+
+import { StyleSheet, View } from 'react-native';
+import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 
 import { Brand } from '@/constants/theme';
 
@@ -24,7 +27,7 @@ export default function AppTabs() {
         <Tabs.Screen
           key={name}
           name={name}
-          options={{ title, tabBarIcon: ({ color, focused }) => <Icon color={color} size={24} strokeWidth={focused ? 2.4 : 1.8} /> }}
+          options={{ title, tabBarIcon: ({ focused }) => <TabIcon Icon={Icon} focused={focused} /> }}
         />
       ))}
       <Tabs.Screen name="find-match" options={{ href: null }} />
@@ -33,3 +36,18 @@ export default function AppTabs() {
     </Tabs>
   );
 }
+
+
+function TabIcon({ Icon, focused }: { Icon: LucideIcon; focused: boolean }) {
+  return (
+    <View style={styles.icon}>
+      {focused && <Animated.View entering={ZoomIn.withInitialValues({ transform: [{ scale: 0.78 }] }).duration(230).reduceMotion(ReduceMotion.System)} style={styles.active} />}
+      <Icon color={focused ? Brand.text : Brand.textSecondary} size={focused ? 19 : 23} strokeWidth={2} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  icon: { width: 32, height: 30, alignItems: 'center', justifyContent: 'center' },
+  active: { position: 'absolute', width: 30, height: 30, borderRadius: 15, backgroundColor: Brand.red },
+});

@@ -1,5 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useState } from 'react';
+import { Plus, Search } from 'lucide-react-native';
+import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
@@ -42,27 +43,35 @@ export default function SocialScreen() {
 }
 
 function MyCommunities() {
-  const { plan } = usePlan();
+  const { plan, openPlans, refresh } = usePlan();
   const { data, error, loading, refetch } = useFetch((signal) => communitiesService.mine(signal));
-  useFocusEffect(refetch);
+  useFocusEffect(useCallback(() => {
+    refetch();
+    void refresh();
+  }, [refetch, refresh]));
 
   return (
     <>
       <View style={styles.headingRow}>
         <Text style={styles.heading}>Mis comunidades</Text>
-        {plan && data && <Text style={styles.message}>{data.length} de {plan.maxCommunitiesTotal} cupos</Text>}
+        {plan && data && <Text style={styles.message}>{plan.maxSpaces !== undefined ? `Tus espacios · ${plan.usedSpaces ?? data.length} de ${plan.maxSpaces}` : `${data.length} de ${plan.maxCommunitiesTotal} cupos`}</Text>}
       </View>
+      {(loading || error) && <View style={styles.listArea}>
       <ScreenState loading={loading} error={error} empty={data?.length === 0}
         emptyMessage="Explora comunidades y encuentra gente con quien jugar." onRetry={refetch} />
+      </View>}
       {!loading && !error && (
         <FlatList data={data ?? []} keyExtractor={(item) => String(item.id)} contentContainerStyle={styles.list}
           renderItem={({ item, index }) => <CommunityCard community={item} featured={index === 0}
             onPress={() => router.push({ pathname: '/social/[id]', params: { id: item.id } })} />}
-          ListFooterComponent={<View style={styles.list}>
-            <AuthButton label="Explorar comunidades" onPress={() => router.push('/social/explore')} />
-            <AuthButton label="Crear comunidad" variant="ghost" onPress={() => router.push('/social/create')} />
-          </View>} />
+          ListEmptyComponent={<ScreenState loading={false} error={null} empty emptyMessage="Explora comunidades y encuentra gente con quien jugar." />}
+          style={styles.listArea} />
       )}
+      <View style={styles.actions}>
+        <AuthButton label="Explorar comunidades" icon={Search} onPress={() => router.push('/social/explore')} />
+        <AuthButton label="Crear comunidad" icon={Plus} variant="ghost"
+          onPress={() => plan?.maxCommunitiesCreated === 0 ? openPlans() : router.push('/social/create')} />
+      </View>
     </>
   );
 }
@@ -70,6 +79,8 @@ function MyCommunities() {
 const styles = StyleSheet.create({
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two, marginBottom: Spacing.two },
   heading: { color: Brand.text, fontSize: 18, fontWeight: '700', flexShrink: 1 },
+  listArea: { flex: 1 },
+  actions: { paddingVertical: Spacing.two },
   list: { gap: Spacing.two, paddingBottom: Spacing.two },
   placeholder: { padding: Spacing.three, borderRadius: Spacing.three, borderWidth: 1, borderStyle: 'dashed', borderColor: Brand.border },
   message: { color: Brand.textSecondary, fontSize: 14, textAlign: 'center' },

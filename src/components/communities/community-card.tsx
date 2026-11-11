@@ -9,6 +9,7 @@ const TYPE_LABEL: Record<CommunityResponse['communityType'], string> = {
   UNIVERSITY: 'Universidad',
   SCHOOL: 'Colegio',
   PUBLIC_PARK: 'Parque',
+  PLAY_GROUP: 'Grupo de juego',
   OTHER: 'Comunidad',
 };
 
@@ -30,7 +31,7 @@ export function CommunityCard({ community, onPress, featured = false }: { commun
         {!featured && mark}
         <View style={styles.label}>
           <Text style={styles.name}>{community.name}</Text>
-          <Text style={styles.meta}>{community.memberCount} {community.memberCount === 1 ? 'miembro' : 'miembros'} · {TYPE_LABEL[community.communityType]}</Text>
+          <Text style={styles.meta}>{community.memberCount} {community.memberCount === 1 ? 'miembro' : 'miembros'} · {community.customLabel || TYPE_LABEL[community.communityType]}</Text>
         </View>
         {onPress && <ChevronRight color={Brand.textSecondary} size={20} />}
       </View>

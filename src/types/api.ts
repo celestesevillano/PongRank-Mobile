@@ -29,7 +29,8 @@ export type CommunityResponse = {
   id: number;
   name: string;
   description: string | null;
-  communityType: 'UNIVERSITY' | 'SCHOOL' | 'PUBLIC_PARK' | 'OTHER';
+  communityType: 'UNIVERSITY' | 'SCHOOL' | 'PUBLIC_PARK' | 'PLAY_GROUP' | 'OTHER';
+  customLabel?: string | null;
   memberCount: number;
 };
 
@@ -123,6 +124,8 @@ export type MyPlanResponse = {
   maxCommunitiesCreated: number;
   maxCommunitiesTotal: number;
   maxClubsTotal: number;
+  maxSpaces?: number;
+  usedSpaces?: number;
 };
 
 export type PaymentPreference = { initPoint: string; preferenceId: string };
