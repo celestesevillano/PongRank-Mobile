@@ -43,7 +43,7 @@ export default function RankingScreen() {
         onRetry={communities.refetch}
       />
 
-      {noCommunities && <AuthButton label="Explorar comunidades" icon={Search} onPress={() => router.navigate('/social/explore')} />}
+      {noCommunities && <AuthButton label="Explorar comunidades" icon={Search} onPress={() => router.navigate({ pathname: '/social/explore', params: { filter: 'communities' } })} />}
 
       {communityId !== null && (
         <>
