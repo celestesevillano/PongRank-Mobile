@@ -1,22 +1,26 @@
 import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
 import { Target, TrendingUp, Users } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
-  FadeInDown,
+  Extrapolation,
+  cancelAnimation,
+  interpolate,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
-import { INTRO_TOTAL_MS, WelcomeIntro, introWillPlay } from '@/components/welcome-intro';
+import { EMBLEM, INTRO_DURATION, SETTLE_AT, WelcomeIntro } from '@/components/welcome-intro';
 import { Brand, Spacing } from '@/constants/theme';
-import { useEffect, useState } from 'react';
+
+let playedIntro = false;
 
 const FEATURES = [
   { Icon: Users, label: 'Compite en tu\ncomunidad' },
@@ -26,66 +30,66 @@ const FEATURES = [
 
 export default function WelcomeScreen() {
   const reduceMotion = useReducedMotion();
-  const [startDelay] = useState(() => (introWillPlay() ? INTRO_TOTAL_MS - 300 : 0));
-  const float = useSharedValue(0);
+  const [playing, setPlaying] = useState(() => !reduceMotion && !playedIntro);
+  const time = useSharedValue(playing ? 0 : INTRO_DURATION);
 
   useEffect(() => {
-    if (reduceMotion) return;
-    float.value = withRepeat(withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }), -1, true);
-  }, [float, reduceMotion]);
+    if (!playing) return;
+    playedIntro = true;
+    if (reduceMotion) {
+      time.value = INTRO_DURATION;
+      setPlaying(false);
+      return;
+    }
+    time.value = withTiming(INTRO_DURATION, { duration: INTRO_DURATION, easing: Easing.linear }, (finished) => {
+      if (finished) scheduleOnRN(setPlaying, false);
+    });
+    return () => cancelAnimation(time);
+  }, [playing, reduceMotion, time]);
 
-  const floatStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -float.value * 10 }, { rotateZ: `${float.value * 2 - 1}deg` }],
+  const emblem = useAnimatedStyle(() => ({
+    opacity: interpolate(time.value, [SETTLE_AT, 1700], [0, 1], Extrapolation.CLAMP),
   }));
-
-  const enter = (order: number) => (reduceMotion ? undefined : FadeInDown.delay(startDelay + order * 120).duration(500));
+  const brand = useAnimatedStyle(() => ({
+    opacity: interpolate(time.value, [1585, 1905], [0, 1], Extrapolation.CLAMP),
+  }));
+  const actions = useAnimatedStyle(() => {
+    const progress = interpolate(time.value, [1860, INTRO_DURATION], [0, 1], Extrapolation.CLAMP);
+    return { opacity: progress, transform: [{ translateY: (1 - progress) * 6 }] };
+  });
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.hero}>
-          <Animated.View style={floatStyle}>
-            <Image
-              source={require('@/assets/images/pongrank-paddle.png')}
-              style={styles.paddle}
-              contentFit="contain"
-            />
+          <Animated.View style={emblem}>
+            <Image source={EMBLEM} style={styles.paddle} contentFit="contain" />
           </Animated.View>
+          {playing && <WelcomeIntro time={time} />}
         </View>
 
-        <Animated.View entering={enter(0)}>
-          <Image
-            source={require('@/assets/images/pongrank-wordmark.png')}
-            style={styles.wordmark}
-            contentFit="contain"
-          />
+        <Animated.View style={brand}>
+          <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
           <Text style={styles.tagline}>JUEGA. SUBE. COMPITE.</Text>
         </Animated.View>
 
-        <Animated.Text entering={enter(1)} style={styles.title}>
-          Encuentra tu próximo rival
-        </Animated.Text>
-
-        <View style={styles.features}>
-          {FEATURES.map((f, index) => (
-            <Animated.View key={f.label} entering={enter(2 + index)} style={styles.featureItem}>
-              <f.Icon color={Brand.red} size={28} strokeWidth={1.8} />
-              <Text style={styles.featureLabel}>{f.label}</Text>
-            </Animated.View>
-          ))}
-        </View>
-
-        <Animated.View entering={enter(5)}>
-          <AuthButton label="Empezar" onPress={() => router.push('/(auth)/register')} />
-        </Animated.View>
-
-        <Animated.View entering={enter(6)}>
-          <Link href="/(auth)/login" style={styles.loginLink}>
-            Ya tengo cuenta
-          </Link>
+        <Animated.View style={actions} pointerEvents={playing ? 'none' : 'auto'}
+          accessibilityElementsHidden={playing} importantForAccessibility={playing ? 'no-hide-descendants' : 'auto'}>
+          <Text style={styles.title}>Encuentra tu próximo rival</Text>
+          <View style={styles.features}>
+            {FEATURES.map(({ Icon, label }) => (
+              <View key={label} style={styles.featureItem}>
+                <Icon color={Brand.red} size={28} strokeWidth={1.8} />
+                <Text style={styles.featureLabel}>{label}</Text>
+              </View>
+            ))}
+          </View>
+          <AuthButton label="Empezar" disabled={playing} onPress={() => router.push('/(auth)/register')} />
+          {playing ? <Text style={styles.loginLink}>Ya tengo cuenta</Text> : (
+            <Link href="/(auth)/login" style={styles.loginLink}>Ya tengo cuenta</Link>
+          )}
         </Animated.View>
       </SafeAreaView>
-      <WelcomeIntro />
     </View>
   );
 }
@@ -126,6 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     marginTop: Spacing.four,
+    marginBottom: Spacing.three,
   },
   features: {
     flexDirection: 'row',

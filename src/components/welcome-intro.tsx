@@ -1,164 +1,67 @@
 import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  Easing,
-  runOnJS,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withDelay,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
+import { StyleSheet, View } from 'react-native';
+import Animated, { Extrapolation, interpolate, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 
-import { Brand, Spacing } from '@/constants/theme';
+import { Brand } from '@/constants/theme';
 
-const IMPACT_AT_MS = 650;
-const TOTAL_MS = 2600;
+const PADDLE = require('@/assets/images/pongrank-intro-paddle.png');
+const BALL = require('@/assets/images/pongrank-intro-ball.png');
+export const EMBLEM = require('@/assets/images/pongrank-paddle.png');
+export const INTRO_DURATION = 2190;
+export const SETTLE_AT = 1540;
+const CONTACT = 1120;
 
-let alreadyPlayed = false;
+export function WelcomeIntro({ time }: { time: SharedValue<number> }) {
+  const paddle = useAnimatedStyle(() => {
+    const frames = [250, 600, 945, CONTACT, 1250, SETTLE_AT, 1700];
+    const frame = (values: number[]) => interpolate(time.value, frames, values, Extrapolation.CLAMP);
+    return {
+      opacity: frame([0, 1, 1, 1, 1, 1, 0]),
+      transform: [
+        { translateX: frame([-3, 0, -16, 6, 11, 0, 0]) },
+        { translateY: frame([8, 0, 12, -4, -7, 0, 0]) },
+        { rotate: `${frame([-4, 0, -19, 4, 7, 0, 0])}deg` },
+        { scale: frame([0.96, 1, 0.99, 1, 1, 1, 1]) },
+      ],
+    };
+  });
 
-export const INTRO_TOTAL_MS = TOTAL_MS;
-export const introWillPlay = () => !alreadyPlayed;
+  const ball = useAnimatedStyle(() => {
+    const frames = [680, 865, CONTACT, 1310, 1465, SETTLE_AT, 1700];
+    const frame = (values: number[]) => interpolate(time.value, frames, values, Extrapolation.CLAMP);
+    return {
+      opacity: frame([0, 1, 1, 1, 1, 1, 0]),
+      transform: [
+        { translateX: frame([109, 91, 53, 83, 68, 50, 50]) },
+        { translateY: frame([-62, -48, -5, -38, -31, -3, -3]) },
+        { rotate: `${frame([-48, -36, -6, 32, 19, 0, 0])}deg` },
+        { scale: frame([0.9, 0.94, 1, 1, 1, 1, 1]) },
+      ],
+    };
+  });
 
-export function WelcomeIntro() {
-  const reduceMotion = useReducedMotion();
-  const [visible, setVisible] = useState(!alreadyPlayed);
-
-  const entry = useSharedValue(0);
-  const shake = useSharedValue(0);
-  const flash = useSharedValue(0);
-  const ring = useSharedValue(0);
-  const ringSlow = useSharedValue(0);
-  const glow = useSharedValue(0.4);
-  const title = useSharedValue(0);
-  const overlay = useSharedValue(1);
-
-  useEffect(() => {
-    if (!visible) return;
-    alreadyPlayed = true;
-    const finish = () => setVisible(false);
-
-    if (reduceMotion) {
-      entry.value = 1;
-      title.value = 1;
-      overlay.value = withDelay(900, withTiming(0, { duration: 250 }, (done) => done && runOnJS(finish)()));
-      return;
-    }
-
-    entry.value = withTiming(1, { duration: IMPACT_AT_MS, easing: Easing.out(Easing.back(1.6)) });
-    glow.value = withSequence(
-      withTiming(0.5, { duration: IMPACT_AT_MS }),
-      withTiming(1, { duration: 200 }),
-      withTiming(0.6, { duration: 900 }),
-    );
-    shake.value = withDelay(
-      IMPACT_AT_MS,
-      withSequence(
-        withTiming(1, { duration: 60 }),
-        withTiming(-1, { duration: 60 }),
-        withTiming(0.6, { duration: 60 }),
-        withTiming(-0.4, { duration: 60 }),
-        withTiming(0, { duration: 60 }),
-      ),
-    );
-    flash.value = withDelay(IMPACT_AT_MS, withSequence(withTiming(1, { duration: 80 }), withTiming(0, { duration: 420 })));
-    ring.value = withDelay(IMPACT_AT_MS, withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }));
-    ringSlow.value = withDelay(IMPACT_AT_MS + 150, withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) }));
-    title.value = withDelay(IMPACT_AT_MS + 250, withTiming(1, { duration: 550, easing: Easing.out(Easing.cubic) }));
-    overlay.value = withDelay(TOTAL_MS - 350, withTiming(0, { duration: 350 }, (done) => done && runOnJS(finish)()));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
-
-  const paddleStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(entry.value * 2, 1),
-    transform: [
-      { perspective: 700 },
-      { translateX: (1 - entry.value) * -170 + shake.value * 7 },
-      { translateY: (1 - entry.value) * 90 + shake.value * -3 },
-      { rotateY: `${(1 - entry.value) * 50}deg` },
-      { rotateZ: `${(1 - entry.value) * -40 + shake.value * 2.5}deg` },
-      { scale: 0.45 + entry.value * 0.55 },
-    ],
+  const impact = useAnimatedStyle(() => ({
+    opacity: interpolate(time.value, [CONTACT - 1, CONTACT, 1400], [0, 0.65, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(time.value, [CONTACT, 1400], [0.6, 2.6], Extrapolation.CLAMP) }],
   }));
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: glow.value,
-    transform: [{ scale: 0.8 + glow.value * 0.5 }],
-  }));
-
-  const flashStyle = useAnimatedStyle(() => ({ opacity: flash.value * 0.55 }));
-
-  const ringStyle = useAnimatedStyle(() => ({
-    opacity: (1 - ring.value) * (ring.value === 0 ? 0 : 1),
-    transform: [{ scale: 0.3 + ring.value * 5 }],
-  }));
-
-  const ringSlowStyle = useAnimatedStyle(() => ({
-    opacity: (1 - ringSlow.value) * (ringSlow.value === 0 ? 0 : 0.7),
-    transform: [{ scale: 0.3 + ringSlow.value * 6.5 }],
-  }));
-
-  const titleStyle = useAnimatedStyle(() => ({
-    opacity: title.value,
-    transform: [{ translateY: (1 - title.value) * 18 }, { scale: 0.92 + title.value * 0.08 }],
-  }));
-
-  const overlayStyle = useAnimatedStyle(() => ({ opacity: overlay.value }));
-
-  if (!visible) return null;
 
   return (
-    <Animated.View style={[styles.overlay, overlayStyle]} pointerEvents="auto">
-      <Animated.View style={[styles.glow, glowStyle]} />
-      <Animated.View style={[styles.flash, flashStyle]} pointerEvents="none" />
-      <View style={styles.stage}>
-        <Animated.View style={[styles.ring, ringSlowStyle]} />
-        <Animated.View style={[styles.ring, ringStyle]} />
-        <Animated.View style={paddleStyle}>
-          <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.paddle} contentFit="contain" />
-        </Animated.View>
-      </View>
-      <Animated.View style={[styles.titleBlock, titleStyle]}>
-        <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
-        <Text style={styles.tagline}>JUEGA. SUBE. COMPITE.</Text>
+    <View pointerEvents="none" accessible={false} style={styles.stage}>
+      <Animated.View style={[styles.paddle, paddle]}>
+        <Image source={PADDLE} style={styles.image} contentFit="contain" transition={0} />
       </Animated.View>
-    </Animated.View>
+      <Animated.View style={[styles.ball, ball]}>
+        <Image source={BALL} style={styles.image} contentFit="contain" transition={0} />
+      </Animated.View>
+      <Animated.View style={[styles.impact, impact]} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    zIndex: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.four,
-    backgroundColor: Brand.background,
-  },
-  glow: {
-    position: 'absolute',
-    width: 460,
-    height: 460,
-    borderRadius: 230,
-    backgroundColor: 'rgba(232, 38, 47, 0.22)',
-  },
-  flash: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: Brand.red,
-  },
-  stage: { width: 260, height: 260, alignItems: 'center', justifyContent: 'center' },
-  paddle: { width: 220, height: 220 },
-  ring: {
-    position: 'absolute',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 3,
-    borderColor: Brand.red,
-  },
-  titleBlock: { alignItems: 'center', gap: Spacing.two, width: '100%' },
-  wordmark: { width: '80%', height: 52 },
-  tagline: { color: Brand.textSecondary, letterSpacing: 3, fontSize: 12 },
+  stage: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+  paddle: { position: 'absolute', width: 220, height: 220 },
+  ball: { position: 'absolute', width: 48, height: 48 },
+  image: { width: '100%', height: '100%' },
+  impact: { position: 'absolute', width: 28, height: 28, marginLeft: 106, marginTop: -10, borderRadius: 14, borderWidth: 2, borderColor: '#22D3EE' },
 });
