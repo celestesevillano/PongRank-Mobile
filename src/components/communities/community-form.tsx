@@ -50,7 +50,7 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
       <Text style={styles.label}>Tipo de comunidad</Text>
       <View style={styles.types}>
         {TYPES.map((item) => (
-          <Pressable key={item.value} onPress={() => setType(item.value)} accessibilityRole="button" accessibilityState={{ selected: type === item.value }} style={[styles.chip, type === item.value && styles.chipActive]}>
+          <Pressable key={item.value} onPress={() => setType(item.value)} accessibilityRole="button" accessibilityState={{ selected: type === item.value }} style={[styles.chip, item.value === 'UNIVERSITY' && styles.wideChip, type === item.value && styles.chipActive]}>
             <Text style={styles.chipLabel}>{item.label}</Text>
           </Pressable>
         ))}
@@ -64,8 +64,9 @@ const styles = StyleSheet.create({
   form: { gap: Spacing.two },
   label: { color: Brand.text, fontWeight: '600' },
   error: { color: '#FF6B72' },
-  types: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  chip: { minHeight: 44, justifyContent: 'center', paddingHorizontal: Spacing.three, borderRadius: 999, backgroundColor: Brand.surface },
+  types: { flexDirection: 'row', alignItems: 'stretch', backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: 14, overflow: 'hidden' },
+  chip: { flex: 1, minWidth: 0, minHeight: 44, alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.two, paddingHorizontal: Spacing.one },
+  wideChip: { flex: 1.35 },
   chipActive: { backgroundColor: Brand.red },
-  chipLabel: { color: Brand.text, fontWeight: '600' },
+  chipLabel: { color: Brand.text, fontSize: 12, fontWeight: '600', textAlign: 'center' },
 });
