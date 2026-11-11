@@ -116,10 +116,6 @@ export default function OnboardingCommunityScreen() {
           />
         )}
 
-        <Pressable onPress={() => router.push('/(auth)/create-community')}>
-          <Text style={styles.skip}>+ Crear una nueva comunidad</Text>
-        </Pressable>
-
         <Text style={styles.footerHint}>
           Puedes jugar partidas, retar amigos y aparecer en el ranking general sin unirte a ninguna comunidad.
           Unirte te da además un ranking dentro de tu grupo específico.

@@ -50,6 +50,10 @@ function MyCommunities() {
     void refresh();
   }, [refetch, refresh]));
 
+  const usedSpaces = plan ? plan.usedSpaces ?? data?.length : undefined;
+  const spacesFull = plan?.maxSpaces !== undefined && usedSpaces !== undefined && usedSpaces >= plan.maxSpaces;
+  const createBlocked = plan?.maxCommunitiesCreated === 0 || spacesFull;
+
   return (
     <>
       <View style={styles.headingRow}>
@@ -70,7 +74,7 @@ function MyCommunities() {
       <View style={styles.actions}>
         <AuthButton label="Explorar comunidades" icon={Search} onPress={() => router.push('/social/explore')} />
         <AuthButton label="Crear comunidad" icon={Plus} variant="ghost"
-          onPress={() => plan?.maxCommunitiesCreated === 0 ? openPlans() : router.push('/social/create')} />
+          onPress={() => createBlocked ? openPlans() : router.push('/social/create')} />
       </View>
     </>
   );
