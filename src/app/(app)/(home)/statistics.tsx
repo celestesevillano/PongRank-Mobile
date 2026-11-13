@@ -1,11 +1,12 @@
 import { Image } from 'expo-image';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronLeft, ChevronRight, Flame, TrendingDown, TrendingUp, Trophy } from 'lucide-react-native';
-import { useCallback, useId, useMemo, useState } from 'react';
+import { ChartNoAxesColumnIncreasing, ChevronLeft, ChevronRight, Flame, RotateCw, TrendingDown, TrendingUp, Trophy } from 'lucide-react-native';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Defs, Ellipse, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { CardLighting } from '@/components/common/card-lighting';
 import { ScreenState } from '@/components/common/screen-state';
 import { RatingChart, signedRating, STAT_CYAN } from '@/components/statistics/rating-chart';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -47,6 +48,7 @@ function UnverifiedPlan() {
           <>
             <Text style={styles.secondary}>No pudimos verificar tu plan.</Text>
             <Pressable accessibilityRole="button" style={styles.back} onPress={lookup.refetch}>
+              <RotateCw size={18} color={STAT_CYAN} />
               <Text style={styles.retry}>Reintentar</Text>
             </Pressable>
           </>
@@ -139,7 +141,7 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
           </View>
         </View>
 
-        <ScreenState loading={history.loading && !snapshot} error={history.error} onRetry={history.refetch} />
+        <ScreenState loading={history.loading && !snapshot} error={history.error} onRetry={history.refetch} retryIcon={RotateCw} />
 
         {snapshot && selected && !history.error ? (
           <>
@@ -205,33 +207,6 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
   );
 }
 
-function CardLighting({ color, court = false }: { color: string; court?: boolean }) {
-  const gradientId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
-  return (
-    <View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={styles.diagonal}>
-      <Svg width="100%" height="100%" viewBox="0 0 360 124" preserveAspectRatio="none">
-        <Defs>
-          <RadialGradient id={gradientId} cx="98%" cy="94%" rx="74%" ry="102%">
-            <Stop offset="0" stopColor={color} stopOpacity={court ? 0.48 : 0.33} />
-            <Stop offset="0.58" stopColor={color} stopOpacity={0.09} />
-            <Stop offset="1" stopColor={color} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect width="360" height="124" fill={`url(#${gradientId})`} />
-        {court ? (
-          <>
-            <Ellipse cx={352} cy={125} rx={85} ry={16} fill={color} opacity={0.16} />
-            <Path d="M235 124 L289 91 L360 75 M267 124 L360 95 M280 113 L360 90 M298 103 L298 124 M313 99 L314 124 M330 94 L331 124 M348 90 L350 124" stroke={color} strokeWidth={1} strokeOpacity={0.38} fill="none" />
-            <Path d="M286 92 L360 75" stroke={color} strokeWidth={3} strokeOpacity={0.85} fill="none" />
-          </>
-        ) : null}
-      </Svg>
-      <View style={[styles.stripe, { backgroundColor: color }]} />
-      <View style={[styles.stripe, styles.thinStripe, { backgroundColor: color }]} />
-    </View>
-  );
-}
-
 function BestHeading() {
   return (
     <View style={styles.sectionHeader}>
@@ -289,9 +264,6 @@ const styles = StyleSheet.create({
   rating: { color: Brand.text, fontWeight: '900', fontSize: 48, fontVariant: ['tabular-nums'] },
   delta: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: '#09191F', borderWidth: 1, borderColor: '#215360', borderRadius: 16, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   deltaText: { fontWeight: '800', fontSize: 15, fontVariant: ['tabular-nums'] },
-  diagonal: { ...StyleSheet.absoluteFill, overflow: 'hidden' },
-  stripe: { position: 'absolute', right: 26, top: -65, width: 30, height: 260, transform: [{ rotate: '38deg' }], opacity: 0.15 },
-  thinStripe: { right: 12, width: 8, opacity: 0.23 },
   results: { padding: Spacing.three, gap: Spacing.two, borderRadius: 16, borderWidth: 1, borderColor: '#344047', backgroundColor: '#101519' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   resultsHeading: { flexWrap: 'wrap' },
