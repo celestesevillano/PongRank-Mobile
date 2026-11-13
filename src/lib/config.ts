@@ -4,4 +4,4 @@ import Constants from 'expo-constants';
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ??
   (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ??
-  'http://54.80.228.129:8080';
+  'https://pongrank-api.duckdns.org';
