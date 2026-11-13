@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react-native';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
@@ -9,10 +10,11 @@ type ScreenStateProps = {
   error: ApiError | null;
   empty?: boolean;
   emptyMessage?: string;
+  retryIcon?: LucideIcon;
   onRetry?: () => void;
 };
 
-export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay nada por aquí.', onRetry }: ScreenStateProps) {
+export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay nada por aquí.', onRetry, retryIcon }: ScreenStateProps) {
   if (loading) {
     return (
       <View style={styles.container}>
@@ -26,7 +28,7 @@ export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay
       <View style={styles.container}>
         <Text style={styles.title}>{error.isNetwork ? 'Sin conexión' : 'No pudimos cargar esto'}</Text>
         <Text style={styles.message}>{error.message}</Text>
-        {onRetry && <AuthButton label="Reintentar" onPress={onRetry} style={styles.button} />}
+        {onRetry && <AuthButton label="Reintentar" icon={retryIcon} onPress={onRetry} style={styles.button} />}
       </View>
     );
   }
