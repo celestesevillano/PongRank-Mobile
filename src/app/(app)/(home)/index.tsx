@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { Bot, ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, LockKeyhole, Plus, RotateCw, Search, Trophy, X, type LucideIcon } from 'lucide-react-native';
+import { Bot, ChartNoAxesColumnIncreasing, ChevronRight, LockKeyhole, Plus, RotateCw, Search, Trophy, X, type LucideIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +19,6 @@ import { matchesService } from '@/services/matches.service';
 
 const cyan = '#22D3EE';
 const loss = '#FF8990';
-const amber = '#FFCB68';
 const statisticsArt = require('../../../../assets/images/pongrank-home-statistics.webp');
 const coachArt = require('../../../../assets/images/pongrank-home-coach.webp');
 const wordmark = require('../../../../assets/images/pongrank-wordmark.png');
@@ -48,19 +47,11 @@ export default function DashboardScreen() {
       position: page.content.find((entry) => entry.playerId === playerId)?.position,
     };
   }, [playerId, visit]);
-  const pending = useFetch(async (signal) => {
-    const matches = await matchesService.active(playerId, signal);
-    return matches.find((match) =>
-      (match.status === 'PROPOSED_P1' && match.player2?.id === playerId)
-      || (match.status === 'PROPOSED_P2' && match.player1.id === playerId));
-  }, [playerId, visit]);
   const recent = useFetch(
     (signal) => matchesService.byPlayer(playerId, { status: 'CONFIRMED', page: 0, size: 3, sort: ['confirmedAt,desc', 'id,desc'] }, signal),
     [playerId, visit],
   );
-  const match = pending.data;
   const recentMatches = recent.data?.content ?? [];
-  const opponent = match?.player1.id === playerId ? match?.player2 : match?.player1;
   const currentRating = rating.data?.ratingGlicko ?? player?.ratingGlicko;
 
   return (
@@ -89,20 +80,6 @@ export default function DashboardScreen() {
             ) : null}
           </View>
         </View>
-
-        {match ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/match/[id]', params: { id: match.id } })}
-            style={({ pressed }) => [styles.tile, styles.pending, pressed && styles.pressed]}>
-            <View style={[styles.icon, styles.pendingIcon]}><ClipboardCheck color={amber} size={20} /></View>
-            <View style={styles.copy}>
-              <Text style={styles.title}>Revisar resultado</Text>
-              <Text style={styles.detail}>{opponent?.name ?? 'Tu rival'} espera tu confirmación</Text>
-            </View>
-            <ChevronRight color={amber} size={18} />
-          </Pressable>
-        ) : null}
 
         <View style={styles.actionRow}>
           <AuthButton label="Nueva partida" icon={Plus} style={styles.playButton} onPress={() => router.push('/new-match')} />
@@ -250,8 +227,6 @@ const styles = StyleSheet.create({
   shortcuts: { gap: Spacing.two },
   tile: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, paddingHorizontal: Spacing.three, borderRadius: 14, backgroundColor: '#101519', borderWidth: 1, borderColor: '#344047' },
   icon: { padding: Spacing.two, borderRadius: 8, backgroundColor: '#10333C' },
-  pending: { backgroundColor: '#221A10', borderColor: '#74532A' },
-  pendingIcon: { backgroundColor: '#422C14' },
   defeat: { backgroundColor: '#241419', borderColor: '#71333C' },
   defeatIcon: { backgroundColor: '#472129' },
   copy: { flex: 1, gap: Spacing.half },
