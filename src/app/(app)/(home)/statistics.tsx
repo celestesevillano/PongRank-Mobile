@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronLeft, ChevronRight, Flame, RotateCw, TrendingDown, TrendingUp, Trophy } from 'lucide-react-native';
+import { ChartNoAxesColumnIncreasing, ChevronLeft, Flame, RotateCw, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -170,20 +170,20 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
                   onPress={() => router.push({ pathname: '/match/[id]', params: { id: best.id } })}
                   style={({ pressed }) => [styles.highlight, styles.bestCard, pressed && styles.pressed]}>
                   <CardLighting color={amber} />
-                  <BestHeading />
+                  <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
                   <Text style={styles.highlightValue}>{best.opponent.name}</Text>
                   {Number.isFinite(best.opponent.ratingGlicko) ? (
                     <Text style={styles.secondary}>Rating {Math.round(best.opponent.ratingGlicko)}</Text>
                   ) : null}
                   <View style={styles.bestFooter}>
+                    <Text style={styles.bestAction}>Ver partida</Text>
                     <Image source={bestVictoryTrophy} contentFit="contain" accessible={false} style={styles.bestTrophy} />
-                    <ChevronRight size={18} color={amber} />
                   </View>
                 </Pressable>
               ) : (
                 <View style={[styles.highlight, styles.bestCard]}>
                   <CardLighting color={amber} />
-                  <BestHeading />
+                  <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
                   <Text style={styles.secondary}>Aún sin victorias.</Text>
                 </View>
               )}
@@ -208,15 +208,6 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
         ) : null}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function BestHeading() {
-  return (
-    <View style={styles.sectionHeader}>
-      <Trophy color={amber} size={19} />
-      <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
-    </View>
   );
 }
 
@@ -285,8 +276,9 @@ const styles = StyleSheet.create({
   highlightValue: { color: Brand.text, fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'], marginTop: Spacing.one },
   encouragement: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: 'flex-start', backgroundColor: '#3B2914', borderRadius: 8, padding: Spacing.two, marginTop: Spacing.one },
   encouragementText: { color: amber, fontWeight: '700', fontSize: 12, flexShrink: 1 },
-  bestFooter: { marginTop: 'auto', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: Spacing.two },
-  bestTrophy: { width: 60, height: 60 },
+  bestFooter: { marginTop: 'auto', minHeight: 64, paddingRight: 64, justifyContent: 'flex-end' },
+  bestAction: { color: amber, fontSize: 12, fontWeight: '700' },
+  bestTrophy: { position: 'absolute', right: -8, bottom: -8, width: 72, height: 72 },
   insight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#081A20', borderRadius: 16, borderWidth: 1, borderColor: '#24616A', overflow: 'hidden', padding: Spacing.three },
   insightIcon: { backgroundColor: '#10333C', borderRadius: 10, padding: Spacing.two },
   insightBall: { position: 'absolute', right: 6, bottom: 10, width: 40, height: 40, opacity: 0.78 },
