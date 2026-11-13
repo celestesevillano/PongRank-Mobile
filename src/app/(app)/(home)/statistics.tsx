@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronLeft, Flame, RotateCw, TrendingDown, TrendingUp } from 'lucide-react-native';
+import { ChartNoAxesColumnIncreasing, ChevronLeft, RotateCw, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +19,8 @@ import { computeStatistics, filterRating, monthlyResults, streakMessage, type St
 
 const paddle = require('../../../../assets/images/pongrank-intro-paddle.png');
 const ball = require('../../../../assets/images/pongrank-intro-ball.png');
-const bestVictoryTrophy = require('../../../../assets/images/pongrank-best-victory.webp');
+const streakArtwork = require('../../../../assets/images/pongrank-current-streak.webp');
+const bestVictoryTrophy = require('../../../../assets/images/pongrank-best-victory-banner.webp');
 const amber = '#FFCB68';
 const loss = '#FF8990';
 
@@ -147,48 +148,6 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
         {snapshot && selected && !history.error ? (
           <>
             <RatingChart period={period} onPeriodChange={setPeriod} points={selected.points} incomplete={selected.incomplete} compact={compact} />
-            <Results wins={snapshot.stats.wins} losses={snapshot.stats.losses} />
-
-            <View style={[styles.highlights, stackCards && styles.stacked]}>
-              <View style={[styles.highlight, styles.streakCard]}>
-                <CardLighting color={Brand.red} />
-                <View style={styles.sectionHeader}>
-                  <Flame color={loss} size={19} />
-                  <Text accessibilityRole="header" style={styles.highlightTitle}>Racha actual</Text>
-                </View>
-                <Text style={styles.highlightValue}>{snapshot.stats.streak} {snapshot.stats.streak === 1 ? 'victoria' : 'victorias'}</Text>
-                <Text style={styles.secondary}>{snapshot.stats.streak === 1 ? 'consecutiva' : 'consecutivas'}</Text>
-                <View style={styles.encouragement}>
-                  <Text style={styles.encouragementText}>{streakMessage(snapshot.stats.streak)}</Text>
-                </View>
-              </View>
-
-              {best ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityHint="Abre el detalle de la partida"
-                  onPress={() => router.push({ pathname: '/match/[id]', params: { id: best.id } })}
-                  style={({ pressed }) => [styles.highlight, styles.bestCard, pressed && styles.pressed]}>
-                  <CardLighting color={amber} />
-                  <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
-                  <Text style={styles.highlightValue}>{best.opponent.name}</Text>
-                  {Number.isFinite(best.opponent.ratingGlicko) ? (
-                    <Text style={styles.secondary}>Rating {Math.round(best.opponent.ratingGlicko)}</Text>
-                  ) : null}
-                  <View style={styles.bestFooter}>
-                    <Text style={styles.bestAction}>Ver partida</Text>
-                    <Image source={bestVictoryTrophy} contentFit="contain" accessible={false} style={styles.bestTrophy} />
-                  </View>
-                </Pressable>
-              ) : (
-                <View style={[styles.highlight, styles.bestCard]}>
-                  <CardLighting color={amber} />
-                  <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
-                  <Text style={styles.secondary}>Aún sin victorias.</Text>
-                </View>
-              )}
-            </View>
-
             {insight ? (
               <View style={styles.insight}>
                 <CardLighting color={STAT_CYAN} court />
@@ -204,6 +163,48 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
                 </View>
               </View>
             ) : null}
+            <Results wins={snapshot.stats.wins} losses={snapshot.stats.losses} />
+
+            <View style={[styles.highlights, stackCards && styles.stacked]}>
+              <View style={[styles.highlight, styles.streakCard]}>
+                <CardLighting color={Brand.red} />
+                <Text accessibilityRole="header" style={styles.highlightTitle}>Racha actual</Text>
+                <View style={styles.highlightBody}>
+                  <Text style={styles.highlightValue}>{snapshot.stats.streak}</Text>
+                  <Text style={styles.secondary}>{snapshot.stats.streak === 1 ? 'victoria consecutiva' : 'victorias consecutivas'}</Text>
+                  <Image source={streakArtwork} contentFit="contain" accessible={false} style={styles.highlightArt} />
+                </View>
+                <View style={styles.encouragement}>
+                  <Text style={styles.encouragementText}>{streakMessage(snapshot.stats.streak)}</Text>
+                </View>
+              </View>
+
+              {best ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityHint="Abre el detalle de la partida"
+                  onPress={() => router.push({ pathname: '/match/[id]', params: { id: best.id } })}
+                  style={({ pressed }) => [styles.highlight, styles.bestCard, pressed && styles.pressed]}>
+                  <CardLighting color={amber} />
+                  <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
+                  <View style={styles.highlightBody}>
+                    <Text style={styles.highlightValue}>{best.opponent.name}</Text>
+                    {Number.isFinite(best.opponent.ratingGlicko) ? (
+                      <Text style={styles.secondary}>Rating {Math.round(best.opponent.ratingGlicko)}</Text>
+                    ) : null}
+                    <Image source={bestVictoryTrophy} contentFit="contain" accessible={false} style={styles.highlightArt} />
+                  </View>
+                  <Text style={styles.bestAction}>Ver partida</Text>
+                </Pressable>
+              ) : (
+                <View style={[styles.highlight, styles.bestCard]}>
+                  <CardLighting color={amber} />
+                  <Text accessibilityRole="header" style={styles.highlightTitle}>Mejor victoria</Text>
+                  <Text style={styles.secondary}>Aún sin victorias.</Text>
+                </View>
+              )}
+            </View>
+
           </>
         ) : null}
       </ScrollView>
@@ -273,12 +274,12 @@ const styles = StyleSheet.create({
   streakCard: { borderColor: '#A03543', backgroundColor: '#231318' },
   bestCard: { borderColor: '#927035', backgroundColor: '#161613' },
   highlightTitle: { color: Brand.text, flexShrink: 1, fontWeight: '800', fontSize: 14 },
-  highlightValue: { color: Brand.text, fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'], marginTop: Spacing.one },
+  highlightBody: { minHeight: 72, paddingRight: 52, justifyContent: 'center', gap: Spacing.half },
+  highlightArt: { position: 'absolute', width: 72, height: 72, right: -12, top: 0 },
+  highlightValue: { color: Brand.text, fontSize: 20, fontWeight: '800', fontVariant: ['tabular-nums'] },
   encouragement: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: 'flex-start', backgroundColor: '#3B2914', borderRadius: 8, padding: Spacing.two, marginTop: Spacing.one },
   encouragementText: { color: amber, fontWeight: '700', fontSize: 12, flexShrink: 1 },
-  bestFooter: { marginTop: 'auto', minHeight: 64, paddingRight: 64, justifyContent: 'flex-end' },
-  bestAction: { color: amber, fontSize: 12, fontWeight: '700' },
-  bestTrophy: { position: 'absolute', right: -8, bottom: -8, width: 72, height: 72 },
+  bestAction: { marginTop: 'auto', color: amber, fontSize: 12, fontWeight: '700' },
   insight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#081A20', borderRadius: 16, borderWidth: 1, borderColor: '#24616A', overflow: 'hidden', padding: Spacing.three },
   insightIcon: { backgroundColor: '#10333C', borderRadius: 10, padding: Spacing.two },
   insightBall: { position: 'absolute', right: 6, bottom: 10, width: 40, height: 40, opacity: 0.78 },
