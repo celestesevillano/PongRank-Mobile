@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, Dumbbell, LockKeyhole, Plus, RotateCw, Search, Trophy, X, type LucideIcon } from 'lucide-react-native';
+import { Bot, ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, LockKeyhole, Plus, RotateCw, Search, Trophy, X, type LucideIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +22,7 @@ const loss = '#FF8990';
 const amber = '#FFCB68';
 const statisticsArt = require('../../../../assets/images/pongrank-home-statistics.webp');
 const coachArt = require('../../../../assets/images/pongrank-home-coach.webp');
+const lockedCoachArt = require('../../../../assets/images/pongrank-home-coach-locked.webp');
 const wordmark = require('../../../../assets/images/pongrank-wordmark.png');
 const ball = require('../../../../assets/images/pongrank-intro-ball.png');
 
@@ -31,6 +32,7 @@ export default function DashboardScreen() {
   const [coachNotice, setCoachNotice] = useState(false);
   const [visit, setVisit] = useState(0);
   const playerId = player?.id ?? 0;
+  const coachUnlocked = plan?.coachAccess === true;
   const statisticsLocked = !plan || plan.plan === 'FREEMIUM';
 
   useFocusEffect(useCallback(() => {
@@ -119,12 +121,12 @@ export default function DashboardScreen() {
           />
           <ShortcutBanner
             title="Coach"
-            subtitle={plan?.coachAccess ? 'Entrenador virtual' : 'Desde Pro'}
-            locked={!plan?.coachAccess}
-            Icon={Dumbbell}
-            artwork={coachArt}
+            subtitle={coachUnlocked ? 'Postura y movimiento' : 'Desde Pro'}
+            locked={!coachUnlocked}
+            Icon={Bot}
+            artwork={coachUnlocked ? coachArt : lockedCoachArt}
             coach
-            onPress={() => plan?.coachAccess ? setCoachNotice(true) : openPlans()}
+            onPress={() => coachUnlocked ? setCoachNotice(true) : openPlans()}
           />
         </View>
 
@@ -167,8 +169,8 @@ export default function DashboardScreen() {
         busy={false}
         onCancel={() => setCoachNotice(false)}
         confirmation={coachNotice ? {
-          title: 'Coach', message: 'El entrenador virtual aún no está disponible en esta versión de la app.',
-          label: 'Entendido', Icon: Dumbbell, onConfirm: () => setCoachNotice(false), cancelLabel: 'Volver',
+          title: 'Coach', message: 'Coach usa MediaPipe para analizar tu postura y movimiento. El análisis aún no está disponible en esta versión.',
+          label: 'Entendido', Icon: Bot, onConfirm: () => setCoachNotice(false), cancelLabel: 'Volver',
         } : null}
       />
     </SafeAreaView>
