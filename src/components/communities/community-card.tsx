@@ -20,11 +20,13 @@ export function CommunityCard({ community, onPress, featured = false }: { commun
     <>
       {featured && (
         <View style={styles.cover}>
-          <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
-            <Defs><LinearGradient id="cover" x1="0%" y1="0%" x2="100%" y2="70%"><Stop offset="0" stopColor={Brand.surface} /><Stop offset="1" stopColor="#22D3EE" /></LinearGradient></Defs>
-            <Rect width="100%" height="100%" fill="url(#cover)" />
-          </Svg>
-          {mark}
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <Svg width="100%" height="100%">
+              <Defs><LinearGradient id="cover" x1="0%" y1="0%" x2="100%" y2="70%"><Stop offset="0" stopColor={Brand.surface} /><Stop offset="1" stopColor="#22D3EE" /></LinearGradient></Defs>
+              <Rect width="100%" height="100%" fill="url(#cover)" />
+            </Svg>
+          </View>
+          <View style={styles.coverContent}>{mark}</View>
         </View>
       )}
       <View style={styles.row}>
@@ -45,7 +47,8 @@ export function CommunityCard({ community, onPress, featured = false }: { commun
 
 const styles = StyleSheet.create({
   card: { backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: Spacing.three, overflow: 'hidden' },
-  cover: { height: 84, padding: Spacing.three, justifyContent: 'flex-end' },
+  cover: { height: 84, justifyContent: 'flex-end', overflow: 'hidden' },
+  coverContent: { padding: Spacing.three },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three },
   mark: { backgroundColor: '#222226', color: '#22D3EE', minWidth: 42, padding: 10, textAlign: 'center', borderRadius: 10, fontWeight: '800', overflow: 'hidden', alignSelf: 'flex-start' },
   label: { flex: 1, gap: Spacing.one },

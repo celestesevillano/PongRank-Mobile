@@ -70,7 +70,7 @@ function MyCommunities() {
       </View>}
       {!loading && !error && (
         <FlatList data={data ?? []} keyExtractor={(item) => String(item.id)} contentContainerStyle={styles.list}
-          renderItem={({ item, index }) => <CommunityCard community={item} featured={index === 0}
+          renderItem={({ item }) => <CommunityCard community={item}
             onPress={() => router.push({ pathname: '/social/[id]', params: { id: item.id } })} />}
           ListEmptyComponent={<ScreenState loading={false} error={null} empty emptyMessage="Usa el buscador para encontrar una comunidad." />}
           style={styles.listArea} />
