@@ -8,10 +8,11 @@ type AuthButtonProps = PressableProps & {
   loading?: boolean;
   icon?: LucideIcon;
   hideChevron?: boolean;
+  foregroundColor?: string;
   variant?: 'primary' | 'ghost';
 };
 
-export function AuthButton({ label, loading, icon: Icon, hideChevron, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
+export function AuthButton({ label, loading, icon: Icon, hideChevron, foregroundColor = Brand.text, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
   const isPrimary = variant === 'primary';
   return (
     <Pressable
@@ -31,8 +32,8 @@ export function AuthButton({ label, loading, icon: Icon, hideChevron, variant = 
         <ActivityIndicator color={isPrimary ? '#FFFFFF' : Brand.red} />
       ) : (
         <>
-          {Icon && <Icon size={18} color={Brand.text} />}
-          <Text style={[styles.label, isPrimary ? styles.labelPrimary : styles.labelGhost]}>{label}</Text>
+          {Icon && <Icon size={18} color={foregroundColor} />}
+          <Text style={[styles.label, { color: foregroundColor }]}>{label}</Text>
           {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, styles.labelPrimary]}>{'  >'}</Text>}
         </>
       )}
@@ -71,8 +72,5 @@ const styles = StyleSheet.create({
   },
   labelPrimary: {
     color: '#FFFFFF',
-  },
-  labelGhost: {
-    color: Brand.text,
   },
 });
