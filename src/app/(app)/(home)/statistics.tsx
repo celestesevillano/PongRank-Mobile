@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronLeft, ChevronRight, Flame, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { ChartNoAxesColumnIncreasing, ChevronLeft, ChevronRight, Flame, TrendingDown, TrendingUp, Trophy } from 'lucide-react-native';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, Ellipse, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { ScreenState } from '@/components/common/screen-state';
 import { RatingChart, signedRating, STAT_CYAN } from '@/components/statistics/rating-chart';
@@ -89,9 +89,21 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
         <View style={styles.hero}>
           <View style={styles.heroArt} pointerEvents="none" importantForAccessibility="no-hide-descendants">
             <Svg width="100%" height="100%" viewBox="0 0 180 116">
-              <Path d="M5 105 Q73 23 152 53" stroke="#711922" strokeWidth={3} fill="none" />
-              <Path d="M25 105 Q93 38 158 56" stroke={Brand.red} strokeOpacity={0.7} strokeWidth={1.5} fill="none" />
-              <Path d="M40 107 Q102 51 148 58" stroke="#4B1119" strokeWidth={2} fill="none" />
+              <Defs>
+                <RadialGradient id="paddleLight" cx="76%" cy="42%" rx="54%" ry="58%">
+                  <Stop offset="0" stopColor="#FF343F" stopOpacity={0.44} />
+                  <Stop offset="0.54" stopColor="#E51B36" stopOpacity={0.19} />
+                  <Stop offset="1" stopColor="#DC1F31" stopOpacity={0} />
+                </RadialGradient>
+                <LinearGradient id="ballTrail" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <Stop offset="0" stopColor={Brand.red} stopOpacity={0} />
+                  <Stop offset="1" stopColor="#FF374A" stopOpacity={0.92} />
+                </LinearGradient>
+              </Defs>
+              <Rect width="180" height="116" fill="url(#paddleLight)" />
+              <Path d="M0 110 Q65 43 120 41 Q71 57 0 110Z" fill="url(#ballTrail)" opacity={0.42} />
+              <Path d="M0 99 Q65 44 118 39 M18 109 Q66 63 115 48" stroke="url(#ballTrail)" strokeWidth={1.6} fill="none" />
+              <Path d="M53 99 L180 79 M45 108 L180 87 M91 93 L90 116 M107 91 L107 116 M122 88 L125 116 M138 86 L143 116 M155 83 L160 116 M170 81 L175 116" stroke="#66838D" strokeOpacity={0.18} strokeWidth={0.8} fill="none" />
             </Svg>
             <Image source={paddle} contentFit="contain" style={styles.paddle} />
             <Image source={ball} contentFit="contain" style={styles.ball} />
@@ -103,12 +115,17 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
             <ChevronLeft size={22} color="#C2C4CA" />
             <Text style={styles.secondary}>Inicio</Text>
           </Pressable>
-          <Text accessibilityRole="header" style={styles.heading}>Estadísticas</Text>
+          <View style={styles.headingRow}>
+            <Text accessibilityRole="header" style={styles.heading}>Estadísticas</Text>
+            <Svg width={24} height={28} viewBox="0 0 24 28" style={styles.titleMarks} accessible={false}>
+              <Path d="M3 12 L8 2 M9 17 L20 9 M12 23 L23 21" stroke="#FF3145" strokeWidth={3.2} strokeLinecap="round" fill="none" />
+            </Svg>
+          </View>
           <Text style={styles.subtitle}>Tu rendimiento en la mesa</Text>
         </View>
 
         <View style={styles.ratingCard}>
-          <Diagonal color={STAT_CYAN} />
+          <CardLighting color={STAT_CYAN} court />
           <Text style={styles.ratingLabel}>RATING ACTUAL</Text>
           <View style={styles.ratingRow}>
             <Text style={styles.rating}>{Number.isFinite(rating) ? Math.round(rating) : '—'}</Text>
@@ -130,7 +147,7 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
 
             <View style={[styles.highlights, stackCards && styles.stacked]}>
               <View style={[styles.highlight, styles.streakCard]}>
-                <Diagonal color={Brand.red} />
+                <CardLighting color={Brand.red} />
                 <View style={styles.sectionHeader}>
                   <Flame color={loss} size={19} />
                   <Text accessibilityRole="header" style={styles.highlightTitle}>Racha actual</Text>
@@ -138,7 +155,6 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
                 <Text style={styles.highlightValue}>{snapshot.stats.streak} {snapshot.stats.streak === 1 ? 'victoria' : 'victorias'}</Text>
                 <Text style={styles.secondary}>{snapshot.stats.streak === 1 ? 'consecutiva' : 'consecutivas'}</Text>
                 <View style={styles.encouragement}>
-                  <Zap size={13} color={amber} />
                   <Text style={styles.encouragementText}>{streakMessage(snapshot.stats.streak)}</Text>
                 </View>
               </View>
@@ -149,7 +165,7 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
                   accessibilityHint="Abre el detalle de la partida"
                   onPress={() => router.push({ pathname: '/match/[id]', params: { id: best.id } })}
                   style={({ pressed }) => [styles.highlight, styles.bestCard, pressed && styles.pressed]}>
-                  <Diagonal color={amber} />
+                  <CardLighting color={amber} />
                   <BestHeading />
                   <Text style={styles.highlightValue}>{best.opponent.name}</Text>
                   {Number.isFinite(best.opponent.ratingGlicko) ? (
@@ -159,7 +175,7 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
                 </Pressable>
               ) : (
                 <View style={[styles.highlight, styles.bestCard]}>
-                  <Diagonal color={amber} />
+                  <CardLighting color={amber} />
                   <BestHeading />
                   <Text style={styles.secondary}>Aún sin victorias.</Text>
                 </View>
@@ -168,8 +184,9 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
 
             {insight ? (
               <View style={styles.insight}>
-                <Diagonal color={STAT_CYAN} />
-                <TrendingUp color={STAT_CYAN} size={22} />
+                <CardLighting color={STAT_CYAN} court />
+                <View style={styles.insightIcon}><TrendingUp color={STAT_CYAN} size={22} /></View>
+                <Image source={ball} contentFit="contain" style={styles.insightBall} />
                 <View style={styles.insightCopy}>
                   <Text accessibilityRole="header" style={styles.highlightTitle}>Tus últimos 30 días</Text>
                   <Text style={styles.secondary}>
@@ -187,9 +204,27 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
   );
 }
 
-function Diagonal({ color }: { color: string }) {
+function CardLighting({ color, court = false }: { color: string; court?: boolean }) {
+  const gradientId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   return (
     <View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={styles.diagonal}>
+      <Svg width="100%" height="100%" viewBox="0 0 360 124" preserveAspectRatio="none">
+        <Defs>
+          <RadialGradient id={gradientId} cx="98%" cy="94%" rx="74%" ry="102%">
+            <Stop offset="0" stopColor={color} stopOpacity={court ? 0.48 : 0.33} />
+            <Stop offset="0.58" stopColor={color} stopOpacity={0.09} />
+            <Stop offset="1" stopColor={color} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect width="360" height="124" fill={`url(#${gradientId})`} />
+        {court ? (
+          <>
+            <Ellipse cx={352} cy={125} rx={85} ry={16} fill={color} opacity={0.16} />
+            <Path d="M235 124 L289 91 L360 75 M267 124 L360 95 M280 113 L360 90 M298 103 L298 124 M313 99 L314 124 M330 94 L331 124 M348 90 L350 124" stroke={color} strokeWidth={1} strokeOpacity={0.38} fill="none" />
+            <Path d="M286 92 L360 75" stroke={color} strokeWidth={3} strokeOpacity={0.85} fill="none" />
+          </>
+        ) : null}
+      </Svg>
       <View style={[styles.stripe, { backgroundColor: color }]} />
       <View style={[styles.stripe, styles.thinStripe, { backgroundColor: color }]} />
     </View>
@@ -232,16 +267,18 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.four, gap: Spacing.three, width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center' },
   hero: { minHeight: 116, justifyContent: 'flex-end', overflow: 'hidden', paddingBottom: Spacing.one },
-  heroArt: { position: 'absolute', right: -8, top: 0, bottom: 0, width: '47%' },
-  paddle: { width: 102, height: 112, position: 'absolute', right: -1, top: 4 },
-  ball: { width: 39, height: 39, position: 'absolute', right: 81, top: 44 },
+  heroArt: { position: 'absolute', right: -8, top: 0, bottom: 0, width: '51%' },
+  paddle: { width: 116, height: 122, position: 'absolute', right: -1, top: 4 },
+  ball: { width: 39, height: 39, position: 'absolute', right: 94, top: 44 },
   back: { minHeight: 44, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
-  heading: { color: Brand.text, fontSize: 34, fontWeight: '900', fontStyle: 'italic' },
+  headingRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  titleMarks: { marginTop: -5, marginLeft: 2 },
+  heading: { flexShrink: 1, color: Brand.text, fontSize: 34, fontWeight: '900', fontStyle: 'italic' },
   subtitle: { color: '#C2C4CA', fontSize: 14, fontWeight: '500', marginTop: Spacing.one },
   secondary: { color: '#B8BDC3', fontSize: 14, fontVariant: ['tabular-nums'] },
   retry: { color: STAT_CYAN, fontWeight: '700' },
   pressed: { opacity: 0.75 },
-  ratingCard: { backgroundColor: '#071C23', borderRadius: 16, borderWidth: 1, borderColor: '#216E7D', padding: Spacing.three, overflow: 'hidden' },
+  ratingCard: { backgroundColor: '#071C23', borderRadius: 16, borderWidth: 1, borderColor: '#248997', padding: Spacing.three, overflow: 'hidden' },
   ratingLabel: { color: '#B8BDC3', fontSize: 12, fontWeight: '700', letterSpacing: 1 },
   ratingRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.three },
   rating: { color: Brand.text, fontWeight: '900', fontSize: 48, fontVariant: ['tabular-nums'] },
@@ -261,13 +298,15 @@ const styles = StyleSheet.create({
   highlights: { flexDirection: 'row', gap: Spacing.two },
   stacked: { flexDirection: 'column' },
   highlight: { flex: 1, minWidth: 0, padding: 12, borderWidth: 1, borderRadius: 16, overflow: 'hidden', gap: Spacing.one },
-  streakCard: { borderColor: '#703139', backgroundColor: '#231318' },
-  bestCard: { borderColor: '#6B532D', backgroundColor: '#161613' },
+  streakCard: { borderColor: '#A03543', backgroundColor: '#231318' },
+  bestCard: { borderColor: '#927035', backgroundColor: '#161613' },
   highlightTitle: { color: Brand.text, flexShrink: 1, fontWeight: '800', fontSize: 14 },
   highlightValue: { color: Brand.text, fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'], marginTop: Spacing.one },
   encouragement: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: 'flex-start', backgroundColor: '#3B2914', borderRadius: 8, padding: Spacing.two, marginTop: Spacing.one },
   encouragementText: { color: amber, fontWeight: '700', fontSize: 12, flexShrink: 1 },
   bestArrow: { marginTop: 'auto', alignSelf: 'flex-end' },
-  insight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#081A20', borderRadius: 16, borderWidth: 1, borderColor: '#20444D', overflow: 'hidden', padding: Spacing.three },
-  insightCopy: { flex: 1, gap: Spacing.one },
+  insight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#081A20', borderRadius: 16, borderWidth: 1, borderColor: '#24616A', overflow: 'hidden', padding: Spacing.three },
+  insightIcon: { backgroundColor: '#10333C', borderRadius: 10, padding: Spacing.two },
+  insightBall: { position: 'absolute', right: 6, bottom: 10, width: 40, height: 40, opacity: 0.78 },
+  insightCopy: { flex: 1, gap: Spacing.one, paddingRight: 28 },
 });

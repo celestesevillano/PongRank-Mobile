@@ -64,10 +64,10 @@ export function filterRating(
 }
 
 export function streakMessage(streak: number) {
-  if (streak >= 10) return '¡Estás jugando en otra liga!';
+  if (streak >= 10) return '¡Estás jugando en otra liga! 🚀';
   if (streak >= 5) return '¡Imparable en la mesa!';
-  if (streak >= 3) return '¡Estás en racha!';
-  if (streak > 0) return '¡Así se empieza!';
+  if (streak >= 3) return '⚡ ¡Estás en racha! No aflojes 🔥';
+  if (streak > 0) return '¡Así se empieza! 🏓';
   return '¡La próxima puede ser el comienzo!';
 }
 
