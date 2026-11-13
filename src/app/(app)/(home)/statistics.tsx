@@ -58,7 +58,8 @@ function UnverifiedPlan() {
 
 function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessionRating: number }) {
   const [period, setPeriod] = useState<StatisticsPeriod>('Mes');
-  const { width, fontScale } = useWindowDimensions();
+  const { width, height, fontScale } = useWindowDimensions();
+  const compact = height <= 720 && fontScale <= 1.2;
   const stackCards = width < 360 || fontScale > 1.2;
   const [focusVersion, setFocusVersion] = useState(0);
   useFocusEffect(useCallback(() => {
@@ -84,9 +85,9 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
     <SafeAreaView style={styles.screen} edges={['top']}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, compact && styles.compactContent]}
         refreshControl={<RefreshControl refreshing={history.loading && !!snapshot} onRefresh={history.refetch} tintColor={STAT_CYAN} colors={[STAT_CYAN]} />}>
-        <View style={styles.hero}>
+        <View style={[styles.hero, compact && styles.compactHero]}>
           <View style={styles.heroArt} pointerEvents="none" importantForAccessibility="no-hide-descendants">
             <Svg width="100%" height="100%" viewBox="0 0 180 116">
               <Defs>
@@ -105,8 +106,8 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
               <Path d="M0 99 Q65 44 118 39 M18 109 Q66 63 115 48" stroke="url(#ballTrail)" strokeWidth={1.6} fill="none" />
               <Path d="M53 99 L180 79 M45 108 L180 87 M91 93 L90 116 M107 91 L107 116 M122 88 L125 116 M138 86 L143 116 M155 83 L160 116 M170 81 L175 116" stroke="#66838D" strokeOpacity={0.18} strokeWidth={0.8} fill="none" />
             </Svg>
-            <Image source={paddle} contentFit="contain" style={styles.paddle} />
-            <Image source={ball} contentFit="contain" style={styles.ball} />
+            <Image source={paddle} contentFit="contain" style={[styles.paddle, compact && styles.compactPaddle]} />
+            <Image source={ball} contentFit="contain" style={[styles.ball, compact && styles.compactBall]} />
           </View>
           <Pressable
             accessibilityRole="button"
@@ -142,7 +143,7 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
 
         {snapshot && selected && !history.error ? (
           <>
-            <RatingChart period={period} onPeriodChange={setPeriod} points={selected.points} incomplete={selected.incomplete} />
+            <RatingChart period={period} onPeriodChange={setPeriod} points={selected.points} incomplete={selected.incomplete} compact={compact} />
             <Results wins={snapshot.stats.wins} losses={snapshot.stats.losses} />
 
             <View style={[styles.highlights, stackCards && styles.stacked]}>
@@ -266,6 +267,10 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.background },
   scroll: { flex: 1 },
   content: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.four, gap: Spacing.three, width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center' },
+  compactContent: { gap: Spacing.two },
+  compactHero: { minHeight: 100 },
+  compactPaddle: { width: 96, height: 102 },
+  compactBall: { right: 80, top: 37 },
   hero: { minHeight: 116, justifyContent: 'flex-end', overflow: 'hidden', paddingBottom: Spacing.one },
   heroArt: { position: 'absolute', right: -8, top: 0, bottom: 0, width: '51%' },
   paddle: { width: 116, height: 122, position: 'absolute', right: -1, top: 4 },
@@ -282,7 +287,7 @@ const styles = StyleSheet.create({
   ratingLabel: { color: '#B8BDC3', fontSize: 12, fontWeight: '700', letterSpacing: 1 },
   ratingRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.three },
   rating: { color: Brand.text, fontWeight: '900', fontSize: 48, fontVariant: ['tabular-nums'] },
-  delta: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: '#09191F', borderWidth: 1, borderColor: '#215360', borderRadius: 16, paddingHorizontal: 10, paddingVertical: Spacing.one },
+  delta: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: '#09191F', borderWidth: 1, borderColor: '#215360', borderRadius: 16, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   deltaText: { fontWeight: '800', fontSize: 15, fontVariant: ['tabular-nums'] },
   diagonal: { ...StyleSheet.absoluteFill, overflow: 'hidden' },
   stripe: { position: 'absolute', right: 26, top: -65, width: 30, height: 260, transform: [{ rotate: '38deg' }], opacity: 0.15 },
@@ -297,7 +302,7 @@ const styles = StyleSheet.create({
   legendText: { color: '#B8BDC3', fontSize: 13, fontVariant: ['tabular-nums'] },
   highlights: { flexDirection: 'row', gap: Spacing.two },
   stacked: { flexDirection: 'column' },
-  highlight: { flex: 1, minWidth: 0, padding: 12, borderWidth: 1, borderRadius: 16, overflow: 'hidden', gap: Spacing.one },
+  highlight: { flex: 1, minWidth: 0, padding: Spacing.three, borderWidth: 1, borderRadius: 16, overflow: 'hidden', gap: Spacing.one },
   streakCard: { borderColor: '#A03543', backgroundColor: '#231318' },
   bestCard: { borderColor: '#927035', backgroundColor: '#161613' },
   highlightTitle: { color: Brand.text, flexShrink: 1, fontWeight: '800', fontSize: 14 },

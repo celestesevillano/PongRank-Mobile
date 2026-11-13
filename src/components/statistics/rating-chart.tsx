@@ -10,7 +10,7 @@ import { STATISTICS_PERIODS, type RatingPoint, type StatisticsPeriod } from '@/u
 export const STAT_CYAN = '#22D3EE';
 
 const shortDate = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'short' });
-const PLOT_HEIGHT = 104;
+const DEFAULT_PLOT_HEIGHT = 104;
 const INSET = 8;
 
 type RatingChartProps = {
@@ -18,6 +18,7 @@ type RatingChartProps = {
   onPeriodChange: (period: StatisticsPeriod) => void;
   points: RatingPoint[];
   incomplete: boolean;
+  compact?: boolean;
 };
 
 export function signedRating(value: number) {
@@ -25,7 +26,7 @@ export function signedRating(value: number) {
   return rounded > 0 ? `+${rounded}` : rounded < 0 ? `−${-rounded}` : '0';
 }
 
-export function RatingChart({ period, onPeriodChange, points, incomplete }: RatingChartProps) {
+export function RatingChart({ period, onPeriodChange, points, incomplete, compact = false }: RatingChartProps) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -44,7 +45,7 @@ export function RatingChart({ period, onPeriodChange, points, incomplete }: Rati
           </Pressable>
         ))}
       </View>
-      {points.length > 0 ? <RatingPlot key={period} points={points} /> : null}
+      {points.length > 0 ? <RatingPlot key={period} points={points} plotHeight={compact ? 80 : DEFAULT_PLOT_HEIGHT} /> : null}
       {incomplete ? (
         <Text style={styles.message}>
           {points.length > 0 ? 'Se muestra el historial de rating que se pudo reconstruir.' : 'Aún no está disponible el historial de rating de este periodo.'}
@@ -54,7 +55,7 @@ export function RatingChart({ period, onPeriodChange, points, incomplete }: Rati
   );
 }
 
-function RatingPlot({ points }: { points: RatingPoint[] }) {
+function RatingPlot({ points, plotHeight }: { points: RatingPoint[]; plotHeight: number }) {
   const [width, setWidth] = useState(0);
   const [selectedId, setSelectedId] = useState<number>();
   const lastIndex = points.length - 1;
@@ -82,7 +83,7 @@ function RatingPlot({ points }: { points: RatingPoint[] }) {
     x: INSET + (width - 2 * INSET) * (last.date === first.date
       ? (lastIndex === 0 ? 0.5 : i / lastIndex)
       : (entry.date - first.date) / (last.date - first.date)),
-    y: INSET + PLOT_HEIGHT * (top - entry.rating) / (top - bottom),
+    y: INSET + plotHeight * (top - entry.rating) / (top - bottom),
   }));
   const path = coords.map(({ x, y }, i) => `${i === 0 ? 'M' : 'L'}${x} ${y}`).join(' ');
   const selected = coords[index];
@@ -102,10 +103,10 @@ function RatingPlot({ points }: { points: RatingPoint[] }) {
               Math.abs(candidate.x - x) <= Math.abs(coords[best].x - x) ? i : best, 0);
             setSelectedId(points[nearest].id);
           }}
-          style={styles.canvas}>
+          style={[styles.canvas, { minHeight: plotHeight + 2 * INSET }]}>
           {width > INSET * 2 ? (
             <View pointerEvents="none">
-              <Svg width={width} height={PLOT_HEIGHT + 2 * INSET}>
+              <Svg width={width} height={plotHeight + 2 * INSET}>
                 <Defs>
                   <LinearGradient id="ratingArea" x1="0" y1="0" x2="0" y2="1">
                     <Stop offset="0" stopColor={STAT_CYAN} stopOpacity={0.32} />
@@ -113,19 +114,19 @@ function RatingPlot({ points }: { points: RatingPoint[] }) {
                   </LinearGradient>
                 </Defs>
                 {labels.map((label) => {
-                  const y = INSET + PLOT_HEIGHT * (top - label) / (top - bottom);
+                  const y = INSET + plotHeight * (top - label) / (top - bottom);
                   return <Line key={label} x1={0} x2={width} y1={y} y2={y} stroke="#37464C" strokeDasharray="4 4" />;
                 })}
                 {points.length > 1 ? (
                   <>
-                    <Path d={`${path} L${coords[lastIndex].x} ${PLOT_HEIGHT + INSET} L${coords[0].x} ${PLOT_HEIGHT + INSET} Z`} fill="url(#ratingArea)" />
+                    <Path d={`${path} L${coords[lastIndex].x} ${plotHeight + INSET} L${coords[0].x} ${plotHeight + INSET} Z`} fill="url(#ratingArea)" />
                     <Path d={path} stroke={STAT_CYAN} strokeWidth={2.5} strokeLinejoin="round" fill="none" />
                   </>
                 ) : null}
                 {points.length <= 32 ? coords.map(({ x, y }, i) => (
                   <Circle key={points[i].id} cx={x} cy={y} r={3} fill={STAT_CYAN} />
                 )) : null}
-                <Line x1={selected.x} x2={selected.x} y1={selected.y} y2={PLOT_HEIGHT + INSET} stroke={STAT_CYAN} strokeOpacity={0.55} strokeDasharray="3 3" />
+                <Line x1={selected.x} x2={selected.x} y1={selected.y} y2={plotHeight + INSET} stroke={STAT_CYAN} strokeOpacity={0.55} strokeDasharray="3 3" />
                 <Circle cx={selected.x} cy={selected.y} r={6} fill={Brand.background} stroke={STAT_CYAN} strokeWidth={2} />
                 <Circle cx={selected.x} cy={selected.y} r={2.5} fill={Brand.text} />
               </Svg>
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
   plotRow: { flexDirection: 'row', alignItems: 'stretch', gap: Spacing.two },
   axis: { justifyContent: 'space-between' },
   axisLabel: { color: '#B8BDC3', fontSize: 12, fontVariant: ['tabular-nums'] },
-  canvas: { flex: 1, minHeight: PLOT_HEIGHT + INSET * 2 },
+  canvas: { flex: 1 },
   dates: { flexDirection: 'row', justifyContent: 'space-between', paddingLeft: 40 },
   tooltip: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, borderWidth: 1, borderColor: '#215360', backgroundColor: '#0A2229' },
   pointDetails: { flex: 1, alignItems: 'center', paddingVertical: Spacing.one },
