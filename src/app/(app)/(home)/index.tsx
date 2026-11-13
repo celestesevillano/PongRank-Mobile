@@ -83,13 +83,13 @@ export default function DashboardScreen() {
 
         <View style={styles.actionRow}>
           <AuthButton label="Nueva partida" icon={Plus} style={styles.playButton} onPress={() => router.push('/new-match')} />
-          <AuthButton label="Buscar partida" icon={Search} variant="ghost" style={[styles.playButton, styles.search]} onPress={() => router.push('/find-match')} />
+          <AuthButton label="Buscar partida" icon={Search} variant="ghost" foregroundColor={cyan} style={[styles.playButton, styles.search]} onPress={() => router.push('/find-match')} />
         </View>
 
         <View style={styles.shortcutRow}>
           <ShortcutBanner
             title="Estadísticas"
-            subtitle={statisticsLocked ? 'Desde Básico' : 'Tu progreso'}
+            subtitle={statisticsLocked ? 'Requiere Básico' : 'Tu progreso'}
             locked={statisticsLocked}
             Icon={ChartNoAxesColumnIncreasing}
             artwork={statisticsArt}
@@ -163,8 +163,6 @@ function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false,
   onPress: () => void;
 }) {
   const accent = coach ? loss : cyan;
-  const coachLocked = coach && locked;
-  const StatusIcon = locked ? LockKeyhole : ChevronRight;
 
   return (
     <Pressable
@@ -177,14 +175,14 @@ function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false,
       </View>
       <View style={styles.bannerTop}>
         <View style={[styles.icon, coach && styles.defeatIcon]}><Icon color={accent} size={20} /></View>
-        {!coachLocked ? <StatusIcon color={locked ? '#C2C4CA' : accent} size={16} /> : null}
+        {!locked ? <ChevronRight color={accent} size={16} /> : null}
       </View>
       <View style={styles.bannerCopy}>
         <Text style={styles.title}>{title}</Text>
-        {coachLocked ? (
-          <View style={styles.coachLock}>
-            <LockKeyhole color={loss} size={14} />
-            <Text style={styles.coachLockLabel}>{subtitle}</Text>
+        {locked ? (
+          <View style={[styles.lockBadge, coach && styles.coachLockBadge]}>
+            <LockKeyhole color={accent} size={14} />
+            <Text style={[styles.lockBadgeLabel, { color: coach ? '#FFBCC0' : '#A5F3FC' }]}>{subtitle}</Text>
           </View>
         ) : (
           <Text style={styles.detail}>{subtitle}</Text>
@@ -205,7 +203,7 @@ const styles = StyleSheet.create({
   ratingCard: { backgroundColor: '#071C23', borderRadius: 16, borderWidth: 1, borderColor: '#248997', padding: Spacing.three, overflow: 'hidden' },
   ratingRow: { flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap', gap: Spacing.two },
   rating: { color: Brand.text, fontSize: 48, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  position: { maxWidth: '48%', padding: Spacing.two, backgroundColor: '#09191F', borderRadius: 8 },
+  position: { maxWidth: '48%', padding: Spacing.two },
   label: { color: '#C2C4CA', fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
   ball: { position: 'absolute', width: 58, height: 58, right: 16, bottom: -8, opacity: 0.72 },
   actionRow: { flexDirection: 'row', gap: Spacing.two },
@@ -215,12 +213,13 @@ const styles = StyleSheet.create({
   coachBanner: { borderColor: '#71333C', backgroundColor: '#241419' },
   bannerTop: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
   bannerCopy: { gap: Spacing.half },
-  coachLock: {
+  lockBadge: {
     alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: Spacing.one,
     paddingHorizontal: Spacing.two, paddingVertical: Spacing.one,
-    borderRadius: 8, borderWidth: 1, borderColor: '#71333C', backgroundColor: '#29151B',
+    borderRadius: 8, borderWidth: 1, borderColor: '#24616A', backgroundColor: '#081A20',
   },
-  coachLockLabel: { color: '#FFBCC0', fontSize: 12, fontWeight: '700', flexShrink: 1 },
+  coachLockBadge: { borderColor: '#71333C', backgroundColor: '#29151B' },
+  lockBadgeLabel: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
   bannerArtwork: { position: 'absolute', right: -4, top: 2, opacity: 0.84 },
   bannerImage: { width: 104, height: 104 },
   search: { borderColor: '#248997' },
