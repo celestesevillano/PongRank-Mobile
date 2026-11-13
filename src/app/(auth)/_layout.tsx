@@ -2,11 +2,12 @@ import { Stack } from 'expo-router';
 
 import { RegistrationProvider } from '@/context/registration';
 
+export const unstable_settings = { initialRouteName: 'welcome' };
+
 export default function AuthLayout() {
   return (
     <RegistrationProvider>
     <Stack
-      initialRouteName="welcome"
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#000000' },
