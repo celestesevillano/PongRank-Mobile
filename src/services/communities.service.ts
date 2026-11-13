@@ -23,6 +23,9 @@ export const communitiesService = {
 
   removeMember: (id: number, playerId: number) => http.delete(`/communities/${id}/members/${playerId}`),
 
+  update: (id: number, input: { name: string; description: string }) =>
+    http.put<CommunityResponse>(`/communities/${id}`, input).then((r) => r.data),
+
   archive: (id: number) => http.delete(`/communities/${id}`),
 
   members: (id: number, params: PageParams, signal?: AbortSignal) =>

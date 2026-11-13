@@ -1,7 +1,7 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { Archive, ArrowLeft, Layers, LayoutGrid, LogOut, Trophy, UserPlus, Users } from 'lucide-react-native';
+import { Archive, ArrowLeft, Layers, LayoutGrid, LogOut, Pencil, Trophy, UserPlus, Users } from 'lucide-react-native';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { CommunityCard } from '@/components/communities/community-card';
@@ -35,14 +35,13 @@ export default function CommunityDetailScreen() {
   const full = limit !== undefined && used !== undefined && used >= limit;
   const openMembers = () => router.push({ pathname: '/social/members', params: { communityId } });
 
-  const changeMembership = async (action: 'join' | 'leave' | 'archive') => {
+  const changeMembership = async (action: 'join' | 'leave') => {
     if (busy || !community || !player) return;
     setBusy(true);
     try {
       if (action === 'join') await communitiesService.join(communityId);
-      else if (action === 'archive') await communitiesService.archive(communityId);
       else await communitiesService.removeMember(communityId, player.id);
-      showToast(action === 'join' ? `Ya eres parte de ${community.name}.` : action === 'archive' ? 'Comunidad archivada.' : `Saliste de ${community.name}.`);
+      showToast(action === 'join' ? `Ya eres parte de ${community.name}.` : `Saliste de ${community.name}.`);
       setConfirmation(null);
       void refresh();
       router.dismissTo('/social');
@@ -81,8 +80,17 @@ export default function CommunityDetailScreen() {
     });
   };
 
+  const canEdit = !detail.loading && !detail.error
+    && community?.status === 'ACTIVE' && community.myRole === 'COMMUNITY_ADMIN';
+
   return (
-    <CommunityScreen title="Comunidad" onBack={() => router.canGoBack() ? router.back() : router.replace('/social')}>
+    <CommunityScreen title="Comunidad" onBack={() => router.canGoBack() ? router.back() : router.replace('/social')}
+      action={canEdit ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Editar comunidad" style={styles.edit}
+          onPress={() => router.push({ pathname: '/social/edit-community', params: { communityId } })}>
+          <Pencil color={Brand.text} size={20} />
+        </Pressable>
+      ) : undefined}>
       <ScreenState loading={detail.loading} error={detail.error} onRetry={detail.refetch} />
       {!detail.loading && !detail.error && community?.status === 'ARCHIVED' && (
         <View style={styles.actions}>
@@ -117,14 +125,7 @@ export default function CommunityDetailScreen() {
                   {community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" icon={Users} variant="ghost" style={styles.half} onPress={openMembers} />}
                   <AuthButton label="Salir" accessibilityLabel="Salir de la comunidad" icon={LogOut} variant="ghost" style={styles.half} disabled={busy} onPress={confirmLeave} />
                 </View>
-                {community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Archivar comunidad" icon={Archive} variant="ghost" disabled={busy} onPress={() => setConfirmation({
-                  title: `¿Archivar ${community.name}?`,
-                  message: 'La comunidad se cerrará para todos sus miembros.',
-                  label: 'Archivar',
-                  Icon: Archive,
-                  destructive: true,
-                  onConfirm: () => void changeMembership('archive'),
-                })} />}
+
               </>
             ) : full ? (
               <>
@@ -144,6 +145,7 @@ export default function CommunityDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  edit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   scroll: { flex: 1 },
   secondary: { flexDirection: 'row', gap: Spacing.two },
   half: { flex: 1 },
