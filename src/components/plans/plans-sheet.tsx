@@ -38,7 +38,7 @@ export function PlansSheet({ visible, currentPlan, onClose }: PlansSheetProps) {
         <View style={styles.header}>
           <View style={styles.flex}>
             <Text style={styles.title}>Elige tu plan</Text>
-            <Text style={styles.subtitle}>Más comunidades y clubes, entrenador virtual y herramientas para organizar. Cancela cuando quieras.</Text>
+            <Text style={styles.subtitle}>Cada comunidad o club que creas o al que te unes usa un espacio.</Text>
           </View>
           <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Cerrar">
             <X color={Brand.text} size={24} />
