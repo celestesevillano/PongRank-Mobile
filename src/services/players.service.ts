@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { PlayerResponse } from '@/types/api';
+import type { Gender, PlayerResponse } from '@/types/api';
 
 export type PlayerUpdate = Partial<{
   name: string;
@@ -10,6 +10,10 @@ export type PlayerUpdate = Partial<{
 }>;
 
 export const playersService = {
+  suggestFdptmCategory: (birthDate: string, gender: Gender, signal: AbortSignal) =>
+    http.post<{ category: string }>('/players/category-suggestion', { birthDate, gender }, { signal })
+      .then(({ data }) => data.category),
+
   update: (playerId: number, input: PlayerUpdate) =>
     http.patch<PlayerResponse>(`/players/${playerId}`, input).then((r) => r.data),
 };

@@ -83,7 +83,7 @@ export default function ProfileScreen() {
           <View style={styles.ratingRow}>
             <Star color={Brand.red} fill={Brand.red} size={14} />
             <Text style={styles.rating}>{Math.round(player?.ratingGlicko ?? 1500)}</Text>
-            {player?.federatedDeclared && player.categoryFdptm ? <Text style={styles.chip}>FDPTM {player.categoryFdptm}</Text> : null}
+            {player?.federatedDeclared && player.categoryFdptm ? <Text style={styles.chip}>FDPTM declarado · {player.categoryFdptm}</Text> : null}
           </View>
         </View>
 
