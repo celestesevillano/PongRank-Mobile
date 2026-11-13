@@ -22,7 +22,6 @@ const loss = '#FF8990';
 const amber = '#FFCB68';
 const statisticsArt = require('../../../../assets/images/pongrank-home-statistics.webp');
 const coachArt = require('../../../../assets/images/pongrank-home-coach.webp');
-const lockedCoachArt = require('../../../../assets/images/pongrank-home-coach-locked.webp');
 const wordmark = require('../../../../assets/images/pongrank-wordmark.png');
 const ball = require('../../../../assets/images/pongrank-intro-ball.png');
 
@@ -70,7 +69,7 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <Image source={wordmark} contentFit="contain" style={styles.wordmark} accessibilityLabel="PongRank" />
           <Text accessibilityRole="header" style={styles.heading}>
-            Hola, <Text style={styles.accent}>{player?.name?.trim().split(/\s+/)[0] || 'jugador'}</Text>
+            Hola, <Text style={styles.greetingName}>{player?.name?.trim().split(/\s+/)[0] || 'jugador'}</Text>
           </Text>
         </View>
 
@@ -121,10 +120,10 @@ export default function DashboardScreen() {
           />
           <ShortcutBanner
             title="Coach"
-            subtitle={coachUnlocked ? 'Postura y movimiento' : 'Desde Pro'}
+            subtitle={coachUnlocked ? 'Postura y movimiento' : 'Requiere Pro'}
             locked={!coachUnlocked}
             Icon={Bot}
-            artwork={coachUnlocked ? coachArt : lockedCoachArt}
+            artwork={coachArt}
             coach
             onPress={() => coachUnlocked ? setCoachNotice(true) : openPlans()}
           />
@@ -187,6 +186,7 @@ function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false,
   onPress: () => void;
 }) {
   const accent = coach ? loss : cyan;
+  const coachLocked = coach && locked;
   const StatusIcon = locked ? LockKeyhole : ChevronRight;
 
   return (
@@ -200,11 +200,18 @@ function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false,
       </View>
       <View style={styles.bannerTop}>
         <View style={[styles.icon, coach && styles.defeatIcon]}><Icon color={accent} size={20} /></View>
-        <StatusIcon color={locked ? '#C2C4CA' : accent} size={16} />
+        {!coachLocked ? <StatusIcon color={locked ? '#C2C4CA' : accent} size={16} /> : null}
       </View>
       <View style={styles.bannerCopy}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.detail}>{subtitle}</Text>
+        {coachLocked ? (
+          <View style={styles.coachLock}>
+            <LockKeyhole color={loss} size={14} />
+            <Text style={styles.coachLockLabel}>{subtitle}</Text>
+          </View>
+        ) : (
+          <Text style={styles.detail}>{subtitle}</Text>
+        )}
       </View>
     </Pressable>
   );
@@ -215,7 +222,8 @@ const styles = StyleSheet.create({
   content: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center', padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.three },
   header: { gap: Spacing.two, alignItems: 'flex-start' },
   wordmark: { width: 116, height: 20 },
-  heading: { color: Brand.text, fontSize: 26, fontWeight: '800' },
+  heading: { color: Brand.text, fontSize: 34, fontWeight: '800' },
+  greetingName: { color: cyan },
   accent: { color: cyan, fontWeight: '700' },
   ratingCard: { backgroundColor: '#071C23', borderRadius: 16, borderWidth: 1, borderColor: '#248997', padding: Spacing.three, overflow: 'hidden' },
   ratingRow: { flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap', gap: Spacing.two },
@@ -230,6 +238,12 @@ const styles = StyleSheet.create({
   coachBanner: { borderColor: '#71333C', backgroundColor: '#241419' },
   bannerTop: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
   bannerCopy: { gap: Spacing.half },
+  coachLock: {
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: Spacing.one,
+    paddingHorizontal: Spacing.two, paddingVertical: Spacing.one,
+    borderRadius: 8, borderWidth: 1, borderColor: '#71333C', backgroundColor: '#29151B',
+  },
+  coachLockLabel: { color: '#FFBCC0', fontSize: 12, fontWeight: '700', flexShrink: 1 },
   bannerArtwork: { position: 'absolute', right: -4, top: 2, opacity: 0.84 },
   bannerImage: { width: 104, height: 104 },
   search: { borderColor: '#248997' },
