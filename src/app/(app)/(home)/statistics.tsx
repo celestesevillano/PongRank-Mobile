@@ -19,6 +19,7 @@ import { computeStatistics, filterRating, monthlyResults, streakMessage, type St
 
 const paddle = require('../../../../assets/images/pongrank-intro-paddle.png');
 const ball = require('../../../../assets/images/pongrank-intro-ball.png');
+const bestVictoryTrophy = require('../../../../assets/images/pongrank-best-victory.webp');
 const amber = '#FFCB68';
 const loss = '#FF8990';
 
@@ -174,7 +175,10 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
                   {Number.isFinite(best.opponent.ratingGlicko) ? (
                     <Text style={styles.secondary}>Rating {Math.round(best.opponent.ratingGlicko)}</Text>
                   ) : null}
-                  <ChevronRight size={18} color={amber} style={styles.bestArrow} />
+                  <View style={styles.bestFooter}>
+                    <Image source={bestVictoryTrophy} contentFit="contain" accessible={false} style={styles.bestTrophy} />
+                    <ChevronRight size={18} color={amber} />
+                  </View>
                 </Pressable>
               ) : (
                 <View style={[styles.highlight, styles.bestCard]}>
@@ -281,7 +285,8 @@ const styles = StyleSheet.create({
   highlightValue: { color: Brand.text, fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'], marginTop: Spacing.one },
   encouragement: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: 'flex-start', backgroundColor: '#3B2914', borderRadius: 8, padding: Spacing.two, marginTop: Spacing.one },
   encouragementText: { color: amber, fontWeight: '700', fontSize: 12, flexShrink: 1 },
-  bestArrow: { marginTop: 'auto', alignSelf: 'flex-end' },
+  bestFooter: { marginTop: 'auto', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: Spacing.two },
+  bestTrophy: { width: 60, height: 60 },
   insight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#081A20', borderRadius: 16, borderWidth: 1, borderColor: '#24616A', overflow: 'hidden', padding: Spacing.three },
   insightIcon: { backgroundColor: '#10333C', borderRadius: 10, padding: Spacing.two },
   insightBall: { position: 'absolute', right: 6, bottom: 10, width: 40, height: 40, opacity: 0.78 },
