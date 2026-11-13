@@ -7,7 +7,7 @@ import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { Brand } from '@/constants/theme';
 
 const tabs = [
-  { name: 'index', title: 'Inicio', Icon: House },
+  { name: '(home)', title: 'Inicio', Icon: House },
   { name: 'social', title: 'Social', Icon: Users },
   { name: 'matches', title: 'Partidas', Icon: Swords },
   { name: 'ranking', title: 'Ranking', Icon: Trophy },
@@ -42,12 +42,15 @@ function TabIcon({ Icon, focused }: { Icon: LucideIcon; focused: boolean }) {
   return (
     <View style={styles.icon}>
       {focused && <Animated.View entering={ZoomIn.withInitialValues({ transform: [{ scale: 0.78 }] }).duration(230).reduceMotion(ReduceMotion.System)} style={styles.active} />}
-      <Icon color={focused ? Brand.text : Brand.textSecondary} size={focused ? 19 : 23} strokeWidth={2} />
+      <View style={styles.glyph}>
+        <Icon color={focused ? Brand.text : Brand.textSecondary} size={focused ? 19 : 23} strokeWidth={2} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   icon: { width: 32, height: 30, alignItems: 'center', justifyContent: 'center' },
+  glyph: { zIndex: 1 },
   active: { position: 'absolute', width: 30, height: 30, borderRadius: 15, backgroundColor: Brand.red },
 });

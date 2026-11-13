@@ -19,5 +19,5 @@ export const authService = {
 
   forgotPassword: (email: string) => http.post<void>('/auth/forgot-password', { email }).then((r) => r.data),
 
-  me: () => http.get<PlayerResponse>('/auth/me').then((r) => r.data),
+  me: (signal?: AbortSignal) => http.get<PlayerResponse>('/auth/me', { signal }).then((r) => r.data),
 };

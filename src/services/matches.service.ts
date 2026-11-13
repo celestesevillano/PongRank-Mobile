@@ -15,8 +15,19 @@ export const ACTIVE_STATUSES = ['CREATED', 'PROPOSED_P1', 'PROPOSED_P2'] as cons
 export const HISTORY_STATUSES = ['CONFIRMED', 'DISPUTED', 'CANCELLED', 'WALKOVER'] as const;
 
 export const matchesService = {
-  byPlayer: (playerId: number, params: PageParams & { status?: string }, signal?: AbortSignal): Promise<Page<MatchResponse>> =>
-    http.get(`/matches/player/${playerId}`, { params, signal }).then((r) => normalizePage<MatchResponse>(r.data)),
+  byPlayer: (playerId: number, params: PageParams & { status?: string; sort?: string[] }, signal?: AbortSignal): Promise<Page<MatchResponse>> =>
+    http.get(`/matches/player/${playerId}`, { params, signal, paramsSerializer: { indexes: null } }).then((r) => normalizePage<MatchResponse>(r.data)),
+
+  confirmedHistory: async (playerId: number, signal?: AbortSignal) => {
+    const matches = new Map<number, MatchResponse>();
+    const params = { status: 'CONFIRMED', size: 100, sort: ['confirmedAt,desc', 'id,desc'] };
+
+    for (let index = 0; ; index += 1) {
+      const page = await matchesService.byPlayer(playerId, { ...params, page: index }, signal);
+      for (const match of page.content) matches.set(match.id, match);
+      if (page.last || page.content.length === 0) return [...matches.values()];
+    }
+  },
 
   active: async (playerId: number, signal?: AbortSignal) => {
     const pages = await Promise.all(

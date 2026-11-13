@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ChartNoAxesColumnIncreasing, ChevronRight, LockKeyhole } from 'lucide-react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 
@@ -7,6 +8,7 @@ import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
 import { MatchCard } from '@/components/matches/match-card';
 import { Brand, Spacing } from '@/constants/theme';
+import { usePlan } from '@/context/plan';
 import { useSession } from '@/context/session';
 import { useFetch } from '@/hooks/use-fetch';
 import { communitiesService } from '@/services/communities.service';
@@ -17,6 +19,8 @@ const POSITION_LOOKUP_SIZE = 100;
 
 export default function DashboardScreen() {
   const { player } = useSession();
+  const { plan, openPlans } = usePlan();
+  const statisticsLocked = !plan || plan.plan === 'FREEMIUM';
   const playerId = player?.id ?? 0;
 
   const standing = useFetch(async (signal) => {
@@ -54,6 +58,16 @@ export default function DashboardScreen() {
           <AuthButton label="Nueva partida" onPress={() => router.push('/new-match')} />
           <AuthButton label="Buscar partida" variant="ghost" onPress={() => router.push('/find-match')} />
         </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityHint={statisticsLocked ? 'Disponible desde el plan Básico' : undefined}
+          onPress={() => statisticsLocked ? openPlans() : router.push('/statistics')}
+          style={({ pressed }) => [styles.statisticsLink, pressed && styles.pressed]}>
+          <ChartNoAxesColumnIncreasing color="#22D3EE" size={20} />
+          <Text style={styles.statisticsLabel}>Estadísticas</Text>
+          {statisticsLocked ? <LockKeyhole color={Brand.textSecondary} size={16} /> : <ChevronRight color="#22D3EE" size={18} />}
+        </Pressable>
 
         <Text style={styles.section}>Ranking {standing.data ? standing.data.communityName : ''}</Text>
         <ScreenState
@@ -102,6 +116,13 @@ const styles = StyleSheet.create({
   position: { alignItems: 'flex-end', maxWidth: '50%' },
   positionValue: { color: Brand.text, fontWeight: '700', textAlign: 'right' },
   actions: { gap: Spacing.one, marginTop: Spacing.two },
+  statisticsLink: {
+    minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two,
+    padding: Spacing.three, borderRadius: 14, backgroundColor: Brand.surface,
+    borderWidth: 1, borderColor: Brand.border,
+  },
+  statisticsLabel: { color: Brand.text, fontWeight: '700', flex: 1 },
+  pressed: { opacity: 0.75 },
   section: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.three },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, borderBottomWidth: 1, borderBottomColor: Brand.border, paddingVertical: Spacing.two },
   rankPosition: { color: Brand.textSecondary, width: 24, fontWeight: '700' },
