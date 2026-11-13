@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, Dumbbell, LockKeyhole, Plus, RotateCw, Search, Trophy, X } from 'lucide-react-native';
+import { ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, Dumbbell, LockKeyhole, Plus, RotateCw, ScanLine, Search, TrendingUp, Trophy, X, type LucideIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -97,34 +97,29 @@ export default function DashboardScreen() {
           </Pressable>
         ) : null}
 
-        <View style={styles.actions}>
-          <AuthButton label="Nueva partida" icon={Plus} onPress={() => router.push('/new-match')} />
-          <AuthButton label="Buscar partida" icon={Search} variant="ghost" style={styles.search} onPress={() => router.push('/find-match')} />
+        <View style={styles.actionRow}>
+          <AuthButton label="Nueva partida" icon={Plus} style={styles.playButton} onPress={() => router.push('/new-match')} />
+          <AuthButton label="Buscar partida" icon={Search} variant="ghost" style={[styles.playButton, styles.search]} onPress={() => router.push('/find-match')} />
         </View>
 
-        <View style={styles.shortcuts}>
-          <Pressable
-            accessibilityRole="button"
+        <View style={styles.shortcutRow}>
+          <ShortcutBanner
+            title="Estadísticas"
+            subtitle={statisticsLocked ? 'Desde Básico' : 'Tu progreso'}
+            locked={statisticsLocked}
+            Icon={ChartNoAxesColumnIncreasing}
+            Artwork={TrendingUp}
             onPress={() => statisticsLocked ? openPlans() : router.push('/statistics')}
-            style={({ pressed }) => [styles.tile, pressed && styles.pressed]}>
-            <View style={styles.icon}><ChartNoAxesColumnIncreasing color={cyan} size={20} /></View>
-            <View style={styles.copy}>
-              <Text style={styles.title}>Estadísticas</Text>
-              <Text style={styles.detail}>{statisticsLocked ? 'Desde Básico' : 'Tu rating, resultados y racha'}</Text>
-            </View>
-            {statisticsLocked ? <LockKeyhole color={Brand.textSecondary} size={16} /> : <ChevronRight color={cyan} size={18} />}
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
+          />
+          <ShortcutBanner
+            title="Coach"
+            subtitle={plan?.coachAccess ? 'Entrenador virtual' : 'Desde Pro'}
+            locked={!plan?.coachAccess}
+            Icon={Dumbbell}
+            Artwork={ScanLine}
+            coach
             onPress={() => plan?.coachAccess ? setCoachNotice(true) : openPlans()}
-            style={({ pressed }) => [styles.tile, pressed && styles.pressed]}>
-            <View style={styles.icon}><Dumbbell color={cyan} size={20} /></View>
-            <View style={styles.copy}>
-              <Text style={styles.title}>Coach</Text>
-              <Text style={styles.detail}>{plan?.coachAccess ? 'Entrenador virtual' : 'Desde Pro'}</Text>
-            </View>
-            {plan?.coachAccess ? <ChevronRight color={cyan} size={18} /> : <LockKeyhole color={Brand.textSecondary} size={16} />}
-          </Pressable>
+          />
         </View>
 
         {recentMatches.length > 0 || recent.error ? (
@@ -174,6 +169,39 @@ export default function DashboardScreen() {
   );
 }
 
+function ShortcutBanner({ title, subtitle, locked, Icon, Artwork, coach = false, onPress }: {
+  title: string;
+  subtitle: string;
+  locked: boolean;
+  Icon: LucideIcon;
+  Artwork: LucideIcon;
+  coach?: boolean;
+  onPress: () => void;
+}) {
+  const accent = coach ? loss : cyan;
+  const StatusIcon = locked ? LockKeyhole : ChevronRight;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.banner, coach && styles.coachBanner, pressed && styles.pressed]}>
+      <CardLighting color={coach ? Brand.red : cyan} />
+      <View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={styles.bannerArtwork}>
+        <Artwork color={accent} size={72} strokeWidth={1} />
+      </View>
+      <View style={styles.bannerTop}>
+        <View style={[styles.icon, coach && styles.defeatIcon]}><Icon color={accent} size={20} /></View>
+        <StatusIcon color={locked ? '#C2C4CA' : accent} size={16} />
+      </View>
+      <View style={styles.bannerCopy}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.detail}>{subtitle}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.background },
   content: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center', padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.three },
@@ -185,8 +213,15 @@ const styles = StyleSheet.create({
   position: { maxWidth: '48%', padding: Spacing.two, backgroundColor: '#09191F', borderRadius: 8 },
   label: { color: '#C2C4CA', fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
   ball: { position: 'absolute', width: 58, height: 58, right: 16, bottom: -8, opacity: 0.72 },
-  actions: { gap: Spacing.two },
-  search: { borderWidth: 1, borderColor: '#248997' },
+  actionRow: { flexDirection: 'row', gap: Spacing.two },
+  playButton: { flex: 1, minWidth: 0, minHeight: 48, paddingVertical: Spacing.two, borderWidth: 1, borderColor: 'transparent' },
+  shortcutRow: { flexDirection: 'row', gap: Spacing.two },
+  banner: { flex: 1, minWidth: 0, minHeight: 104, borderRadius: 16, borderWidth: 1, borderColor: '#24616A', backgroundColor: '#081A20', padding: Spacing.three, gap: Spacing.two, overflow: 'hidden' },
+  coachBanner: { borderColor: '#71333C', backgroundColor: '#241419' },
+  bannerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  bannerCopy: { gap: Spacing.half },
+  bannerArtwork: { position: 'absolute', right: -4, bottom: -8, opacity: 0.28 },
+  search: { borderColor: '#248997' },
   shortcuts: { gap: Spacing.two },
   tile: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, paddingHorizontal: Spacing.three, borderRadius: 14, backgroundColor: '#101519', borderWidth: 1, borderColor: '#344047' },
   icon: { padding: Spacing.two, borderRadius: 8, backgroundColor: '#10333C' },
