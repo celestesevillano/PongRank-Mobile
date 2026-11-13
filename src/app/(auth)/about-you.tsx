@@ -95,7 +95,7 @@ export default function AboutYouScreen() {
             {age !== null ? (
               <View style={styles.ageRow}>
                 <CalendarDays color={Brand.textSecondary} size={16} />
-                <Text style={styles.ageText}>Tienes {age} años · se calcula sola</Text>
+                <Text style={styles.ageText}>Tienes {age} años</Text>
               </View>
             ) : (
               <FieldError message={submitted ? dateError : null} />
