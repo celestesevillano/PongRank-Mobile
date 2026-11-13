@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, Dumbbell, LockKeyhole, Plus, RotateCw, ScanLine, Search, TrendingUp, Trophy, X, type LucideIcon } from 'lucide-react-native';
+import { ChartNoAxesColumnIncreasing, ChevronRight, ClipboardCheck, Dumbbell, LockKeyhole, Plus, RotateCw, Search, Trophy, X, type LucideIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +20,9 @@ import { matchesService } from '@/services/matches.service';
 const cyan = '#22D3EE';
 const loss = '#FF8990';
 const amber = '#FFCB68';
+const statisticsArt = require('../../../../assets/images/pongrank-home-statistics.webp');
+const coachArt = require('../../../../assets/images/pongrank-home-coach.webp');
+const wordmark = require('../../../../assets/images/pongrank-wordmark.png');
 const ball = require('../../../../assets/images/pongrank-intro-ball.png');
 
 export default function DashboardScreen() {
@@ -62,9 +65,12 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
-        <Text accessibilityRole="header" style={styles.heading}>
-          Hola, <Text style={styles.accent}>{player?.name?.trim().split(/\s+/)[0] || 'jugador'}</Text>
-        </Text>
+        <View style={styles.header}>
+          <Image source={wordmark} contentFit="contain" style={styles.wordmark} accessibilityLabel="PongRank" />
+          <Text accessibilityRole="header" style={styles.heading}>
+            Hola, <Text style={styles.accent}>{player?.name?.trim().split(/\s+/)[0] || 'jugador'}</Text>
+          </Text>
+        </View>
 
         <View style={styles.ratingCard}>
           <CardLighting color={cyan} court />
@@ -108,7 +114,7 @@ export default function DashboardScreen() {
             subtitle={statisticsLocked ? 'Desde Básico' : 'Tu progreso'}
             locked={statisticsLocked}
             Icon={ChartNoAxesColumnIncreasing}
-            Artwork={TrendingUp}
+            artwork={statisticsArt}
             onPress={() => statisticsLocked ? openPlans() : router.push('/statistics')}
           />
           <ShortcutBanner
@@ -116,7 +122,7 @@ export default function DashboardScreen() {
             subtitle={plan?.coachAccess ? 'Entrenador virtual' : 'Desde Pro'}
             locked={!plan?.coachAccess}
             Icon={Dumbbell}
-            Artwork={ScanLine}
+            artwork={coachArt}
             coach
             onPress={() => plan?.coachAccess ? setCoachNotice(true) : openPlans()}
           />
@@ -169,12 +175,12 @@ export default function DashboardScreen() {
   );
 }
 
-function ShortcutBanner({ title, subtitle, locked, Icon, Artwork, coach = false, onPress }: {
+function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false, onPress }: {
   title: string;
   subtitle: string;
   locked: boolean;
   Icon: LucideIcon;
-  Artwork: LucideIcon;
+  artwork: number;
   coach?: boolean;
   onPress: () => void;
 }) {
@@ -188,7 +194,7 @@ function ShortcutBanner({ title, subtitle, locked, Icon, Artwork, coach = false,
       style={({ pressed }) => [styles.banner, coach && styles.coachBanner, pressed && styles.pressed]}>
       <CardLighting color={coach ? Brand.red : cyan} />
       <View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={styles.bannerArtwork}>
-        <Artwork color={accent} size={72} strokeWidth={1} />
+        <Image source={artwork} contentFit="contain" style={styles.bannerImage} />
       </View>
       <View style={styles.bannerTop}>
         <View style={[styles.icon, coach && styles.defeatIcon]}><Icon color={accent} size={20} /></View>
@@ -205,6 +211,8 @@ function ShortcutBanner({ title, subtitle, locked, Icon, Artwork, coach = false,
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.background },
   content: { width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center', padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.three },
+  header: { gap: Spacing.two, alignItems: 'flex-start' },
+  wordmark: { width: 116, height: 20 },
   heading: { color: Brand.text, fontSize: 26, fontWeight: '800' },
   accent: { color: cyan, fontWeight: '700' },
   ratingCard: { backgroundColor: '#071C23', borderRadius: 16, borderWidth: 1, borderColor: '#248997', padding: Spacing.three, overflow: 'hidden' },
@@ -218,9 +226,10 @@ const styles = StyleSheet.create({
   shortcutRow: { flexDirection: 'row', gap: Spacing.two },
   banner: { flex: 1, minWidth: 0, minHeight: 104, borderRadius: 16, borderWidth: 1, borderColor: '#24616A', backgroundColor: '#081A20', padding: Spacing.three, gap: Spacing.two, overflow: 'hidden' },
   coachBanner: { borderColor: '#71333C', backgroundColor: '#241419' },
-  bannerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  bannerTop: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
   bannerCopy: { gap: Spacing.half },
-  bannerArtwork: { position: 'absolute', right: -4, bottom: -8, opacity: 0.28 },
+  bannerArtwork: { position: 'absolute', right: -4, top: 2, opacity: 0.84 },
+  bannerImage: { width: 104, height: 104 },
   search: { borderColor: '#248997' },
   shortcuts: { gap: Spacing.two },
   tile: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, paddingHorizontal: Spacing.three, borderRadius: 14, backgroundColor: '#101519', borderWidth: 1, borderColor: '#344047' },
