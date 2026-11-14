@@ -29,8 +29,10 @@ export function ConfirmDialog({ confirmation, busy, onCancel }: {
           <Icon size={24} color={destructive ? '#FF4A52' : '#22D3EE'} />
           <Text style={styles.title} accessibilityRole="header">{title}</Text>
           <Text style={styles.message}>{message}</Text>
-          <AuthButton label={label} loading={busy} hideChevron onPress={onConfirm} />
-          <AuthButton label={cancelLabel ?? 'Cancelar'} variant="ghost" disabled={busy} onPress={onCancel} />
+          <View style={styles.actions}>
+            <AuthButton label={cancelLabel ?? 'Cancelar'} variant="secondary" disabled={busy} onPress={onCancel} style={styles.action} />
+            <AuthButton label={label} loading={busy} hideChevron onPress={onConfirm} style={styles.action} />
+          </View>
         </View>
       </ScrollView>
     </Modal>
@@ -42,4 +44,7 @@ const styles = StyleSheet.create({
   dialog: { width: '100%', maxWidth: 360, backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: 22, padding: Spacing.four, gap: Spacing.two },
   title: { color: Brand.text, fontSize: 22, fontWeight: '800' },
   message: { color: Brand.textSecondary, fontSize: 16, marginBottom: Spacing.two },
+  // Cancelar a la izquierda, la acción a la derecha
+  actions: { flexDirection: 'row', gap: Spacing.two },
+  action: { flex: 1 },
 });

@@ -117,7 +117,7 @@ export default function OnboardingCommunityScreen() {
         )}
 
         <Text style={styles.footerHint}>
-          Puedes jugar partidas, retar amigos y aparecer en el ranking general sin unirte a ninguna comunidad.
+          Puedes jugar partidas, retar a tus Pongmigos y aparecer en el ranking general sin unirte a ninguna comunidad.
           Unirte te da además un ranking dentro de tu grupo específico.
         </Text>
 

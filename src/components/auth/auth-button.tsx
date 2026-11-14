@@ -9,20 +9,25 @@ type AuthButtonProps = PressableProps & {
   icon?: LucideIcon;
   hideChevron?: boolean;
   foregroundColor?: string;
-  variant?: 'primary' | 'ghost';
+  // primary: rojo sólido, una por pantalla. secondary: contorno claro. ghost: solo texto.
+  variant?: 'primary' | 'secondary' | 'ghost';
 };
 
 export function AuthButton({ label, loading, icon: Icon, hideChevron, foregroundColor = Brand.text, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
   const isPrimary = variant === 'primary';
+  const isDisabled = Boolean(disabled) && !loading;
+  const labelColor = isDisabled ? Brand.disabledText : foregroundColor;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ disabled: isDisabled, busy: Boolean(loading) }}
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.base,
-        isPrimary ? styles.primary : styles.ghost,
-        (disabled || loading) && styles.disabled,
+        isPrimary ? styles.primary : variant === 'secondary' ? styles.secondary : styles.ghost,
+        isDisabled && styles.disabled,
+        loading && styles.loading,
         pressed && styles.pressed,
         style as object,
       ]}
@@ -32,8 +37,8 @@ export function AuthButton({ label, loading, icon: Icon, hideChevron, foreground
         <ActivityIndicator color={isPrimary ? '#FFFFFF' : Brand.red} />
       ) : (
         <>
-          {Icon && <Icon size={18} color={foregroundColor} />}
-          <Text style={[styles.label, { color: foregroundColor }]}>{label}</Text>
+          {Icon && <Icon size={18} color={labelColor} />}
+          <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
           {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, styles.labelPrimary]}>{'  >'}</Text>}
         </>
       )}
@@ -53,13 +58,23 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
   },
   primary: {
-    backgroundColor: Brand.red,
+    backgroundColor: Brand.action,
+  },
+  secondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: Brand.borderStrong,
   },
   ghost: {
     backgroundColor: 'transparent',
   },
+  // Deshabilitado: relleno plano, sin borde y texto tenue (no se confunde con el secundario)
   disabled: {
-    opacity: 0.5,
+    backgroundColor: Brand.disabledSurface,
+    borderWidth: 0,
+  },
+  loading: {
+    opacity: 0.85,
   },
   pressed: {
     opacity: 0.85,

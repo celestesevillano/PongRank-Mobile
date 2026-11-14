@@ -21,7 +21,7 @@ import { Brand, Spacing } from '@/constants/theme';
 const SEGMENTS = [
   { key: 'communities', label: 'Comunidades' },
   { key: 'clubs', label: 'Clubes' },
-  { key: 'friends', label: 'Amigos' },
+  { key: 'friends', label: 'Pongmigos' },
 ] as const;
 
 type Segment = (typeof SEGMENTS)[number]['key'];
@@ -39,7 +39,7 @@ export default function SocialScreen() {
       {segment === 'clubs' && <MyClubs />}
       {segment === 'friends' && (
         <View style={styles.placeholder}>
-          <Text style={styles.message}>Aquí verás tus amigos y las solicitudes pendientes.</Text>
+          <Text style={styles.message}>Aquí verás tus Pongmigos y las solicitudes pendientes.</Text>
         </View>
       )}
     </ScreenContainer>

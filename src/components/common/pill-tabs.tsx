@@ -8,7 +8,7 @@ type PillTabsProps<T extends string> = {
   onSelect: (key: T) => void;
 };
 
-// Segmentos en forma de píldora (Social: Comunidades, Clubes, Amigos)
+// Segmentos en forma de píldora (Social: Comunidades, Clubes, Pongmigos)
 export function PillTabs<T extends string>({ options, selected, onSelect }: PillTabsProps<T>) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row} style={styles.scroll}>

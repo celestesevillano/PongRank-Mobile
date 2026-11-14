@@ -135,7 +135,7 @@ export default function NewMatchScreen() {
             <Search color={Brand.textSecondary} size={18} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Buscar un amigo"
+              placeholder="Buscar un Pongmigo"
               placeholderTextColor={Brand.textSecondary}
               value={friendQuery}
               onChangeText={setFriendQuery}
@@ -144,7 +144,7 @@ export default function NewMatchScreen() {
           {friendsLoading ? (
             <ActivityIndicator color={Brand.red} style={styles.loader} />
           ) : visibleFriends.length === 0 ? (
-            <Text style={styles.hint}>{friends.length === 0 ? 'Aún no tienes amigos agregados.' : 'No hay amigos con ese nombre.'}</Text>
+            <Text style={styles.hint}>{friends.length === 0 ? 'Aún no tienes Pongmigos agregados.' : 'No hay Pongmigos con ese nombre.'}</Text>
           ) : (
             visibleFriends.map((friend) => (
               <Pressable
