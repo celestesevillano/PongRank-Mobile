@@ -34,12 +34,12 @@ export default function SocialScreen() {
       <Pressable style={styles.search} accessibilityRole="button" onPress={() => router.push('/social/explore')}>
         <Search size={20} color={Brand.textSecondary} /><Text style={styles.message}>Buscar comunidades y clubes</Text>
       </Pressable>
-      <PillTabs options={SEGMENTS} selected={segment} onSelect={setSegment} />
+      <PillTabs variant="segment" options={SEGMENTS} selected={segment} onSelect={setSegment} />
       {segment === 'communities' && <MyCommunities />}
       {segment === 'clubs' && <MyClubs />}
       {segment === 'friends' && (
         <View style={styles.placeholder}>
-          <Text style={styles.message}>Aquí verás tus amigos y las solicitudes pendientes.</Text>
+          <Text style={styles.message}>Aquí verás tus Pongmigos y las solicitudes pendientes.</Text>
         </View>
       )}
     </ScreenContainer>

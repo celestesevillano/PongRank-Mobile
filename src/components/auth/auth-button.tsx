@@ -9,11 +9,15 @@ type AuthButtonProps = PressableProps & {
   icon?: LucideIcon;
   hideChevron?: boolean;
   foregroundColor?: string;
-  variant?: 'primary' | 'ghost';
+  // 'ghost' se conserva como alias de 'secondary'
+  variant?: 'primary' | 'secondary' | 'text' | 'ghost';
 };
 
 export function AuthButton({ label, loading, icon: Icon, hideChevron, foregroundColor = Brand.text, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
   const isPrimary = variant === 'primary';
+  const isText = variant === 'text';
+  const off = disabled || loading;
+  const labelColor = off && !loading ? Brand.textDisabled : isText ? Brand.cyan : foregroundColor;
   return (
     <Pressable
       accessibilityRole="button"
@@ -21,20 +25,20 @@ export function AuthButton({ label, loading, icon: Icon, hideChevron, foreground
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.base,
-        isPrimary ? styles.primary : styles.ghost,
-        (disabled || loading) && styles.disabled,
-        pressed && styles.pressed,
+        isPrimary ? styles.primary : isText ? styles.text : styles.secondary,
+        off && !loading && styles.disabled,
+        pressed && !off && (isPrimary ? styles.primaryPressed : styles.pressed),
         style as object,
       ]}
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={isPrimary ? '#FFFFFF' : Brand.red} />
+        <ActivityIndicator color={isPrimary ? '#FFFFFF' : Brand.cyan} />
       ) : (
         <>
-          {Icon && <Icon size={18} color={foregroundColor} />}
-          <Text style={[styles.label, { color: foregroundColor }]}>{label}</Text>
-          {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, styles.labelPrimary]}>{'  >'}</Text>}
+          {Icon && <Icon size={18} color={labelColor} />}
+          <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
+          {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, { color: labelColor }]}>{'  >'}</Text>}
         </>
       )}
     </Pressable>
@@ -53,13 +57,23 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
   },
   primary: {
-    backgroundColor: Brand.red,
+    backgroundColor: Brand.primary,
   },
-  ghost: {
+  primaryPressed: {
+    backgroundColor: Brand.redDark,
+  },
+  secondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Brand.secondaryBorder,
+  },
+  text: {
     backgroundColor: 'transparent',
   },
   disabled: {
-    opacity: 0.5,
+    backgroundColor: Brand.surfaceDisabled,
+    borderWidth: 1,
+    borderColor: Brand.border,
   },
   pressed: {
     opacity: 0.85,
@@ -69,8 +83,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '700',
-  },
-  labelPrimary: {
-    color: '#FFFFFF',
   },
 });

@@ -135,7 +135,7 @@ export default function NewMatchScreen() {
             <Search color={Brand.textSecondary} size={18} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Buscar un amigo"
+              placeholder="Buscar un Pongmigo"
               placeholderTextColor={Brand.textSecondary}
               value={friendQuery}
               onChangeText={setFriendQuery}
