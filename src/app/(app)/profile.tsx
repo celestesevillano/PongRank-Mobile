@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { Check, ChevronRight, Flame, LogOut, MessageCircle, Plus, Star, Trophy } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { PLAN_LABEL } from '@/constants/plans';
 import { Brand, Spacing } from '@/constants/theme';
@@ -52,11 +53,8 @@ export default function ProfileScreen() {
   const communities = useFetch((signal) => communitiesService.mine(signal), []);
   const stats = useMemo(() => computeStats(history.data?.content ?? [], playerId), [history.data, playerId]);
 
-  const confirmSignOut = () =>
-    Alert.alert('Cerrar sesión', '¿Seguro que quieres salir?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Salir', style: 'destructive', onPress: () => signOut() },
-    ]);
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const confirmSignOut = () => setSignOutOpen(true);
 
   const toggleContact = async (value: boolean) => {
     if (!player) return;
@@ -166,6 +164,15 @@ export default function ProfileScreen() {
           <Text style={styles.signOutLabel}>Cerrar sesión</Text>
         </Pressable>
       </ScrollView>
+      <ConfirmDialog
+        busy={false}
+        onCancel={() => setSignOutOpen(false)}
+        confirmation={signOutOpen ? {
+          title: 'Cerrar sesión', message: '¿Seguro que quieres salir?',
+          label: 'Cerrar sesión', Icon: LogOut, destructive: true,
+          onConfirm: () => { setSignOutOpen(false); void signOut(); },
+        } : null}
+      />
     </ScreenContainer>
   );
 }

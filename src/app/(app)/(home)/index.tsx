@@ -146,7 +146,7 @@ export default function DashboardScreen() {
         onCancel={() => setCoachNotice(false)}
         confirmation={coachNotice ? {
           title: 'Coach', message: 'Coach usa MediaPipe para analizar tu postura y movimiento. El análisis aún no está disponible en esta versión.',
-          label: 'Entendido', Icon: Bot, onConfirm: () => setCoachNotice(false), cancelLabel: 'Volver',
+          label: 'Aceptar', Icon: Bot, onConfirm: () => setCoachNotice(false), infoOnly: true,
         } : null}
       />
     </SafeAreaView>
