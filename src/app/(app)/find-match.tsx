@@ -20,7 +20,7 @@ import { toApiError } from '@/utils/api-error';
 type Tab = 'friends' | 'community' | 'open';
 
 const TABS: { value: Tab; label: string; empty: string }[] = [
-  { value: 'friends', label: 'Amigos', empty: 'Ninguno de tus amigos tiene una partida abierta ahora.' },
+  { value: 'friends', label: 'Pongmigos', empty: 'Ninguno de tus Pongmigos tiene una partida abierta ahora.' },
   { value: 'community', label: 'Comunidad', empty: 'No hay partidas abiertas en tus comunidades.' },
   { value: 'open', label: 'Libres', empty: 'No hay partidas libres cerca de ti con tu nivel. Crea una y espera rival.' },
 ];

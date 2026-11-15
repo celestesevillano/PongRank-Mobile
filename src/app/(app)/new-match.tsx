@@ -247,7 +247,7 @@ export default function NewMatchScreen() {
       {step === 'waiting' && (
         <View style={styles.waiting}>
           <View style={styles.clock}>
-            <Clock color="#F5A524" size={48} />
+            <Clock color="#22D3EE" size={48} />
           </View>
           <Text style={styles.waitingTitle}>{opponent ? `Esperando a ${opponent.name}...` : 'Esperando rival...'}</Text>
           <Text style={styles.hint}>

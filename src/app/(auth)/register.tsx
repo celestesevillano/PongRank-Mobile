@@ -114,5 +114,5 @@ const styles = StyleSheet.create({
   eyeButton: { position: 'absolute', right: Spacing.three, top: 0, bottom: 0, justifyContent: 'center' },
   hint: { color: Brand.textSecondary, fontSize: 12 },
   error: { color: Brand.red, fontSize: 13 },
-  loginLink: { color: Brand.textSecondary, textAlign: 'center', textDecorationLine: 'underline', marginTop: Spacing.two, marginBottom: Spacing.three },
+  loginLink: { color: Brand.cyan, textAlign: 'center', marginTop: Spacing.two, marginBottom: Spacing.three },
 });

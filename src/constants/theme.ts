@@ -28,13 +28,20 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 // PongRank siempre se ve oscuro en las pantallas de auth/onboarding, independiente del tema del sistema.
 export const Brand = {
+  // Rojo de marca y pestaña activa (4.75:1 sobre negro)
   red: '#E8262F',
+  // Acción primaria y contador: texto blanco encima (5.08:1)
+  primary: '#D81E28',
   redDark: '#B01E26',
+  cyan: '#22D3EE',
+  surfaceDisabled: '#232326',
+  textDisabled: '#9A9CA3',
+  secondaryBorder: '#B9BBC1',
   background: '#000000',
   surface: '#141416',
   border: '#2A2A2E',
   text: '#FFFFFF',
-  textSecondary: '#9A9CA3',
+  textSecondary: '#B9BBC1',
 } as const;
 
 export const Fonts = Platform.select({

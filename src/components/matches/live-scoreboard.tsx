@@ -92,5 +92,5 @@ const styles = StyleSheet.create({
   plusDisabled: { opacity: 0.3 },
   plusLabel: { color: Brand.red, fontSize: 22, fontWeight: '800' },
   sets: { color: Brand.textSecondary, textAlign: 'center' },
-  undo: { color: Brand.textSecondary, textAlign: 'center', textDecorationLine: 'underline' },
+  undo: { color: Brand.cyan, textAlign: 'center' },
 });

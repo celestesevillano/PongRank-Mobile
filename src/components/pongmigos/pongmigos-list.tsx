@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { ArrowRight, ChevronRight, Ellipsis, Send, Swords, UserMinus, UserPlus } from 'lucide-react-native';
+import { ChevronRight, Ellipsis, List, Send, Swords, UserMinus, UserPlus } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
@@ -70,7 +70,7 @@ export function PongmigosList({ preview = false }: { preview?: boolean }) {
         ListEmptyComponent={friends.loading ? <ActivityIndicator color={Brand.red} />
           : friends.error ? <PongiState error={friends.error} retry={friends.refetch} />
           : <Text style={pongmigosStyles.body}>{term ? 'No encontramos coincidencias.' : 'Aún no tienes Pongmigos'}</Text>}
-        ListFooterComponent={friends.error && list.length > 0 ? <PongiState error={friends.error} retry={friends.refetch} /> : preview && list.length > 5 ? <PongmigoButton label="Ver todos mis Pongmigos" icon={ArrowRight}
+        ListFooterComponent={friends.error && list.length > 0 ? <PongiState error={friends.error} retry={friends.refetch} /> : preview && list.length > 5 ? <PongmigoButton label="Ver todos mis Pongmigos" icon={List}
           variant="text" onPress={() => router.push('/social/pongmigos')} /> : undefined}
         renderItem={({ item }) => {
           const other = friendOf(item, playerId);
