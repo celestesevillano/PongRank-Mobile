@@ -62,12 +62,18 @@ export function PlayerResult({ player }: { player: PlayerSummary }) {
   );
 }
 
-export function PongiState({ text, artwork, error, retry }: { text?: string; artwork?: number; error?: ApiError; retry?: () => void }) {
+export function PongiState({ text, artwork, error, errorMessage, retry }: {
+  text?: string;
+  artwork?: number;
+  error?: ApiError;
+  errorMessage?: string;
+  retry?: () => void;
+}) {
   return (
     <View style={styles.empty}>
       {(error?.isNetwork || artwork) ? <Image source={error?.isNetwork ? pongiArt.offline : artwork}
         contentFit="contain" style={styles.emptyArt} accessibilityElementsHidden importantForAccessibility="no" /> : null}
-      <Text style={styles.emptyCopy}>{error?.isNetwork ? 'No pudimos conectar con PongRank' : error?.message ?? text}</Text>
+      <Text style={styles.emptyCopy}>{error ? errorMessage ?? error.message : text}</Text>
       {retry && <PongmigoButton label="Reintentar" icon={RotateCw} onPress={retry} />}
     </View>
   );

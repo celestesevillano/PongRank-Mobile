@@ -79,7 +79,8 @@ function Results<T extends { id: number }>({ title, empty, artwork, fetchPage, r
   return (
     <View style={styles.section}>
       <Text style={styles.heading} accessibilityRole="header">{title}</Text>
-      {artwork && result.error ? <PongiState error={result.error} retry={result.refetch} />
+      {artwork && result.error ? <PongiState error={result.error} retry={result.refetch}
+        errorMessage={result.error.status === 404 ? 'La búsqueda de jugadores no está disponible por ahora.' : undefined} />
         : artwork && !result.loading && result.data?.content.length === 0 ? <PongiState artwork={artwork} text={empty} />
         : <ScreenState loading={result.loading} error={result.error} empty={result.data?.content.length === 0}
           emptyMessage={empty} onRetry={result.refetch} />}

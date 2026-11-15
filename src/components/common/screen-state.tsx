@@ -26,7 +26,7 @@ export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>{error.isNetwork ? 'Sin conexión' : 'No pudimos cargar esto'}</Text>
+        <Text style={styles.title}>{error.isNetwork ? 'Problema de conexión' : 'No pudimos cargar esto'}</Text>
         <Text style={styles.message}>{error.message}</Text>
         {onRetry && <AuthButton label="Reintentar" icon={retryIcon} onPress={onRetry} style={styles.button} />}
       </View>
