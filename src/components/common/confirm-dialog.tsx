@@ -27,7 +27,7 @@ export function ConfirmDialog({ confirmation, busy, onCancel }: {
     <Modal transparent visible animationType="fade" onRequestClose={() => { if (!busy) onCancel(); }}>
       <ScrollView contentContainerStyle={styles.backdrop} keyboardShouldPersistTaps="handled">
         <View style={styles.dialog} accessibilityViewIsModal>
-          <Icon size={24} color={destructive ? '#FF4A52' : '#22D3EE'} />
+          <View style={[styles.circle, { borderColor: destructive ? '#FF4A52' : '#22D3EE' }]}><Icon size={21} color={destructive ? '#FF4A52' : '#22D3EE'} /></View>
           <Text style={styles.title} accessibilityRole="header">{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <ActionRow>
@@ -42,7 +42,8 @@ export function ConfirmDialog({ confirmation, busy, onCancel }: {
 
 const styles = StyleSheet.create({
   backdrop: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.four, backgroundColor: '#000B' },
-  dialog: { width: '100%', maxWidth: 360, backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: 22, padding: Spacing.four, gap: Spacing.two },
-  title: { color: Brand.text, fontSize: 22, fontWeight: '800' },
-  message: { color: Brand.textSecondary, fontSize: 16, marginBottom: Spacing.two },
+  dialog: { width: '100%', maxWidth: 320, alignItems: 'center', backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: 20, padding: Spacing.three, paddingVertical: 18, gap: Spacing.two },
+  circle: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, backgroundColor: '#232326', alignItems: 'center', justifyContent: 'center' },
+  title: { color: Brand.text, fontSize: 24, fontWeight: '800', textAlign: 'center' },
+  message: { color: Brand.textSecondary, fontSize: 14, textAlign: 'center', marginBottom: Spacing.two },
 });
