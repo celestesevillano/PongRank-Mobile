@@ -86,6 +86,13 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 - Accesibilidad: la imagen es decorativa; no lleva información clave ni sustituye al texto. Las imágenes no se usan como fondo de texto sin un degradado oscuro que mantenga el contraste 4.5:1.
 - Entrega: PNG o WebP, máximo 1600 px de ancho, peso menor a 300 KB y con nombre descriptivo (`banner-pongmigos.webp`, `vacio-solicitudes.webp`).
 
+**Pongi y sus encuadres**
+- Pongi es el personaje único de PongRank. Tiene tres encuadres del mismo diseño: **cabeza** (iconos, avatares, estados vacíos pequeños, notificaciones), **hasta la cadera** (estados vacíos, tarjetas y banners donde el personaje sostiene un objeto) y **cuerpo completo** (hoja de personaje, bienvenida, victoria y escenas de juego).
+- Los tres comparten casco negro, visor luminoso, detalles rojos y el mismo detalle fijo de tenis de mesa (paleta pequeña o pelota), y la misma paleta cerrada.
+- El encuadre se elige por el espacio disponible y no cambia la identidad: en tamaño pequeño se usa la cabeza, en pantallas con mucho aire el busto, y el cuerpo completo solo cuando la escena lo necesita.
+- La paleta y la pelota grandes se reservan para escenas de juego. En escenas administrativas Pongi sostiene su objeto (buzón, lupa) y conserva su detalle fijo.
+- Una hoja de personaje con los tres encuadres y 4–5 emociones es la referencia de todos los prompts de imagen.
+
 **Plantilla de prompt (completar lo que está entre corchetes)**
 
 > Ilustración 3D estilizada y amigable de [escena: por ejemplo, dos robots chocando las manos], personajes robot de PongRank con casco negro brillante, visor con ojos luminosos y detalles rojos; [segundo robot con acentos dorados]. Fondo [negro/carbón con degradado rojo oscuro], luz rojiza y destellos celestes. Estilo juvenil, lúdico y gamer, iluminación suave de estudio, bordes redondeados. Composición [16:9 con el sujeto a la derecha / 1:1 centrada] y espacio libre para texto superpuesto. Sin texto, sin logos, sin colores fuera de negro, rojo, celeste y toques dorados.
