@@ -32,11 +32,11 @@ export function PongmigoButton({ label, icon, variant = 'primary', busy, disable
   return <AuthButton {...props} label={label} icon={icon} variant={variant} loading={busy} disabled={disabled} style={style as object} />;
 }
 
-export function PlayerIdentity({ player, showRating = false }: { player: PlayerSummary; showRating?: boolean }) {
+export function PlayerIdentity({ player, showRating = false, hideAvatar = false }: { player: PlayerSummary; showRating?: boolean; hideAvatar?: boolean }) {
   const initials = player.name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   return (
     <>
-      <View style={styles.avatar}><Text style={styles.initials}>{initials}</Text></View>
+      {hideAvatar ? null : <View style={styles.avatar}><Text style={styles.initials}>{initials}</Text></View>}
       <View style={styles.identity}>
         <Text style={styles.name} numberOfLines={1}>{player.name}</Text>
         {showRating ? <Text style={styles.detail}>{Math.round(player.ratingGlicko)} de rating</Text>

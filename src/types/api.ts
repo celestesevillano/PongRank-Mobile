@@ -4,6 +4,7 @@ export type PlayerResponse = {
   id: number;
   name: string;
   email: string;
+  username?: string | null;
   birthDate?: string | null;
   gender?: Gender | null;
   whatsapp: string | null;

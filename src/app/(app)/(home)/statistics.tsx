@@ -143,7 +143,7 @@ function StatisticsScreen({ playerId, sessionRating }: { playerId: number; sessi
           </View>
         </View>
 
-        <ScreenState loading={history.loading && !snapshot} error={history.error} onRetry={history.refetch} retryIcon={RotateCw} />
+        <ScreenState loading={history.loading && !snapshot} error={history.error} errorMessage="Intenta de nuevo en unos segundos." onRetry={history.refetch} retryIcon={RotateCw} />
 
         {snapshot && selected && !history.error ? (
           <>
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   highlightValue: { color: Brand.text, fontSize: 20, fontWeight: '800', fontVariant: ['tabular-nums'] },
   encouragement: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: 'flex-start', backgroundColor: '#3B2914', borderRadius: 8, padding: Spacing.two, marginTop: Spacing.one },
   encouragementText: { color: amber, fontWeight: '700', fontSize: 12, flexShrink: 1 },
-  bestAction: { marginTop: 'auto', color: amber, fontSize: 12, fontWeight: '700' },
+  bestAction: { marginTop: 'auto', color: Brand.cyan, fontSize: 12, fontWeight: '700' },
   insight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: '#081A20', borderRadius: 16, borderWidth: 1, borderColor: '#24616A', overflow: 'hidden', padding: Spacing.three },
   insightIcon: { backgroundColor: '#10333C', borderRadius: 10, padding: Spacing.two },
   insightBall: { position: 'absolute', right: 6, bottom: 10, width: 40, height: 40, opacity: 0.78 },

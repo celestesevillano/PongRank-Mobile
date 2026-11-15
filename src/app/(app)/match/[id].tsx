@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AuthButton } from '@/components/auth/auth-button';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
+import { WhatsAppMatchButton } from '@/components/matches/whatsapp-match-button';
 import { LiveScoreboard } from '@/components/matches/live-scoreboard';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
@@ -61,6 +62,9 @@ function MatchContent({ match, onChanged }: { match: MatchDetail; onChanged: () 
       <Text style={styles.meta}>
         {match.format} · {match.communityName ?? 'Partida libre'}
       </Text>
+
+      {canScore && opponent && (isPlayer1 || match.player2?.id === player?.id)
+        ? <WhatsAppMatchButton opponent={opponent} /> : null}
 
       {canScore && <LiveScoreboard format={match.format} opponentName={opponent?.name ?? 'Rival'} player1IsMe={isPlayer1} submitting={busy} onSubmit={submitScore} />}
 
