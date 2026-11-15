@@ -37,7 +37,7 @@ export function AuthButton({ label, loading, icon: Icon, hideChevron, foreground
       ) : (
         <>
           {Icon && <Icon size={18} color={labelColor} />}
-          <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
+          <Text numberOfLines={1} style={[styles.label, { color: labelColor }]}>{label}</Text>
           {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, { color: labelColor }]}>{'  >'}</Text>}
         </>
       )}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { ActionRow } from '@/components/common/action-row';
 import { CommunityCard } from '@/components/communities/community-card';
 import { CommunityScreen } from '@/components/communities/community-screen';
 import { RankingPosition } from '@/components/communities/ranking-position';
@@ -121,10 +122,10 @@ export default function CommunityDetailScreen() {
             {community.isMember ? (
               <>
                 <AuthButton label="Ver ranking" icon={Trophy} onPress={() => router.navigate({ pathname: '/ranking', params: { communityId } })} />
-                <View style={styles.secondary}>
-                  {community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" icon={Users} variant="ghost" style={styles.half} onPress={openMembers} />}
-                  <AuthButton label="Salir" accessibilityLabel="Salir de la comunidad" icon={LogOut} variant="ghost" style={styles.half} disabled={busy} onPress={confirmLeave} />
-                </View>
+                <ActionRow>
+                  {community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" icon={Users} variant="ghost" onPress={openMembers} />}
+                  <AuthButton label="Salir" accessibilityLabel="Salir de la comunidad" icon={LogOut} variant="ghost" disabled={busy} onPress={confirmLeave} />
+                </ActionRow>
 
               </>
             ) : full ? (

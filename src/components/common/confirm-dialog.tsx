@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react-native';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { ActionRow } from '@/components/common/action-row';
 import { Brand, Spacing } from '@/constants/theme';
 
 export type Confirmation = {
@@ -29,8 +30,10 @@ export function ConfirmDialog({ confirmation, busy, onCancel }: {
           <Icon size={24} color={destructive ? '#FF4A52' : '#22D3EE'} />
           <Text style={styles.title} accessibilityRole="header">{title}</Text>
           <Text style={styles.message}>{message}</Text>
-          <AuthButton label={label} loading={busy} hideChevron onPress={onConfirm} />
-          <AuthButton label={cancelLabel ?? 'Cancelar'} variant="ghost" disabled={busy} onPress={onCancel} />
+          <ActionRow>
+            <AuthButton label={cancelLabel ?? 'Cancelar'} variant="secondary" disabled={busy} onPress={onCancel} />
+            <AuthButton label={label} loading={busy} hideChevron onPress={onConfirm} />
+          </ActionRow>
         </View>
       </ScrollView>
     </Modal>
