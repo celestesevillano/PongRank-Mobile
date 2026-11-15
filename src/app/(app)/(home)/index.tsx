@@ -170,8 +170,8 @@ function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false,
       onPress={onPress}
       style={({ pressed }) => [styles.banner, coach && styles.coachBanner, pressed && styles.pressed]}>
       <CardLighting color={coach ? Brand.red : cyan} />
-      <View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={styles.bannerArtwork}>
-        <Image source={artwork} contentFit="contain" style={styles.bannerImage} />
+      <View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={[styles.bannerArtwork, coach && styles.coachArtwork]}>
+        <Image source={artwork} contentFit="contain" style={coach ? styles.coachImage : styles.bannerImage} />
       </View>
       <View style={styles.bannerTop}>
         <View style={[styles.icon, coach && styles.defeatIcon]}><Icon color={accent} size={20} /></View>
@@ -185,7 +185,7 @@ function ShortcutBanner({ title, subtitle, locked, Icon, artwork, coach = false,
             <Text style={[styles.lockBadgeLabel, { color: coach ? '#FFBCC0' : '#A5F3FC' }]}>{subtitle}</Text>
           </View>
         ) : (
-          <Text style={styles.detail}>{subtitle}</Text>
+          <Text style={[styles.detail, coach && styles.coachDetail]}>{subtitle}</Text>
         )}
       </View>
     </Pressable>
@@ -222,6 +222,9 @@ const styles = StyleSheet.create({
   lockBadgeLabel: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
   bannerArtwork: { position: 'absolute', right: -4, top: 2, opacity: 0.84 },
   bannerImage: { width: 104, height: 104 },
+  coachArtwork: { right: 2, top: 5, width: '48%', maxWidth: 100, aspectRatio: 1, opacity: 1 },
+  coachImage: { width: '100%', height: '100%' },
+  coachDetail: { maxWidth: '60%' },
   shortcuts: { gap: Spacing.two },
   tile: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, paddingHorizontal: Spacing.three, borderRadius: 14, backgroundColor: '#101519', borderWidth: 1, borderColor: '#344047' },
   icon: { padding: Spacing.two, borderRadius: 8, backgroundColor: '#10333C' },
