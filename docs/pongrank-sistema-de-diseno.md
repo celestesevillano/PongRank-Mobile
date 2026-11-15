@@ -86,6 +86,13 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 - Accesibilidad: la imagen es decorativa; no lleva información clave ni sustituye al texto. Las imágenes no se usan como fondo de texto sin un degradado oscuro que mantenga el contraste 4.5:1.
 - Entrega: PNG o WebP, máximo 1600 px de ancho, peso menor a 300 KB y con nombre descriptivo (`banner-pongmigos.webp`, `vacio-solicitudes.webp`).
 
+**Pongi es el coach de PongRank**
+- Su rol es acompañar y guiar al jugador: celebra los logros, anima después de una derrota, sugiere el siguiente paso y explica con calma. Es la voz de la app, no un adorno.
+- Su tono es cercano, motivador y breve, en tú. Habla en primera persona solo cuando da consejos («Te recomiendo retar a alguien de tu nivel»); los estados vacíos y errores usan frases neutras y claras.
+- Aparece en los lugares donde la app orienta: el coach de Inicio, estados vacíos, hitos y victorias, consejos tras una partida. No se usa en datos fríos (tablas de ranking, formularios, pagos).
+- Sus emociones siguen el contexto: celebra una victoria, anima después de una derrota, está curioso al buscar y tranquilo cuando no hay pendientes. Nunca se burla ni culpa al jugador.
+- Su detalle fijo de entrenador de tenis de mesa (silbato o paleta pequeña) lo hace reconocible como coach además de jugador.
+
 **Pongi y sus encuadres**
 - Pongi es el personaje único de PongRank. Tiene tres encuadres del mismo diseño: **cabeza** (iconos, avatares, estados vacíos pequeños, notificaciones), **hasta la cadera** (estados vacíos, tarjetas y banners donde el personaje sostiene un objeto) y **cuerpo completo** (hoja de personaje, bienvenida, victoria y escenas de juego).
 - Los tres comparten casco negro, visor luminoso, detalles rojos y el mismo detalle fijo de tenis de mesa (paleta pequeña o pelota), y la misma paleta cerrada.
