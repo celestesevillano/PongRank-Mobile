@@ -66,6 +66,7 @@ Las acciones usan una zona táctil de al menos **44 pt**, radio de **12 pt** y f
 - Rating, partidas y victorias comparten una fila de igual ancho. Los números tienen mayor tamaño y un halo celeste tenue.
 - Instagram, TikTok y Facebook ocupan todo el ancho en tres columnas con su icono. Con enlace, usan borde y texto celestes. Sin enlace, aparecen en gris y deshabilitados.
 - La fila de Pongmigos muestra la cifra junto a «Ver lista ›» cuando es pública. Si está oculta, muestra la cifra junto a «Lista privada» con un candado.
+- En Social no hay botón de agregar ni de gestionar: agregar se hace desde el buscador y las acciones están en el menú de tres puntos de cada fila. El único botón de la sección es «Ver todos mis Pongmigos» (con un icono de lista a la izquierda) y solo aparece con más de cinco.
 - En Social, con hasta cinco Pongmigos, el perfil se abre tocando la fila y el menú de tres puntos contiene «Retar a una partida» y «Eliminar amistad». Con más de cinco aparece la vista previa de cinco filas y «Ver todos mis Pongmigos ›». La lista completa tiene búsqueda y menú por persona.
 
 **Ventanas emergentes (popups)**
@@ -151,7 +152,7 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 - Pantalla o bloque con la mascota, el mensaje «No pudimos conectar con PongRank» y la acción primaria «Reintentar». Se conserva el contenido ya cargado cuando sea posible.
 
 **Dos tipos de estado vacío**
-- **Sección vacía** (la pantalla tiene más contenido útil, por ejemplo «Tu lista» sin Pongmigos): frase corta bajo el título de la sección y, si existe, una acción de texto («Buscar jugadores ›»). Sin mascota, porque la pantalla ya tiene su ilustración (el banner) y otra más la sobrecargaría.
+- **Sección vacía** (la pantalla tiene más contenido útil, por ejemplo «Tu lista» sin Pongmigos): frase corta bajo el título de la sección. Solo lleva acción si la pantalla no ofrece ya otra forma de resolverlo; en Pongmigos no hay botón de agregar, porque el buscador de Social está arriba. Sin mascota, porque la pantalla ya tiene su ilustración (el banner) y otra más la sobrecargaría.
 - **Pantalla vacía** (la lista es todo el contenido, por ejemplo «Solicitudes recibidas» sin pendientes): mascota centrada con su emoción y una frase. Ocupa el lugar de la lista.
 - Son estados independientes: se puede tener Pongmigos y cero solicitudes, o recibir una solicitud antes de tener Pongmigos. Cada vacío se decide por su propia lista.
 
@@ -159,7 +160,7 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 - Sin Pongmigos: «Aún no tienes Pongmigos agregados.» (mascota triste).
 - Sin solicitudes: «No tienes solicitudes pendientes.» (mascota tranquila).
 - Sin resultados de búsqueda: «No encontramos a nadie con ese nombre.» (mascota curiosa).
-- Cada estado vacío incluye una acción útil cuando existe (por ejemplo, «Buscar jugadores»).
+- Un estado vacío incluye una acción solo cuando la pantalla no tiene ya un camino evidente (por ejemplo, «Reintentar» sin conexión). No se duplican acciones que ya existen en la pantalla.
 
 ## Checklist de las 10 heurísticas de Nielsen
 
