@@ -2,11 +2,11 @@ import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { ChevronRight, Ellipsis, List, Send, Swords, UserMinus, UserPlus } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { AuthInput } from '@/components/auth/auth-input';
-import { ActionRow } from '@/components/common/action-row';
 import { CardLighting } from '@/components/common/card-lighting';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { PlayerIdentity, PongmigoButton, PongiState, ResultDialog, challengePlayer, openPlayer, pongiArt, pongmigosStyles } from '@/components/pongmigos/pongmigos-ui';
 import { Brand } from '@/constants/theme';
 import { useSession } from '@/context/session';
@@ -100,22 +100,13 @@ export function PongmigosList({ preview = false }: { preview?: boolean }) {
           </Pressable>
         </View>
       </Modal>}
-      {removing && <Modal transparent animationType="fade" onRequestClose={() => setRemoving(null)}>
-        <ScrollView contentContainerStyle={styles.backdrop}>
-          <View accessibilityViewIsModal style={styles.decision}>
-            <Text accessibilityRole="header" style={styles.bannerTitle}>¿Eliminar a {friendOf(removing, playerId).name}?</Text>
-            <Text style={pongmigosStyles.body}>Para volver, envíale otra solicitud.</Text>
-            <ActionRow>
-              <PongmigoButton label="Eliminar Pongmigo" onPress={() => {
-                const id = removing.id;
-                setRemoving(null);
-                void perform('remove', id);
-              }} disabled={pending !== null} />
-              <PongmigoButton label="Cancelar" variant="secondary" onPress={() => setRemoving(null)} />
-            </ActionRow>
-          </View>
-        </ScrollView>
-      </Modal>}
+      <ConfirmDialog busy={pending !== null} onCancel={() => setRemoving(null)}
+        confirmation={removing ? {
+          title: `¿Eliminar a ${friendOf(removing, playerId).name} de tus Pongmigos?`,
+          message: 'Si quieres volver a agregarla, tendrás que enviarle otra solicitud.',
+          label: 'Eliminar Pongmigo', Icon: UserMinus, destructive: true,
+          onConfirm: () => { const id = removing.id; setRemoving(null); void perform('remove', id); },
+        } : null} />
       <ResultDialog info={notice} onClose={closeNotice} />
     </View>
   );
@@ -140,6 +131,4 @@ const styles = StyleSheet.create({
   menu: { ...pongmigosStyles.card, position: 'absolute', right: 18, padding: 4 },
   removeAction: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', minHeight: 44, gap: 6 },
   removeCopy: { color: '#FF989E', fontSize: 15, fontWeight: '700' },
-  backdrop: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000A', padding: 16 },
-  decision: { ...pongmigosStyles.card, width: '100%', maxWidth: 320, padding: 15, gap: 10 },
 });
