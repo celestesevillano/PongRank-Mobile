@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react-native';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Spacing } from '@/constants/theme';
@@ -30,8 +31,9 @@ export function PillTabs<T extends string>({ options, selected, onSelect, varian
       {options.map(({ key, label }) => {
         const active = key === selected;
         return (
-          <Pressable key={key} onPress={() => onSelect(key)} style={[styles.pill, active && styles.pillActive]} accessibilityRole="tab" accessibilityState={{ selected: active }}>
-            <Text style={[styles.label, active && styles.labelActive]}>{active ? '✓ ' : ''}{label}</Text>
+          <Pressable key={key} hitSlop={4} onPress={() => onSelect(key)} style={[styles.pill, active && styles.pillActive]} accessibilityRole="tab" accessibilityState={{ selected: active }}>
+            {active && <Check size={14} color="#FFB3B7" strokeWidth={2.5} />}
+            <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
           </Pressable>
         );
       })}
@@ -47,8 +49,8 @@ const styles = StyleSheet.create({
   segmentLabelActive: { color: Brand.text },
   scroll: { flexGrow: 0, marginBottom: Spacing.three },
   row: { gap: Spacing.two },
-  pill: { minHeight: 44, paddingHorizontal: Spacing.three, borderRadius: 22, borderWidth: 1, borderColor: Brand.border, justifyContent: 'center' },
+  pill: { height: 40, flexDirection: 'row', gap: 6, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
   pillActive: { borderColor: '#D84149', backgroundColor: '#36191E' },
-  label: { color: Brand.textSecondary, fontSize: 13, fontWeight: '600' },
+  label: { color: Brand.textSecondary, fontSize: 14, fontWeight: '600' },
   labelActive: { color: '#FFB3B7' },
 });
