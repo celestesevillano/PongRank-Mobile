@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import type { ReactNode } from 'react';
 import { ArrowRight, RotateCw, type LucideIcon } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View, type PressableProps } from 'react-native';
 
@@ -55,19 +56,27 @@ export function PlayerResult({ player }: { player: PlayerSummary }) {
   );
 }
 
-export function PongiState({ text, artwork, error, errorMessage, retry }: {
+export function PongiState({ title, text, artwork, error, errorMessage, retry, action, details, contextLabel }: {
+  title?: string;
+  details?: ReactNode;
+  contextLabel?: string;
   text?: string;
   artwork?: number;
   error?: ApiError;
   errorMessage?: string;
   retry?: () => void;
+  action?: { label: string; icon: LucideIcon; onPress: () => void };
 }) {
   return (
     <View style={styles.empty}>
       {(error?.isNetwork || artwork) ? <Image source={error?.isNetwork ? pongiArt.offline : artwork}
         contentFit="contain" style={styles.emptyArt} accessibilityElementsHidden importantForAccessibility="no" /> : null}
-      <Text style={styles.emptyCopy}>{error ? errorMessage ?? error.message : text}</Text>
+      {title && <Text accessibilityRole="header" style={styles.emptyTitle}>{title}</Text>}
+      {!!contextLabel && <Text style={styles.emptyCopy}>{contextLabel}</Text>}
+      {(error || text) && <Text style={styles.emptyCopy}>{error ? errorMessage ?? error.message : text}</Text>}
+      {details}
       {retry && <PongmigoButton label="Reintentar" icon={RotateCw} onPress={retry} />}
+      {action && <PongmigoButton {...action} />}
     </View>
   );
 }
@@ -103,5 +112,6 @@ const styles = StyleSheet.create({
   detail: { color: '#B9BBC1', fontSize: 13 },
   empty: { alignItems: 'center', gap: 10, padding: 16 },
   emptyArt: { width: 144, height: 144 },
+  emptyTitle: { ...pongmigosStyles.heading, textAlign: 'center' },
   emptyCopy: { ...pongmigosStyles.body, textAlign: 'center' },
 });

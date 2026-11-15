@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { CommunityResponse, Page, PageParams, RankingEntry } from '@/types/api';
+import type { CommunityResponse, CommunityStatus, Page, PageParams, RankingEntry } from '@/types/api';
 import { normalizePage } from '@/utils/pagination';
 
 export type CommunityType = CommunityResponse['communityType'];
@@ -7,11 +7,17 @@ export type CommunityType = CommunityResponse['communityType'];
 export type CommunityCreateInput = { name: string; description?: string; communityType: CommunityType; customLabel?: string };
 
 export type CommunityRole = 'MEMBER' | 'COMMUNITY_ADMIN';
+export type CommunityAdministrationCandidate = { playerId: number; playerName: string; eligible: boolean };
 export type CommunityMember = { playerId: number; playerName: string; role: CommunityRole };
 
-type CommunityDetail = CommunityResponse & {
+export type CommunityDetail = CommunityResponse & {
   creatorName: string | null;
-  status: 'ACTIVE' | 'ARCHIVED';
+  status: CommunityStatus;
+  lifecyclePhase?: 'ACTIVE' | 'GRACE' | 'DELETED';
+  canTransferAdministration?: boolean;
+  serverTime?: string;
+  planExpiresAt?: string | null;
+  graceEndsAt?: string | null;
   isMember: boolean;
   myRole: CommunityRole | null;
   adminCount?: number;
@@ -23,10 +29,17 @@ export const communitiesService = {
 
   removeMember: (id: number, playerId: number) => http.delete(`/communities/${id}/members/${playerId}`),
 
-  update: (id: number, input: { name: string; description: string }) =>
+  update: (id: number, input: Pick<CommunityCreateInput, 'name' | 'description'> & Partial<Pick<CommunityCreateInput, 'communityType' | 'customLabel'>>) =>
     http.put<CommunityResponse>(`/communities/${id}`, input).then((r) => r.data),
 
   archive: (id: number) => http.delete(`/communities/${id}`),
+
+  administrationCandidates: (id: number, params: PageParams, signal?: AbortSignal) =>
+    http.get(`/communities/${id}/administration-candidates`, { params, signal })
+      .then((response) => normalizePage<CommunityAdministrationCandidate>(response.data)),
+
+  transferAdministration: (id: number, playerId: number) =>
+    http.post(`/communities/${id}/transfer-administration`, { playerId }),
 
   members: (id: number, params: PageParams, signal?: AbortSignal) =>
     http.get(`/communities/${id}/members`, { params, signal }).then((r) => normalizePage<CommunityMember>(r.data)),
@@ -38,7 +51,8 @@ export const communitiesService = {
   search: (params: PageParams & { name?: string }, signal?: AbortSignal) =>
     http.get('/communities', { params, signal }).then((r) => normalizePage<CommunityResponse>(r.data)),
 
-  mine: (signal?: AbortSignal) => http.get<CommunityResponse[]>('/communities/me', { signal }).then((r) => r.data),
+  mine: (signal?: AbortSignal, includeClosed = false) =>
+    http.get<CommunityResponse[]>('/communities/me', { signal, params: includeClosed ? { includeClosed } : undefined }).then((r) => r.data),
 
   ranking: (communityId: number, params: PageParams, signal?: AbortSignal): Promise<Page<RankingEntry>> =>
     http.get(`/communities/${communityId}/ranking`, { params, signal }).then((r) => normalizePage<RankingEntry>(r.data)),

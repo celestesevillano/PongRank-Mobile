@@ -47,13 +47,16 @@ export default function SocialScreen() {
 
 function MyCommunities() {
   const { plan, openPlans, refresh } = usePlan();
-  const { data, error, loading, refetch } = useFetch((signal) => communitiesService.mine(signal));
+  const [showHistory, setShowHistory] = useState(false);
+  const { data, error, loading, refetch } = useFetch((signal) => communitiesService.mine(signal, true));
   useFocusEffect(useCallback(() => {
     refetch();
     void refresh();
   }, [refetch, refresh]));
 
-  const usedSpaces = plan ? plan.usedSpaces ?? data?.length : undefined;
+  const active = data?.filter((community) => !community.status || community.status === 'ACTIVE');
+  const deleted = data?.filter((community) => community.status === 'DELETED' || community.status === 'ARCHIVED') ?? [];
+  const usedSpaces = plan ? plan.usedSpaces ?? (data ? active?.length : undefined) : undefined;
   const spacesFull = plan?.maxSpaces !== undefined && usedSpaces !== undefined && usedSpaces >= plan.maxSpaces;
   const createBlocked = plan?.maxCommunitiesCreated === 0 || spacesFull;
 
@@ -70,13 +73,13 @@ function MyCommunities() {
         </View>
       ) : (
         <FlatList
-          data={data ?? []}
+          data={active ?? []}
           keyExtractor={(item) => String(item.id)}
           style={styles.listArea}
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={styles.communitiesHeader}>
-              <CommunitiesBanner communityCount={data?.length} used={plan?.usedSpaces} limit={plan?.maxSpaces} />
+              <CommunitiesBanner communityCount={active?.length} used={plan?.usedSpaces} limit={plan?.maxSpaces} />
               <Text accessibilityRole="header" style={styles.heading}>Tu lista</Text>
               {error ? <ScreenState loading={false} error={error} onRetry={refetch} /> : null}
             </View>
@@ -84,6 +87,20 @@ function MyCommunities() {
           ListEmptyComponent={loading
             ? <ScreenState loading error={null} />
             : !error ? <Text style={styles.emptyCopy}>Aún no perteneces a una comunidad. Encuentra una desde Buscar en Social.</Text> : undefined}
+          ListFooterComponent={deleted.length ? (
+            <View style={styles.list}>
+              {deleted.length > 0 && (
+                <Pressable accessibilityRole="button" accessibilityState={{ expanded: showHistory }}
+                  onPress={() => setShowHistory((visible) => !visible)} style={styles.historyButton}>
+                  <Text style={styles.historyLabel}>Historial de comunidades</Text>
+                </Pressable>
+              )}
+              {showHistory && deleted.map((community) => (
+                <CommunityCard key={community.id} community={community}
+                  onPress={() => router.push({ pathname: '/social/[id]', params: { id: community.id } })} />
+              ))}
+            </View>
+          ) : undefined}
           renderItem={({ item }) => <CommunityCard community={item}
             onPress={() => router.push({ pathname: '/social/[id]', params: { id: item.id } })} />}
         />
@@ -162,6 +179,8 @@ const styles = StyleSheet.create({
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two, marginBottom: Spacing.two },
   heading: { color: Brand.text, fontSize: 18, fontWeight: '700', flexShrink: 1 },
   listArea: { flex: 1 },
+  historyButton: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  historyLabel: { color: '#22D3EE', fontSize: 14, fontWeight: '700' },
   actions: { paddingTop: Spacing.two, paddingBottom: 12 },
   communitiesHeader: { gap: Spacing.three },
   emptyCopy: { color: Brand.textSecondary, fontSize: 14, lineHeight: 20 },

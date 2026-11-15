@@ -9,8 +9,12 @@ const medals = [
   { color: '#F0AF86', backgroundColor: '#39261E' },
 ];
 
+export function getRankingMedal(position: number) {
+  return medals[position - 1];
+}
+
 export function RankingPosition({ position }: { position: number }) {
-  const medal = medals[position - 1];
+  const medal = getRankingMedal(position);
   const color = medal?.color ?? Brand.textSecondary;
 
   return (

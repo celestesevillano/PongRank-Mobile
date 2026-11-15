@@ -53,15 +53,7 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
         {nameTaken && <Text accessibilityRole="alert" style={styles.error}>Ese nombre ya está en uso. Elige otro.</Text>}
         <Text style={styles.label}>Descripción (opcional)</Text>
         <AuthInput accessibilityLabel="Descripción opcional" value={description} onChangeText={setDescription} maxLength={500} multiline />
-        <Text style={styles.label}>Tipo de comunidad</Text>
-        <PillTabs variant="chip" options={TYPES} selected={type} onSelect={setType} />
-        {type === 'OTHER' && (
-          <>
-            <Text style={styles.label}>Etiqueta personalizada</Text>
-            <AuthInput accessibilityLabel="Etiqueta personalizada" placeholder="Ej. Liga vecinal"
-              value={customLabel} onChangeText={setCustomLabel} maxLength={40} />
-          </>
-        )}
+        <CommunityTypeFields type={type} onTypeChange={setType} customLabel={customLabel} onLabelChange={setCustomLabel} disabled={loading} />
         {name.trim().length >= 3 ? (
           <>
             <Text accessibilityRole="header" style={styles.label}>Vista previa</Text>
@@ -77,8 +69,34 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
+const typesWithPark = [...TYPES.slice(0, 2), { label: 'Parque', key: 'PUBLIC_PARK' as const }, ...TYPES.slice(2)];
+
+export function CommunityTypeFields({ type, onTypeChange, customLabel, onLabelChange, includePark, disabled }: {
+  type: CommunityType;
+  onTypeChange: (type: CommunityType) => void;
+  customLabel: string;
+  onLabelChange: (label: string) => void;
+  includePark?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <>
+      <Text style={styles.label}>Tipo de comunidad</Text>
+      <PillTabs variant="chip" options={includePark ? typesWithPark : TYPES} selected={type}
+        onSelect={(selection) => { if (!disabled) onTypeChange(selection); }} />
+      {type === 'OTHER' && (
+        <>
+          <Text style={styles.label}>Etiqueta personalizada</Text>
+          <AuthInput accessibilityLabel="Etiqueta personalizada" placeholder="Ej. Liga vecinal" value={customLabel}
+            onChangeText={onLabelChange} maxLength={40} editable={!disabled} />
+        </>
+      )}
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
-  layout: { flex: 1, gap: Spacing.two, paddingBottom: Spacing.two },
+  layout: { flex: 1, gap: Spacing.two, paddingBottom: 12 },
   form: { gap: Spacing.two, paddingBottom: Spacing.three },
   label: { color: Brand.text, fontWeight: '600' },
   error: { color: '#FF6B72' },

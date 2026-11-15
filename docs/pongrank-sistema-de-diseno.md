@@ -59,6 +59,8 @@ Las acciones usan una zona táctil de al menos **44 pt**, radio de **12 pt** y f
 - Barra inferior en el orden **Inicio, Social, Partidas, Ranking y Perfil**. Pestaña activa con círculo rojo, icono blanco y etiqueta roja. Comunidades, Clubes y Pongmigos usan un segmento común con labels centradas. Los filtros de búsqueda usan chips.
 - Los controles usan Lucide. Las redes usan sus propios símbolos. Las confirmaciones sencillas y los formularios breves usan un diálogo centrado. La explicación de planes usa un panel inferior.
 - Comunidades usa degradado celeste, Clubes usa carbón, rojo y escudo, y el perfil público usa portada de tenis de mesa. Las ilustraciones específicas de una pantalla se usan una vez. El isotipo y los iconos funcionales se comparten como parte del sistema.
+- En el detalle de Comunidades, «Eres miembro» usa la insignia verde con icono de usuario y check. La puerta en la esquina superior derecha abre el diálogo para confirmar la salida.
+- En Comunidades, «Gestión pausada» cubre las 24 horas tras el vencimiento. Al terminar ese plazo, la comunidad se elimina automáticamente. «Eliminar comunidad» cierra la comunidad de inmediato tras la confirmación. Solo la persona responsable ve el vencimiento del plan y las acciones de renovación o transferencia.
 
 ## Perfil público y Pongmigos
 

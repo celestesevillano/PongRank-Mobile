@@ -1,10 +1,11 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { Search } from 'lucide-react-native';
+import { Search, Trophy } from 'lucide-react-native';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
-import { RankingPosition } from '@/components/communities/ranking-position';
+import { getRankingMedal, RankingPosition } from '@/components/communities/ranking-position';
+import { PillTabs } from '@/components/common/pill-tabs';
 import { PaginationBar } from '@/components/common/pagination-bar';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
@@ -32,6 +33,10 @@ export default function RankingScreen() {
   );
 
   const noCommunities = !communities.loading && communities.data?.length === 0;
+  const entries = ranking.data?.content ?? [];
+  const podium = entries.filter(({ position }) => position >= 1 && position <= 3);
+  const otherPositions = entries.filter(({ position }) => position > 3);
+
 
   return (
     <ScreenContainer title="Ranking">
@@ -47,31 +52,51 @@ export default function RankingScreen() {
 
       {communityId !== null && (
         <>
-          <FlatList
-            horizontal
-            data={communities.data ?? []}
-            keyExtractor={(item) => String(item.id)}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chips}
-            style={styles.chipList}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => {
-                  setSelectedId(item.id);
-                  if (requested) router.setParams({ communityId: String(item.id) });
-                  ranking.setPage(0);
-                }}
-                style={[styles.chip, item.id === communityId && styles.chipActive]}>
-                <Text style={styles.chipLabel}>{item.name}</Text>
-              </Pressable>
-            )}
+          <PillTabs
+            variant="chip"
+            options={(communities.data ?? []).map(({ id, name }) => ({ key: String(id), label: name }))}
+            selected={String(communityId)}
+            onSelect={(key) => {
+              setSelectedId(Number(key));
+              if (requested) router.setParams({ communityId: key });
+              ranking.setPage(0);
+            }}
           />
 
           <ScreenState loading={ranking.loading} error={ranking.error} empty={ranking.data?.content.length === 0} onRetry={ranking.refetch} />
 
-          {ranking.data && !ranking.loading && (
+          {ranking.data && !ranking.loading && !ranking.error && (
             <FlatList
-              data={ranking.data.content}
+              data={otherPositions}
+              contentContainerStyle={styles.list}
+              ListHeaderComponent={
+                <>
+                  {entries.length > 0 && (
+                    <View style={styles.positionsHeader}>
+                      <Text accessibilityRole="header" style={styles.positionsTitle}>Posiciones</Text>
+                      <Text style={styles.ratingLabel}>Rating PongRank</Text>
+                    </View>
+                  )}
+                  {podium.length > 0 && (
+                    <View style={styles.podium}>
+                      <View style={styles.podiumHeader}>
+                        <Trophy size={20} color="#FFD278" />
+                        <Text accessibilityRole="header" style={styles.podiumTitle}>Top 3 de la comunidad</Text>
+                      </View>
+                      {podium.map((item) => {
+                        const medal = getRankingMedal(item.position);
+                        return (
+                          <View key={item.playerId} style={[styles.podiumRow, { backgroundColor: medal.backgroundColor + '60' }]}>
+                            <RankingPosition position={item.position} />
+                            <Text style={styles.name}>{item.playerName}{item.playerId === player?.id ? ' (tú)' : ''}</Text>
+                            <Text style={[styles.rating, styles.podiumRating, { color: medal.color }]}>{Math.round(item.ratingGlicko)}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  )}
+                </>
+              }
               keyExtractor={(item) => String(item.playerId)}
               ItemSeparatorComponent={() => <View style={{ height: Spacing.two }} />}
               ListFooterComponent={<PaginationBar page={ranking.data} onPageChange={ranking.setPage} />}
@@ -91,13 +116,26 @@ export default function RankingScreen() {
 }
 
 const styles = StyleSheet.create({
-  chipList: { flexGrow: 0, marginBottom: Spacing.three },
-  chips: { gap: Spacing.two },
-  chip: { paddingVertical: Spacing.two, paddingHorizontal: Spacing.three, borderRadius: 999, backgroundColor: Brand.surface },
-  chipActive: { backgroundColor: Brand.red },
-  chipLabel: { color: Brand.text, fontWeight: '600' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, backgroundColor: Brand.surface, borderRadius: Spacing.three, padding: Spacing.three },
+  list: { paddingBottom: Spacing.three },
+  podium: {
+    marginVertical: Spacing.two, backgroundColor: Brand.surface, borderRadius: 16,
+    borderWidth: 2, borderColor: '#FFD278A6', boxShadow: '0 0 14px #FFD27838',
+  },
+  podiumHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: 12,
+    borderTopLeftRadius: 14, borderTopRightRadius: 14, backgroundColor: '#FFD27818',
+  },
+  podiumTitle: { flex: 1, color: Brand.text, fontSize: 18, fontWeight: '800' },
+  podiumRow: {
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 48,
+    paddingVertical: Spacing.two, paddingHorizontal: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Brand.border,
+  },
+  podiumRating: { fontSize: 18 },
+  positionsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two, marginVertical: Spacing.two },
+  positionsTitle: { flex: 1, color: Brand.text, fontSize: 16, fontWeight: '700' },
+  ratingLabel: { color: Brand.textSecondary, fontSize: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, backgroundColor: Brand.surface, borderRadius: 14, padding: 12 },
   rowMe: { borderWidth: 1, borderColor: Brand.red },
   name: { color: Brand.text, flex: 1, fontWeight: '600' },
-  rating: { color: Brand.red, fontWeight: '800' },
+  rating: { color: '#22D3EE', fontVariant: ['tabular-nums'], fontWeight: '800' },
 });

@@ -5,9 +5,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { Brand, Spacing } from '@/constants/theme';
 
-export function CommunityScreen({ title, onBack, action, children }: PropsWithChildren<{ title: string; onBack: () => void; action?: ReactNode }>) {
+export function CommunityScreen({ title, onBack, action, scrollable, children }: PropsWithChildren<{ title: string; onBack: () => void; action?: ReactNode; scrollable?: boolean }>) {
   return (
-    <ScreenContainer title={title}>
+    <ScreenContainer title={title} scrollable={scrollable}>
       <View style={styles.toolbar}>
         <Pressable accessibilityRole="button" onPress={onBack} style={styles.back}>
           <ArrowLeft color={Brand.textSecondary} size={20} />
