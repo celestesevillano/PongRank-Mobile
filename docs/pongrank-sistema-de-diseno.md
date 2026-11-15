@@ -15,7 +15,7 @@ Propuesta de referencia para las pantallas de PongRank. El visor de amistad mues
 | Acción primaria y contador de actividad nueva | `#D81E28` |
 | Rojo en pulsación | `#B01E26` |
 | Acción de texto, foco, selección y datos deportivos | `#22D3EE` |
-| Fondo de acción secundaria | `#252529` |
+| Borde de acción secundaria | `#B9BBC1` (sin relleno) |
 | Deshabilitado | Fondo `#232326`, texto `#9A9CA3`, borde `#2A2A2E` |
 | Confirmación y vínculo activo | `#2ECC71`, con texto e icono |
 | Verificación FDPTM | Oro `#FFD278`, fondo `#372A15`, borde `#715426` |
@@ -30,7 +30,7 @@ Tipografía del sistema. Título principal de pestaña **34 pt**, título de det
 | Variante | Apariencia | Ejemplo |
 | --- | --- | --- |
 | Primaria | Relleno rojo, texto e icono blancos. Ancho completo cuando tiene su propia fila. | Enviar solicitud, aceptar, retar |
-| Secundaria | Relleno grafito, texto e icono blancos. Mismo alto que la primaria en acciones pareadas. | Rechazar, cancelar un diálogo |
+| Secundaria | Transparente con borde gris claro `#B9BBC1` de 1 pt, texto e icono blancos. Sin relleno, para que no parezca deshabilitada. Mismo alto que la primaria en acciones pareadas. | Rechazar, cancelar un diálogo |
 | Solo texto | Celeste, fondo transparente y texto sin subrayado. Flecha al final cuando abre otra pantalla. | Ver perfil, cancelar solicitud, cambiar visibilidad |
 | Deshabilitada | Fondo y texto grises con motivo cercano cuando haga falta. Expuesta como deshabilitada al lector de pantalla. | Continuar cuando falta elegir rival |
 | En proceso | Indicador de carga dentro de la acción y ancho reservado. Se protege contra toques duplicados. | Aceptando solicitud |
