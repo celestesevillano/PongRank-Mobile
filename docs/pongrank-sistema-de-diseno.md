@@ -105,11 +105,11 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 - Su tono es cercano, motivador y breve, en tú. Habla en primera persona solo cuando da consejos («Te recomiendo retar a alguien de tu nivel»); los estados vacíos y errores usan frases neutras y claras.
 - Aparece en los lugares donde la app orienta: el coach de Inicio, estados vacíos, hitos y victorias, consejos tras una partida. No se usa en datos fríos (tablas de ranking, formularios, pagos).
 - Sus emociones siguen el contexto: celebra una victoria, anima después de una derrota, está curioso al buscar y tranquilo cuando no hay pendientes. Nunca se burla ni culpa al jugador.
-- Su detalle fijo de entrenador lo hace reconocible como coach: **gorra de coach** negra con una pelota de ping pong blanca bordada al frente y una franja celeste `#22D3EE`, más un **silbato plateado** al cuello. Ningún detalle fijo es rojo ni crema, para que se distinga de los detalles rojos del traje; la pelota es blanca pura y con contorno claro para que se vea sobre fondo oscuro. Debe leerse en el encuadre de cabeza a 64 px.
+- Su gorra grafito lleva el **contorno blanco de una paleta** bordado al centro y una franja celeste `#22D3EE`. Lleva ojos celestes, chaqueta deportiva con hombros blancos y ribetes rojos, y **silbato plateado** con cordón celeste.
 
 **Pongi y sus encuadres**
 - Pongi es el personaje único de PongRank. Tiene tres encuadres del mismo diseño: **cabeza** (iconos, avatares, estados vacíos pequeños, notificaciones), **hasta la cadera** (estados vacíos, tarjetas y banners donde el personaje sostiene un objeto) y **cuerpo completo** (hoja de personaje, bienvenida, victoria y escenas de juego).
-- Los tres comparten casco negro, visor luminoso, detalles rojos y el mismo detalle fijo de coach (gorra con pelota y silbato plateado), y la misma paleta cerrada.
+- Los tres comparten el visor luminoso, la misma gorra con la paleta bordada, el silbato plateado y la paleta de colores de PongRank.
 - El encuadre se elige por el espacio disponible y no cambia la identidad: en tamaño pequeño se usa la cabeza, en pantallas con mucho aire el busto, y el cuerpo completo solo cuando la escena lo necesita.
 - La paleta y la pelota grandes se reservan para escenas de juego. En escenas administrativas Pongi sostiene su objeto (buzón, lupa) y conserva su detalle fijo.
 - Una hoja de personaje con los tres encuadres y 4–5 emociones es la referencia de todos los prompts de imagen.
