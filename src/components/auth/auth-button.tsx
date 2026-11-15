@@ -7,13 +7,14 @@ type AuthButtonProps = PressableProps & {
   label: string;
   loading?: boolean;
   icon?: LucideIcon;
+  /** @deprecated ya no hay flecha a la derecha; se conserva para no romper llamadas existentes */
   hideChevron?: boolean;
   foregroundColor?: string;
   // 'ghost' se conserva como alias de 'secondary'
   variant?: 'primary' | 'secondary' | 'text' | 'ghost';
 };
 
-export function AuthButton({ label, loading, icon: Icon, hideChevron, foregroundColor = Brand.text, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
+export function AuthButton({ label, loading, icon: Icon, foregroundColor = Brand.text, variant = 'primary', disabled, style, ...rest }: AuthButtonProps) {
   const isPrimary = variant === 'primary';
   const isText = variant === 'text';
   const off = disabled || loading;
@@ -38,7 +39,6 @@ export function AuthButton({ label, loading, icon: Icon, hideChevron, foreground
         <>
           {Icon && <Icon size={18} color={labelColor} />}
           <Text numberOfLines={1} style={[styles.label, { color: labelColor }]}>{label}</Text>
-          {isPrimary && !Icon && !hideChevron && <Text style={[styles.label, { color: labelColor }]}>{'  >'}</Text>}
         </>
       )}
     </Pressable>
