@@ -92,7 +92,7 @@ function EditForm({ id, initialName, initialDescription, onSaved }: {
           maxLength={500} multiline editable={!busy} />
         <View style={styles.archive}>
           <Text style={styles.note}>Al archivar, se cierra la comunidad para todos sus miembros.</Text>
-          <AuthButton label="Archivar comunidad" icon={Archive} variant="ghost"
+          <AuthButton label="Archivar comunidad" icon={Archive} variant="text"
             disabled={!!busy} onPress={() => setConfirmArchive(true)} />
         </View>
       </ScrollView>
@@ -101,6 +101,7 @@ function EditForm({ id, initialName, initialDescription, onSaved }: {
           loading={busy === 'save'} onPress={() => void save()} />
       </View>
       <ConfirmDialog confirmation={confirmArchive ? {
+        hideTitleIcon: true,
         title: `¿Archivar ${initialName}?`,
         message: 'La comunidad se cerrará para todos sus miembros.',
         label: 'Archivar',

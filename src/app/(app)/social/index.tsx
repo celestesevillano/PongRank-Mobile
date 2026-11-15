@@ -1,10 +1,11 @@
 import { router, useFocusEffect } from 'expo-router';
-import { Plus, Search } from 'lucide-react-native';
+import { Layers, Plus, Search } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { ClubCard } from '@/components/clubs/club-card';
+import { CommunitiesBanner } from '@/components/communities/communities-banner';
 import { CommunityCard } from '@/components/communities/community-card';
 import { ScreenState } from '@/components/common/screen-state';
 import { usePlan } from '@/context/plan';
@@ -14,6 +15,7 @@ import { useFetch } from '@/hooks/use-fetch';
 import { clubsService } from '@/services/clubs.service';
 import { communitiesService } from '@/services/communities.service';
 
+import { PongiState } from '@/components/pongmigos/pongmigos-ui';
 import { PongmigosList } from '@/components/pongmigos/pongmigos-list';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { ScreenContainer } from '@/components/common/screen-container';
@@ -31,7 +33,7 @@ export default function SocialScreen() {
   const [segment, setSegment] = useState<Segment>('communities');
 
   return (
-    <ScreenContainer title="Social">
+    <ScreenContainer title="Social" titleStyle={styles.socialTitle}>
       <Pressable style={styles.search} accessibilityRole="button" onPress={() => router.push('/social/explore')}>
         <Search size={20} color={Brand.textSecondary} /><Text style={styles.message}>Buscar en Social</Text>
       </Pressable>
@@ -55,26 +57,39 @@ function MyCommunities() {
   const spacesFull = plan?.maxSpaces !== undefined && usedSpaces !== undefined && usedSpaces >= plan.maxSpaces;
   const createBlocked = plan?.maxCommunitiesCreated === 0 || spacesFull;
 
+  const create = () => {
+    if (createBlocked) openPlans();
+    else router.push('/social/create');
+  };
+
   return (
     <>
-      <View style={styles.headingRow}>
-        <Text style={styles.heading}>Mis comunidades</Text>
-        {plan && data && <Text style={styles.message}>{plan.maxSpaces !== undefined ? `Tus espacios · ${plan.usedSpaces ?? data.length} de ${plan.maxSpaces}` : `${data.length} de ${plan.maxCommunitiesTotal} cupos`}</Text>}
-      </View>
-      {(loading || error) && <View style={styles.listArea}>
-      <ScreenState loading={loading} error={error} empty={data?.length === 0}
-        emptyMessage="Usa el buscador para encontrar una comunidad." onRetry={refetch} />
-      </View>}
-      {!loading && !error && (
-        <FlatList data={data ?? []} keyExtractor={(item) => String(item.id)} contentContainerStyle={styles.list}
+      {error && !data ? (
+        <View style={styles.listArea}>
+          <PongiState error={error} errorMessage={error.isNetwork ? 'No pudimos conectar con PongRank.' : 'No pudimos cargar tus comunidades.'} retry={refetch} />
+        </View>
+      ) : (
+        <FlatList
+          data={data ?? []}
+          keyExtractor={(item) => String(item.id)}
+          style={styles.listArea}
+          contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <View style={styles.communitiesHeader}>
+              <CommunitiesBanner communityCount={data?.length} used={plan?.usedSpaces} limit={plan?.maxSpaces} />
+              <Text accessibilityRole="header" style={styles.heading}>Tu lista</Text>
+              {error ? <ScreenState loading={false} error={error} onRetry={refetch} /> : null}
+            </View>
+          }
+          ListEmptyComponent={loading
+            ? <ScreenState loading error={null} />
+            : !error ? <Text style={styles.emptyCopy}>Aún no perteneces a una comunidad. Encuentra una desde Buscar en Social.</Text> : undefined}
           renderItem={({ item }) => <CommunityCard community={item}
             onPress={() => router.push({ pathname: '/social/[id]', params: { id: item.id } })} />}
-          ListEmptyComponent={<ScreenState loading={false} error={null} empty emptyMessage="Usa el buscador para encontrar una comunidad." />}
-          style={styles.listArea} />
+        />
       )}
       <View style={styles.actions}>
-        <AuthButton label="Crear comunidad" icon={Plus}
-          onPress={() => createBlocked ? openPlans() : router.push('/social/create')} />
+        <AuthButton label={createBlocked ? 'Ver planes' : 'Crear comunidad'} icon={createBlocked ? Layers : Plus} onPress={create} />
       </View>
     </>
   );
@@ -142,11 +157,14 @@ function MyClubs() {
 }
 
 const styles = StyleSheet.create({
+  socialTitle: { fontSize: 34 },
   search: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three, marginBottom: Spacing.three, borderRadius: 14, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface },
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two, marginBottom: Spacing.two },
   heading: { color: Brand.text, fontSize: 18, fontWeight: '700', flexShrink: 1 },
   listArea: { flex: 1 },
-  actions: { paddingVertical: Spacing.two },
+  actions: { paddingTop: Spacing.two, paddingBottom: 12 },
+  communitiesHeader: { gap: Spacing.three },
+  emptyCopy: { color: Brand.textSecondary, fontSize: 14, lineHeight: 20 },
   list: { gap: Spacing.two, paddingBottom: Spacing.two },
   message: { color: Brand.textSecondary, fontSize: 14, textAlign: 'center' },
 });

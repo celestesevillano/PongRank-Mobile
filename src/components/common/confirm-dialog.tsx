@@ -17,6 +17,7 @@ export type Confirmation = {
   destructive?: boolean;
   // Éxito: icono verde
   success?: boolean;
+  hideTitleIcon?: boolean;
 };
 
 export function ConfirmDialog({ confirmation, busy, onCancel }: {
@@ -25,14 +26,14 @@ export function ConfirmDialog({ confirmation, busy, onCancel }: {
   onCancel: () => void;
 }) {
   if (!confirmation) return null;
-  const { title, message, label, Icon, onConfirm, cancelLabel, destructive, success, infoOnly } = confirmation;
+  const { title, message, label, Icon, onConfirm, cancelLabel, destructive, success, infoOnly, hideTitleIcon } = confirmation;
   const tone = destructive ? '#FF4A52' : success ? '#2ECC71' : '#22D3EE';
 
   return (
     <Modal transparent visible animationType="fade" onRequestClose={() => { if (!busy) onCancel(); }}>
       <ScrollView contentContainerStyle={styles.backdrop} keyboardShouldPersistTaps="handled">
         <View style={styles.dialog} accessibilityViewIsModal>
-          <View style={[styles.circle, { borderColor: tone }]}><Icon size={21} color={tone} /></View>
+          {!hideTitleIcon && <View style={[styles.circle, { borderColor: tone }]}><Icon size={21} color={tone} /></View>}
           <Text style={styles.title} accessibilityRole="header">{title}</Text>
           <Text style={styles.message}>{message}</Text>
           {infoOnly ? (

@@ -1,5 +1,5 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { Archive, ArrowLeft, Layers, LayoutGrid, LogOut, Pencil, Trophy, UserPlus, Users } from 'lucide-react-native';
+import { Archive, ArrowLeft, Check, Layers, LayoutGrid, LogOut, Pencil, Trophy, UserPlus, Users } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -9,6 +9,7 @@ import { CommunityCard } from '@/components/communities/community-card';
 import { CommunityScreen } from '@/components/communities/community-screen';
 import { RankingPosition } from '@/components/communities/ranking-position';
 import { ConfirmDialog, type Confirmation } from '@/components/common/confirm-dialog';
+import { PongiState } from '@/components/pongmigos/pongmigos-ui';
 import { ScreenState } from '@/components/common/screen-state';
 import { Brand, Spacing } from '@/constants/theme';
 import { usePlan } from '@/context/plan';
@@ -42,10 +43,20 @@ export default function CommunityDetailScreen() {
     try {
       if (action === 'join') await communitiesService.join(communityId);
       else await communitiesService.removeMember(communityId, player.id);
-      showToast(action === 'join' ? `Ya eres parte de ${community.name}.` : `Saliste de ${community.name}.`);
-      setConfirmation(null);
       void refresh();
-      router.dismissTo('/social');
+      if (action === 'join') {
+        detail.refetch();
+        ranking.refetch();
+        setConfirmation({
+          title: 'Ya eres parte del grupo', message: `Te uniste a ${community.name}.`,
+          label: 'Aceptar', Icon: Check, infoOnly: true, success: true,
+          onConfirm: () => setConfirmation(null),
+        });
+      } else {
+        showToast(`Saliste de ${community.name}.`);
+        setConfirmation(null);
+        router.dismissTo('/social');
+      }
     } catch (err) {
       setConfirmation(null);
       showToast(toApiError(err).message, 'error');
@@ -61,6 +72,7 @@ export default function CommunityDetailScreen() {
     if (!community) return;
     if (community.memberCount > 1 && community.myRole === 'COMMUNITY_ADMIN' && community.adminCount === 1) {
       setConfirmation({
+        hideTitleIcon: true,
         title: 'Asigna otro administrador',
         message: 'Antes de salir, elige a otro miembro para administrar la comunidad.',
         label: 'Ver miembros',
@@ -72,6 +84,7 @@ export default function CommunityDetailScreen() {
     }
     const last = community.memberCount === 1;
     setConfirmation({
+      hideTitleIcon: true,
       title: last ? `¿Salir y archivar ${community.name}?` : `¿Salir de ${community.name}?`,
       message: last ? 'Eres la última persona. Al salir, la comunidad se cerrará.' : 'Saldrás del ranking y liberarás un cupo.',
       label: last ? 'Salir y archivar' : 'Salir',
@@ -92,7 +105,9 @@ export default function CommunityDetailScreen() {
           <Pencil color={Brand.text} size={20} />
         </Pressable>
       ) : undefined}>
-      <ScreenState loading={detail.loading} error={detail.error} onRetry={detail.refetch} />
+      {detail.error ? (
+        <PongiState error={detail.error} errorMessage={detail.error.isNetwork ? 'No pudimos conectar con PongRank.' : 'No pudimos cargar la comunidad.'} retry={detail.refetch} />
+      ) : <ScreenState loading={detail.loading} error={null} />}
       {!detail.loading && !detail.error && community?.status === 'ARCHIVED' && (
         <View style={styles.actions}>
           <Text style={styles.heading}>Comunidad cerrada</Text>
@@ -123,8 +138,8 @@ export default function CommunityDetailScreen() {
               <>
                 <AuthButton label="Ver ranking" icon={Trophy} onPress={() => router.navigate({ pathname: '/ranking', params: { communityId } })} />
                 <ActionRow>
-                  {community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" icon={Users} variant="ghost" onPress={openMembers} />}
-                  <AuthButton label="Salir" accessibilityLabel="Salir de la comunidad" icon={LogOut} variant="ghost" disabled={busy} onPress={confirmLeave} />
+                  {community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" icon={Users} variant="text" onPress={openMembers} />}
+                  <AuthButton label="Salir" accessibilityLabel="Salir de la comunidad" icon={LogOut} variant="text" disabled={busy} onPress={confirmLeave} />
                 </ActionRow>
 
               </>
@@ -132,7 +147,7 @@ export default function CommunityDetailScreen() {
               <>
                 <Text style={styles.meta}>Sin cupos disponibles · {used} de {limit} espacios</Text>
                 <AuthButton label="Ver planes" icon={Layers} onPress={openPlans} />
-                <AuthButton label="Gestionar mis espacios" icon={LayoutGrid} variant="ghost" onPress={() => router.dismissTo('/social')} />
+                <AuthButton label="Gestionar mis espacios" icon={LayoutGrid} variant="text" onPress={() => router.dismissTo('/social')} />
               </>
             ) : (
               <AuthButton label="Unirme a la comunidad" icon={UserPlus} loading={busy} onPress={() => void changeMembership('join')} />
@@ -148,15 +163,13 @@ export default function CommunityDetailScreen() {
 const styles = StyleSheet.create({
   edit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   scroll: { flex: 1 },
-  secondary: { flexDirection: 'row', gap: Spacing.two },
-  half: { flex: 1 },
   content: { gap: Spacing.two, paddingBottom: Spacing.three },
-  actions: { gap: Spacing.two, paddingVertical: Spacing.two },
+  actions: { gap: Spacing.two, paddingTop: Spacing.two, paddingBottom: 12 },
   meta: { color: Brand.textSecondary, fontSize: 13 },
   description: { color: Brand.text, fontSize: 16, lineHeight: 23 },
   member: { color: '#2ECC71', fontWeight: '700' },
   heading: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.two },
-  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, borderRadius: 12, backgroundColor: Brand.surface },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, borderRadius: 14, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface },
   player: { color: Brand.text, flex: 1 },
   rating: { color: '#22D3EE', fontWeight: '700' },
 });

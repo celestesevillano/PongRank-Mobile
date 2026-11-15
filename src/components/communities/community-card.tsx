@@ -22,7 +22,7 @@ export function CommunityCard({ community, onPress, featured = false }: { commun
         <View style={styles.cover}>
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <Svg width="100%" height="100%">
-              <Defs><LinearGradient id="cover" x1="0%" y1="0%" x2="100%" y2="70%"><Stop offset="0" stopColor={Brand.surface} /><Stop offset="1" stopColor="#22D3EE" /></LinearGradient></Defs>
+              <Defs><LinearGradient id="cover" x1="0%" y1="0%" x2="100%" y2="70%"><Stop offset="0" stopColor={Brand.surface} /><Stop offset="1" stopColor="#176471" /></LinearGradient></Defs>
               <Rect width="100%" height="100%" fill="url(#cover)" />
             </Svg>
           </View>
@@ -41,17 +41,18 @@ export function CommunityCard({ community, onPress, featured = false }: { commun
   );
 
   return onPress
-    ? <Pressable accessibilityRole="button" onPress={onPress} style={styles.card}>{content}</Pressable>
+    ? <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>{content}</Pressable>
     : <View style={styles.card}>{content}</View>;
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: Spacing.three, overflow: 'hidden' },
+  card: { backgroundColor: Brand.surface, borderColor: Brand.border, borderWidth: 1, borderRadius: 14, overflow: 'hidden' },
+  pressed: { opacity: 0.78 },
   cover: { height: 84, justifyContent: 'flex-end', overflow: 'hidden' },
   coverContent: { padding: Spacing.three },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.three },
-  mark: { backgroundColor: '#222226', color: '#22D3EE', minWidth: 42, padding: 10, textAlign: 'center', borderRadius: 10, fontWeight: '800', overflow: 'hidden', alignSelf: 'flex-start' },
+  mark: { backgroundColor: '#132D36', color: '#22D3EE', minWidth: 42, padding: 10, textAlign: 'center', borderRadius: 10, fontWeight: '800', overflow: 'hidden', alignSelf: 'flex-start' },
   label: { flex: 1, gap: Spacing.one },
-  name: { color: Brand.text, fontSize: 16, fontWeight: '700' },
+  name: { color: Brand.text, fontSize: 15, fontWeight: '700' },
   meta: { color: Brand.textSecondary, fontSize: 13 },
 });
