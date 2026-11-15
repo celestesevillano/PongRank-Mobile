@@ -1,8 +1,10 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { ArrowRight, RotateCw, type LucideIcon } from 'lucide-react-native';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View, type PressableProps } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type PressableProps } from 'react-native';
 
+import { AuthButton } from '@/components/auth/auth-button';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { Brand } from '@/constants/theme';
 import type { PlayerSummary } from '@/types/api';
 import type { ApiError } from '@/utils/api-error';
@@ -24,19 +26,10 @@ export function challengePlayer(player: PlayerSummary) {
   router.push({ pathname: '/new-match', params: { opponentId: String(player.id) } });
 }
 
-export function PongmigoButton({ label, icon: Icon, variant = 'primary', busy, disabled, style, ...props }:
+// Envoltorio de AuthButton: mantiene la API de Pongmigos y usa el botón compartido del sistema de diseño.
+export function PongmigoButton({ label, icon, variant = 'primary', busy, disabled, style, ...props }:
   Omit<PressableProps, 'style'> & { label: string; icon?: LucideIcon; variant?: 'primary' | 'secondary' | 'text'; busy?: boolean; style?: PressableProps['style'] }) {
-  const off = disabled || busy;
-  const color = disabled ? '#9A9CA3' : variant === 'text' ? '#22D3EE' : Brand.text;
-  return (
-    <Pressable {...props} accessibilityRole="button" accessibilityLabel={label}
-      accessibilityState={{ disabled: off, busy }} disabled={off}
-      style={(state) => [styles.button, styles[variant], disabled && styles.disabled,
-        state.pressed && styles.pressed, typeof style === 'function' ? style(state) : style]}>
-      {busy ? <ActivityIndicator size="small" color={color} /> : Icon && <Icon size={17} color={color} />}
-      <Text numberOfLines={1} style={[styles.label, { color }]}>{label}</Text>
-    </Pressable>
-  );
+  return <AuthButton {...props} label={label} icon={icon} variant={variant} loading={busy} disabled={disabled} style={style as object} />;
 }
 
 export function PlayerIdentity({ player, showRating = false }: { player: PlayerSummary; showRating?: boolean }) {
@@ -82,20 +75,9 @@ export function PongiState({ text, artwork, error, errorMessage, retry }: {
 export type ResultNotice = { title: string; message: string; icon: LucideIcon; success?: boolean };
 
 export function ResultDialog({ info, onClose }: { info: ResultNotice | null; onClose: () => void }) {
-  if (!info) return null;
-  const { icon: Icon, title, message, success } = info;
-  const color = success ? '#2ECC71' : '#22D3EE';
   return (
-    <Modal transparent animationType="fade" onRequestClose={onClose}>
-      <ScrollView contentContainerStyle={styles.backdrop}>
-        <View accessibilityViewIsModal style={styles.dialog}>
-          <View style={[styles.circle, { borderColor: color }]}><Icon size={21} color={color} /></View>
-          <Text accessibilityRole="header" style={styles.dialogTitle}>{title}</Text>
-          <Text style={styles.emptyCopy}>{message}</Text>
-          <PongmigoButton label="Aceptar" onPress={onClose} style={styles.acknowledge} />
-        </View>
-      </ScrollView>
-    </Modal>
+    <ConfirmDialog busy={false} onCancel={onClose}
+      confirmation={info ? { title: info.title, message: info.message, label: 'Aceptar', Icon: info.icon, success: info.success, infoOnly: true, onConfirm: onClose } : null} />
   );
 }
 
@@ -122,9 +104,4 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', gap: 10, padding: 16 },
   emptyArt: { width: 144, height: 144 },
   emptyCopy: { ...pongmigosStyles.body, textAlign: 'center' },
-  backdrop: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000A', padding: 16 },
-  dialog: { ...pongmigosStyles.card, width: '100%', maxWidth: 300, alignItems: 'center', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 18, gap: 8 },
-  circle: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, backgroundColor: '#232326', alignItems: 'center', justifyContent: 'center' },
-  dialogTitle: { color: Brand.text, fontSize: 24, fontWeight: '800', textAlign: 'center' },
-  acknowledge: { minWidth: 112, marginTop: 4 },
 });

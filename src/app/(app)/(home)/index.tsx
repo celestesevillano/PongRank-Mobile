@@ -83,7 +83,7 @@ export default function DashboardScreen() {
 
         <View style={styles.actionRow}>
           <AuthButton label="Nueva partida" icon={Plus} style={styles.playButton} onPress={() => router.push('/new-match')} />
-          <AuthButton label="Buscar partida" icon={Search} variant="ghost" foregroundColor={cyan} style={[styles.playButton, styles.search]} onPress={() => router.push('/find-match')} />
+          <AuthButton label="Buscar partida" icon={Search} variant="secondary" style={styles.playButton} onPress={() => router.push('/find-match')} />
         </View>
 
         <View style={styles.shortcutRow}>
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   label: { color: '#C2C4CA', fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
   ball: { position: 'absolute', width: 58, height: 58, right: 16, bottom: -8, opacity: 0.72 },
   actionRow: { flexDirection: 'row', gap: Spacing.two },
-  playButton: { flex: 1, minWidth: 0, minHeight: 48, paddingVertical: Spacing.two, borderWidth: 1, borderColor: 'transparent' },
+  playButton: { flex: 1, minWidth: 0, minHeight: 48, paddingVertical: Spacing.two },
   shortcutRow: { flexDirection: 'row', gap: Spacing.two },
   banner: { flex: 1, minWidth: 0, minHeight: 104, borderRadius: 16, borderWidth: 1, borderColor: '#24616A', backgroundColor: '#081A20', padding: Spacing.three, gap: Spacing.two, overflow: 'hidden' },
   coachBanner: { borderColor: '#71333C', backgroundColor: '#241419' },
@@ -225,7 +225,6 @@ const styles = StyleSheet.create({
   coachArtwork: { right: 2, top: 5, width: '48%', maxWidth: 100, aspectRatio: 1, opacity: 1 },
   coachImage: { width: '100%', height: '100%' },
   coachDetail: { maxWidth: '60%' },
-  search: { borderColor: '#248997' },
   shortcuts: { gap: Spacing.two },
   tile: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, padding: Spacing.two, paddingHorizontal: Spacing.three, borderRadius: 14, backgroundColor: '#101519', borderWidth: 1, borderColor: '#344047' },
   icon: { padding: Spacing.two, borderRadius: 8, backgroundColor: '#10333C' },

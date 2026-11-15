@@ -15,6 +15,8 @@ export type Confirmation = {
   // Aviso informativo: un solo botón «Aceptar», sin cancelar
   infoOnly?: boolean;
   destructive?: boolean;
+  // Éxito: icono verde
+  success?: boolean;
 };
 
 export function ConfirmDialog({ confirmation, busy, onCancel }: {
@@ -23,13 +25,14 @@ export function ConfirmDialog({ confirmation, busy, onCancel }: {
   onCancel: () => void;
 }) {
   if (!confirmation) return null;
-  const { title, message, label, Icon, onConfirm, cancelLabel, destructive, infoOnly } = confirmation;
+  const { title, message, label, Icon, onConfirm, cancelLabel, destructive, success, infoOnly } = confirmation;
+  const tone = destructive ? '#FF4A52' : success ? '#2ECC71' : '#22D3EE';
 
   return (
     <Modal transparent visible animationType="fade" onRequestClose={() => { if (!busy) onCancel(); }}>
       <ScrollView contentContainerStyle={styles.backdrop} keyboardShouldPersistTaps="handled">
         <View style={styles.dialog} accessibilityViewIsModal>
-          <View style={[styles.circle, { borderColor: destructive ? '#FF4A52' : '#22D3EE' }]}><Icon size={21} color={destructive ? '#FF4A52' : '#22D3EE'} /></View>
+          <View style={[styles.circle, { borderColor: tone }]}><Icon size={21} color={tone} /></View>
           <Text style={styles.title} accessibilityRole="header">{title}</Text>
           <Text style={styles.message}>{message}</Text>
           {infoOnly ? (
