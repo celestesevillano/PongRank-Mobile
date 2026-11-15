@@ -36,6 +36,8 @@ Tipografía del sistema. Título principal de pestaña **34 pt**, título de det
 | En proceso | Indicador de carga dentro de la acción y ancho reservado. Se protege contra toques duplicados. | Aceptando solicitud |
 | Destructiva | Texto rosa rojizo en el menú. Confirmación centrada con acción roja explícita. | Eliminar amistad |
 
+**Acciones pareadas:** comparten fila con **8 pt** de separación y el mismo alto, pero no necesitan el mismo ancho. El ancho se reparte según el texto: la acción con la etiqueta más larga (normalmente la primaria) ocupa más espacio, por ejemplo 40 % / 60 %. La etiqueta nunca se parte en dos líneas (`numberOfLines={1}`). Si no cabe, se acorta la etiqueta («Eliminar» en vez de «Eliminar Pongmigo») o se apilan las acciones a ancho completo, con la primaria arriba.
+
 Las acciones usan una zona táctil de al menos **44 pt**, radio de **12 pt** y foco visible. Se separan **8 pt** entre sí. Cuando hay una acción principal en el pie, se reservan **12 pt** como mínimo encima de la navegación y se respeta la zona segura. «Cerrar sesión» conserva el tratamiento de texto gris definido en Perfil.
 
 **Solicitudes recibidas** combina «Ver perfil ›» como acción de texto, «Aceptar» como primaria y «Rechazar» como secundaria. «Solicitud recibida» y «Solicitud enviada» se muestran como información de estado dentro del contenido. Las acciones aparecen debajo. El estado usa un icono y texto sin apariencia de botón. Rechazar y Cancelar solicitud permanecen disponibles mientras la solicitud pueda resolverse.
