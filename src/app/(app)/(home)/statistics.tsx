@@ -21,7 +21,7 @@ const paddle = require('../../../../assets/images/pongrank-intro-paddle.png');
 const ball = require('../../../../assets/images/pongrank-intro-ball.png');
 const streakArtwork = require('../../../../assets/images/pongrank-current-streak.webp');
 const bestVictoryTrophy = require('../../../../assets/images/pongrank-best-victory-banner.webp');
-const amber = '#FFCB68';
+const amber = '#FFD278';
 const loss = '#FF8990';
 
 export default function StatisticsRoute() {
