@@ -11,10 +11,11 @@ type ScreenStateProps = {
   empty?: boolean;
   emptyMessage?: string;
   retryIcon?: LucideIcon;
+  errorMessage?: string;
   onRetry?: () => void;
 };
 
-export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay nada por aquí.', onRetry, retryIcon }: ScreenStateProps) {
+export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay nada por aquí.', onRetry, retryIcon, errorMessage }: ScreenStateProps) {
   if (loading) {
     return (
       <View style={styles.container}>
@@ -27,7 +28,7 @@ export function ScreenState({ loading, error, empty, emptyMessage = 'Aún no hay
     return (
       <View style={styles.container}>
         <Text style={styles.title}>{error.isNetwork ? 'Problema de conexión' : 'No pudimos cargar esto'}</Text>
-        <Text style={styles.message}>{error.message}</Text>
+        <Text style={styles.message}>{errorMessage ?? error.message}</Text>
         {onRetry && <AuthButton label="Reintentar" icon={retryIcon} onPress={onRetry} style={styles.button} />}
       </View>
     );

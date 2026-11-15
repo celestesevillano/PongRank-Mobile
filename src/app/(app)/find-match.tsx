@@ -1,12 +1,14 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Check, MapPin, MessageCircle } from 'lucide-react-native';
+import { CalendarClock, MapPin, Swords } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { LocationNotice } from '@/components/common/location-notice';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
+import { WhatsAppMatchButton } from '@/components/matches/whatsapp-match-button';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useToast } from '@/context/toast';
@@ -32,7 +34,7 @@ export default function FindMatchScreen() {
   const [confirmed, setConfirmed] = useState<MatchResponse | null>(null);
 
   return (
-    <ScreenContainer title={confirmed ? 'Partida confirmada' : 'Buscar partida'}>
+    <ScreenContainer title={confirmed ? undefined : 'Buscar partida'}>
       {!confirmed && (
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Text style={styles.back}>‹ Volver</Text>
@@ -135,37 +137,24 @@ function OpenMatches({ coords, onJoined }: { coords: Coordinates; onJoined: (mat
 
 function Confirmed({ match }: { match: MatchResponse }) {
   const opponent = match.player1;
-  const phone = opponent.whatsapp?.replace(/\D/g, '');
+  const initials = opponent.name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
 
   return (
-    <View style={styles.confirmed}>
-      <View style={styles.check}>
-        <Check color="#22D3EE" size={44} />
-      </View>
-      <Text style={styles.confirmedTitle}>¡Partida confirmada!</Text>
-      <Text style={styles.meta}>Ya quedó pactada con {opponent.name}</Text>
-      <View style={styles.summary}>
-        <Text style={styles.name}>{opponent.name}</Text>
-        <Text style={styles.meta}>{Math.round(opponent.ratingGlicko)}</Text>
-        <View style={styles.place}>
-          <MapPin color={Brand.red} size={14} />
-          <Text style={styles.placeText}>{match.communityName ?? 'Partida libre'}</Text>
+    <ScrollView style={styles.flex} contentContainerStyle={styles.confirmationContent}>
+      <View style={styles.confirmed}>
+        <Image source={require('../../../assets/images/pongrank-match-confirmed.webp')} contentFit="cover" style={styles.confirmedArt} accessible={false} />
+        <Text accessibilityRole="header" style={styles.confirmedTitle}>Partida confirmada</Text>
+        <View style={styles.rivalRow}>
+          <View style={styles.rivalAvatar}><Text style={styles.avatarText}>{initials}</Text></View>
+          <Text style={styles.name}>{opponent.name}</Text>
         </View>
-        <Text style={styles.chip}>{FORMAT_LABELS[match.format]}</Text>
+        <View style={styles.confirmationRow}><CalendarClock color={Brand.cyan} size={17} /><Text style={styles.confirmationLabel}>Hora por coordinar</Text></View>
+        <View style={styles.confirmationRow}><MapPin color={Brand.cyan} size={17} /><Text style={styles.confirmationLabel}>{match.communityName ?? 'Partida libre'}</Text></View>
+        <WhatsAppMatchButton opponent={opponent} showUnavailable />
+        <AuthButton label="Empezar partida" icon={Swords} onPress={() => router.replace(`/match/${match.id}`)} />
+        <AuthButton label="Ver mis partidas" variant="text" onPress={() => router.replace('/matches')} style={styles.allMatches} />
       </View>
-      {phone ? (
-        <Pressable style={styles.whatsapp} onPress={() => Linking.openURL(`https://wa.me/${phone}`)}>
-          <MessageCircle color="#22D3EE" size={20} />
-          <Text style={styles.whatsappLabel}>Coordinar por WhatsApp</Text>
-        </Pressable>
-      ) : (
-        <Text style={styles.note}>Este jugador no compartió un contacto directo. Coordina el encuentro en el lugar y hora acordados.</Text>
-      )}
-      <AuthButton label="Empezar partido" onPress={() => router.replace(`/match/${match.id}`)} style={styles.start} />
-      <Pressable onPress={() => router.replace('/matches')} hitSlop={12}>
-        <Text style={styles.link}>Ver mis partidas</Text>
-      </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -186,13 +175,13 @@ const styles = StyleSheet.create({
   placeText: { color: Brand.red, fontSize: 13 },
   chip: { alignSelf: 'flex-start', marginTop: 6, color: Brand.text, fontSize: 12, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, borderWidth: 1, borderColor: Brand.border },
   join: { alignSelf: 'flex-end', paddingVertical: Spacing.two, paddingHorizontal: Spacing.three },
-  confirmed: { alignItems: 'center', gap: Spacing.two, paddingTop: Spacing.four },
-  check: { width: 96, height: 96, borderRadius: 48, borderWidth: 2, borderColor: '#22D3EE', alignItems: 'center', justifyContent: 'center' },
-  confirmedTitle: { color: Brand.text, fontSize: 26, fontWeight: '800', marginTop: Spacing.two },
-  summary: { alignSelf: 'stretch', marginTop: Spacing.three, padding: Spacing.three, borderRadius: Spacing.three, borderWidth: 1, borderColor: Brand.red, backgroundColor: Brand.surface },
-  whatsapp: { alignSelf: 'stretch', minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.two, borderRadius: Spacing.three, borderWidth: 1.5, borderColor: '#22D3EE', marginTop: Spacing.two },
-  whatsappLabel: { color: '#22D3EE', fontWeight: '700' },
-  note: { color: Brand.textSecondary, fontSize: 13, textAlign: 'center', marginTop: Spacing.two },
-  start: { alignSelf: 'stretch', marginTop: Spacing.two },
-  link: { color: Brand.textSecondary, marginTop: Spacing.two },
+  confirmationContent: { flexGrow: 1, justifyContent: 'center', paddingVertical: Spacing.three },
+  confirmed: { alignSelf: 'center', width: '100%', maxWidth: 460, gap: Spacing.two, padding: 12, borderRadius: 16, borderWidth: 1, borderColor: '#365760', backgroundColor: '#11171B' },
+  confirmedArt: { width: '100%', aspectRatio: 1.9, borderRadius: 12 },
+  confirmedTitle: { color: Brand.cyan, textAlign: 'center', fontSize: 25, fontWeight: '800', marginVertical: Spacing.one },
+  rivalRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: Spacing.two, borderRadius: 12, backgroundColor: '#202B31' },
+  rivalAvatar: { width: 31, height: 31, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: '#32454D' },
+  confirmationRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44, paddingHorizontal: Spacing.two, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: Brand.border },
+  confirmationLabel: { color: Brand.text, fontSize: 14, flexShrink: 1 },
+  allMatches: { paddingVertical: 8 },
 });

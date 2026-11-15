@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   lockBadgeLabel: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
   bannerArtwork: { position: 'absolute', right: -4, top: 2, opacity: 0.84 },
   bannerImage: { width: 104, height: 104 },
-  coachArtwork: { position: 'absolute', right: 2, bottom: -3, width: '48%', maxWidth: 100, aspectRatio: 1 },
+  coachArtwork: { position: 'absolute', right: 2, bottom: -3, width: '58%', maxWidth: 116, aspectRatio: 1 },
   coachImage: { width: '100%', height: '100%' },
   coachDetail: { maxWidth: '60%' },
   shortcuts: { gap: Spacing.two },

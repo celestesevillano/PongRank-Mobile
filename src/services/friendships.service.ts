@@ -8,7 +8,13 @@ export type Friendship = {
   status: string;
 };
 
+export type PongmigosVisibility = 'EVERYONE' | 'ONLY_ME';
+
 export const friendshipsService = {
+  getVisibility: (signal?: AbortSignal) =>
+    http.get<{ visibility: PongmigosVisibility }>('/friendships/me/visibility', { signal }).then(({ data }) => data),
+  updateVisibility: (visibility: PongmigosVisibility) =>
+    http.patch<{ visibility: PongmigosVisibility }>('/friendships/me/visibility', { visibility }).then(({ data }) => data),
   accepted: (playerId: number, signal?: AbortSignal) =>
     http.get<Friendship[]>(`/friendships/players/${playerId}`, { signal }).then((response) => response.data),
   received: (playerId: number, signal?: AbortSignal) =>

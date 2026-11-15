@@ -7,6 +7,9 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { ActionRow } from '@/components/common/action-row';
 import { CommunityScreen } from '@/components/communities/community-screen';
 import { PlayerIdentity, PongmigoButton, PongiState, ResultDialog, challengePlayer, pongmigosStyles } from '@/components/pongmigos/pongmigos-ui';
+import { ProfileAvatar } from '@/components/profile/profile-identity';
+import { ProfileNetworks } from '@/components/profile/profile-networks';
+import { toProfilePresentation } from '@/utils/profile-presentation';
 import { Brand } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useFetch } from '@/hooks/use-fetch';
@@ -21,6 +24,9 @@ export default function PublicPlayerScreen() {
   const self = player?.id;
   const profile = useFetch((signal) =>
     Number.isSafeInteger(id) && id > 0 ? playersService.summary(id, signal) : Promise.resolve(null), [id]);
+  const presentation = useFetch(async (signal) =>
+    Number.isSafeInteger(id) && id > 0 ? { id, data: await playersService.presentation(id, signal) } : null, [id]);
+  const publicInfo = presentation.data?.id === id ? toProfilePresentation(presentation.data.data) : null;
   const relation = useFetch(async (signal) => {
     if (!self || self === id) return null;
     const [friends, inbox, outbox] = await Promise.all([
@@ -38,8 +44,9 @@ export default function PublicPlayerScreen() {
 
   useFocusEffect(useCallback(() => {
     profile.refetch();
+    presentation.refetch();
     relation.refetch();
-  }, [profile.refetch, relation.refetch]));
+  }, [profile.refetch, presentation.refetch, relation.refetch]));
 
   const other = profile.data?.id === id ? profile.data : null;
   const { friend, received, sent } = relation.data ?? {};
@@ -57,9 +64,14 @@ export default function PublicPlayerScreen() {
             <Image source={require('../../../../../assets/images/pongrank-public-profile.jpg')} contentFit="cover" style={styles.cover} accessibilityElementsHidden />
             <View style={styles.details}>
               <View style={styles.identity}>
-                <PlayerIdentity player={other} />
-                <Image source={require('../../../../../assets/images/pongrank-intro-paddle.png')} contentFit="contain" style={styles.brand} accessibilityElementsHidden />
+                {publicInfo?.photo ? <ProfileAvatar name={other.name} photo={publicInfo.photo} /> : null}
+                <PlayerIdentity player={other} hideAvatar={Boolean(publicInfo?.photo)} />
+                {!publicInfo?.photo ? (
+                  <Image source={require('../../../../../assets/images/pongrank-intro-paddle.png')} contentFit="contain" style={styles.brand} accessibilityElementsHidden />
+                ) : null}
               </View>
+              {publicInfo?.city ? <Text style={pongmigosStyles.body}>{publicInfo.city}</Text> : null}
+              {publicInfo?.description ? <Text style={pongmigosStyles.body}>{publicInfo.description}</Text> : null}
               {status && <View style={styles.badge}><StatusIcon size={14} color={friend ? '#2ECC71' : '#22D3EE'} />
                 <Text style={[styles.badgeText, friend && styles.friend]}>{status}</Text></View>}
             </View>
@@ -68,6 +80,7 @@ export default function PublicPlayerScreen() {
             <Text style={styles.ratingValue}>{Math.round(other.ratingGlicko)}</Text>
             <Text style={pongmigosStyles.body}>Rating PongRank</Text>
           </View>
+          {publicInfo ? <ProfileNetworks links={publicInfo.links} /> : null}
           {relation.error ? <PongiState error={relation.error} retry={relation.refetch} /> :
             relation.loading && !working ? <ActivityIndicator color={Brand.red} /> :
             friend ? <PongmigoButton label="Retar a una partida" icon={Swords} onPress={() => challengePlayer(other)} /> :

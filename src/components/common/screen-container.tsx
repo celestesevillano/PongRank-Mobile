@@ -4,11 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand, Spacing } from '@/constants/theme';
 
-export function ScreenContainer({ title, children }: PropsWithChildren<{ title: string }>) {
+export function ScreenContainer({ title, children }: PropsWithChildren<{ title?: string }>) {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <Text style={styles.title}>{title}</Text>
+        {title ? <Text style={styles.title}>{title}</Text> : null}
         {children}
       </SafeAreaView>
     </View>

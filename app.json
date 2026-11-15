@@ -40,6 +40,14 @@
       ],
       "expo-secure-store",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "PongRank usa tu galería para elegir tu foto de perfil.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "PongRank usa tu ubicación para encontrar partidas cerca de ti y publicar la tuya."
