@@ -49,6 +49,7 @@ export type PageParams = { page?: number; size?: number };
 export type PlayerSummary = {
   id: number;
   name: string;
+  username?: string | null;
   ratingGlicko: number;
   categoryFdptm: string | null;
   federatedDeclared: boolean | null;

@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   segmentLabelActive: { color: Brand.text },
   scroll: { flexGrow: 0, marginBottom: Spacing.three },
   row: { gap: Spacing.two },
-  pill: { height: 40, flexDirection: 'row', gap: 6, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
+  pill: { height: 40, flexDirection: 'row', gap: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, borderColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
   pillActive: { borderColor: '#D84149', backgroundColor: '#36191E' },
   label: { color: Brand.textSecondary, fontSize: 14, fontWeight: '600' },
   labelActive: { color: '#FFB3B7' },

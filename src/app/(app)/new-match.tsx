@@ -1,11 +1,13 @@
-import { router } from 'expo-router';
-import { ChevronRight, Clock, MapPin, Search, Users } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import { ArrowRight, CheckCircle2, ChevronRight, Circle, Clock, MapPin, Search, Users } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { LocationNotice } from '@/components/common/location-notice';
 import { ScreenContainer } from '@/components/common/screen-container';
+import { PlayerIdentity, PongmigoButton, PongiState, pongiArt } from '@/components/pongmigos/pongmigos-ui';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useToast } from '@/context/toast';
@@ -15,7 +17,7 @@ import { friendOf, friendshipsService } from '@/services/friendships.service';
 import { matchesService, type MatchCreateInput } from '@/services/matches.service';
 import { placesAvailable, placesService, type PlaceSuggestion } from '@/services/places.service';
 import type { MatchResponse, PlayerSummary } from '@/types/api';
-import { toApiError } from '@/utils/api-error';
+import { toApiError, type ApiError } from '@/utils/api-error';
 
 const FORMATS: { label: string; value: MatchCreateInput['format'] }[] = [
   { label: 'Mejor de 3', value: 'BO3' },
@@ -27,6 +29,7 @@ type Step = 'who' | 'where' | 'format' | 'waiting';
 const STEP_TITLE: Record<Step, string> = { who: 'Crear partida', where: 'Crear partida', format: 'Crear partida', waiting: 'Partida publicada' };
 
 export default function NewMatchScreen() {
+  const { opponentId } = useLocalSearchParams<{ opponentId?: string }>();
   const { player } = useSession();
   const { showToast } = useToast();
   const { coords, setCoords, status, retry } = useLocation();
@@ -34,6 +37,8 @@ export default function NewMatchScreen() {
   const [opponent, setOpponent] = useState<PlayerSummary | null>(null);
   const [friends, setFriends] = useState<PlayerSummary[]>([]);
   const [friendsLoading, setFriendsLoading] = useState(true);
+  const [friendsError, setFriendsError] = useState<ApiError | null>(null);
+  const [retryFriends, setRetryFriends] = useState(0);
   const [friendQuery, setFriendQuery] = useState('');
   const [format, setFormat] = useState<MatchCreateInput['format']>('BO3');
   const [placeQuery, setPlaceQuery] = useState('');
@@ -43,16 +48,27 @@ export default function NewMatchScreen() {
   const [created, setCreated] = useState<MatchResponse | null>(null);
   const debouncedQuery = useDebouncedValue(placeQuery, 350);
 
+  const playerId = player?.id;
   useEffect(() => {
-    if (!player) return;
+    if (!playerId) return;
     const controller = new AbortController();
-    friendshipsService
-      .accepted(player.id, controller.signal)
-      .then((list) => setFriends(list.map((f) => friendOf(f, player.id))))
-      .catch(() => setFriends([]))
-      .finally(() => setFriendsLoading(false));
+    setFriendsLoading(true);
+    setFriendsError(null);
+    friendshipsService.accepted(playerId, controller.signal)
+      .then((list) => {
+        if (controller.signal.aborted) return;
+        const players = list.map((item) => friendOf(item, playerId));
+        setFriends(players);
+        setOpponent(players.find((candidate) => candidate.id === Number(opponentId)) ?? null);
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) setFriendsError(toApiError(error));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setFriendsLoading(false);
+      });
     return () => controller.abort();
-  }, [player]);
+  }, [playerId, opponentId, retryFriends]);
 
   useEffect(() => {
     if (!placesAvailable || debouncedQuery.trim().length < 3 || placeLabel) {
@@ -129,60 +145,45 @@ export default function NewMatchScreen() {
       )}
 
       {step === 'who' && (
-        <>
-          <Text style={styles.section}>¿Contra quién?</Text>
+        <View style={styles.rivalStage}>
+          <Image pointerEvents="none" source={pongiArt.rival} style={styles.rivalArt} contentFit="contain" accessibilityElementsHidden />
+          <Text style={styles.section} accessibilityRole="header">Elige rival</Text>
           <View style={styles.searchBox}>
             <Search color={Brand.textSecondary} size={18} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Buscar un Pongmigo"
-              placeholderTextColor={Brand.textSecondary}
-              value={friendQuery}
-              onChangeText={setFriendQuery}
-            />
+            <TextInput style={styles.searchInput} placeholder="Buscar un Pongmigo" placeholderTextColor={Brand.textSecondary}
+              accessibilityLabel="Buscar un Pongmigo" value={friendQuery} onChangeText={setFriendQuery} />
           </View>
-          {friendsLoading ? (
-            <ActivityIndicator color={Brand.red} style={styles.loader} />
-          ) : visibleFriends.length === 0 ? (
-            <Text style={styles.hint}>{friends.length === 0 ? 'Aún no tienes amigos agregados.' : 'No hay amigos con ese nombre.'}</Text>
-          ) : (
-            visibleFriends.map((friend) => (
-              <Pressable
-                key={friend.id}
-                style={styles.row}
-                onPress={() => {
-                  setOpponent(friend);
-                  setStep('where');
-                }}
-              >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{friend.name.slice(0, 2).toUpperCase()}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.rowTitle}>{friend.name}</Text>
-                  <Text style={styles.rating}>{Math.round(friend.ratingGlicko)}</Text>
-                </View>
-                <ChevronRight color={Brand.textSecondary} size={18} />
-              </Pressable>
-            ))
-          )}
-          <Pressable
-            style={styles.row}
-            onPress={() => {
-              setOpponent(null);
-              setStep('where');
+          <FlatList
+            data={friendsError ? [] : visibleFriends}
+            keyExtractor={(item) => String(item.id)}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => {
+              const selected = item.id === opponent?.id;
+              const SelectionIcon = selected ? CheckCircle2 : Circle;
+              return (
+                <Pressable style={[styles.row, selected && styles.selectedRival]} accessibilityRole="radio"
+                  accessibilityState={{ checked: selected }} onPress={() => setOpponent(item)}>
+                  <PlayerIdentity player={item} />
+                  <SelectionIcon size={20} color={selected ? '#22D3EE' : Brand.textSecondary} />
+                </Pressable>
+              );
             }}
-          >
-            <View style={styles.avatar}>
-              <Users color={Brand.textSecondary} size={20} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rowTitle}>Dejar abierta</Text>
-              <Text style={styles.hint}>Cualquiera de nivel similar podrá unirse</Text>
-            </View>
-            <ChevronRight color={Brand.textSecondary} size={18} />
-          </Pressable>
-        </>
+            ListEmptyComponent={friendsLoading ? <ActivityIndicator color={Brand.red} style={styles.loader} />
+              : friendsError ? <PongiState error={friendsError} retry={() => setRetryFriends((value) => value + 1)} />
+              : <Text style={styles.hint}>{friends.length ? 'No hay Pongmigos con ese nombre.' : 'Aún no tienes Pongmigos'}</Text>}
+            ListFooterComponent={<Pressable
+              style={styles.row} accessibilityRole="button" onPress={() => { setOpponent(null); setStep('where'); }}>
+              <View style={styles.avatar}><Users color={Brand.textSecondary} size={20} /></View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Dejar abierta</Text>
+                <Text style={styles.hint}>Cualquiera de nivel similar podrá unirse</Text>
+              </View>
+              <ChevronRight color={Brand.textSecondary} size={18} />
+            </Pressable>}
+          />
+          <PongmigoButton label="Continuar" icon={ArrowRight} disabled={!opponent || friendsLoading || Boolean(friendsError)}
+            style={styles.rivalContinue} onPress={() => setStep('where')} />
+        </View>
       )}
 
       {step === 'where' && (
@@ -279,6 +280,10 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  rivalStage: { flex: 1, minHeight: 0 },
+  rivalArt: { position: 'absolute', top: '22%', bottom: '14%', width: '64%', alignSelf: 'center', opacity: 0.25 },
+  rivalContinue: { marginTop: 8, marginBottom: 12 },
+  selectedRival: { borderColor: '#22D3EE', backgroundColor: '#122A32' },
   back: { color: Brand.textSecondary, marginBottom: Spacing.three },
   section: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.two, marginBottom: Spacing.two },
   input: { backgroundColor: Brand.surface, borderRadius: Spacing.three, borderWidth: 1, borderColor: Brand.border, color: Brand.text, padding: Spacing.three },
@@ -307,9 +312,7 @@ const styles = StyleSheet.create({
     borderColor: Brand.border,
   },
   rowTitle: { color: Brand.text, fontSize: 15, fontWeight: '700' },
-  rating: { color: Brand.red, fontSize: 13, marginTop: 2 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: Brand.text, fontWeight: '700' },
   suggestion: { paddingVertical: Spacing.two, borderBottomWidth: 1, borderBottomColor: Brand.border },
   suggestionText: { color: Brand.text },
   hint: { color: Brand.textSecondary, fontSize: 13, marginTop: Spacing.two },
