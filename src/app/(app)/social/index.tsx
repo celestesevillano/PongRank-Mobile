@@ -14,6 +14,7 @@ import { useFetch } from '@/hooks/use-fetch';
 import { clubsService } from '@/services/clubs.service';
 import { communitiesService } from '@/services/communities.service';
 
+import { PongmigosList } from '@/components/pongmigos/pongmigos-list';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { Brand, Spacing } from '@/constants/theme';
@@ -21,7 +22,7 @@ import { Brand, Spacing } from '@/constants/theme';
 const SEGMENTS = [
   { key: 'communities', label: 'Comunidades' },
   { key: 'clubs', label: 'Clubes' },
-  { key: 'friends', label: 'Amigos' },
+  { key: 'friends', label: 'Pongmigos' },
 ] as const;
 
 type Segment = (typeof SEGMENTS)[number]['key'];
@@ -32,16 +33,12 @@ export default function SocialScreen() {
   return (
     <ScreenContainer title="Social">
       <Pressable style={styles.search} accessibilityRole="button" onPress={() => router.push('/social/explore')}>
-        <Search size={20} color={Brand.textSecondary} /><Text style={styles.message}>Buscar comunidades y clubes</Text>
+        <Search size={20} color={Brand.textSecondary} /><Text style={styles.message}>Buscar en Social</Text>
       </Pressable>
-      <PillTabs options={SEGMENTS} selected={segment} onSelect={setSegment} />
+      <PillTabs variant="segment" options={SEGMENTS} selected={segment} onSelect={setSegment} />
       {segment === 'communities' && <MyCommunities />}
       {segment === 'clubs' && <MyClubs />}
-      {segment === 'friends' && (
-        <View style={styles.placeholder}>
-          <Text style={styles.message}>Aquí verás tus amigos y las solicitudes pendientes.</Text>
-        </View>
-      )}
+      {segment === 'friends' && <PongmigosList preview />}
     </ScreenContainer>
   );
 }
@@ -151,6 +148,5 @@ const styles = StyleSheet.create({
   listArea: { flex: 1 },
   actions: { paddingVertical: Spacing.two },
   list: { gap: Spacing.two, paddingBottom: Spacing.two },
-  placeholder: { padding: Spacing.three, borderRadius: Spacing.three, borderWidth: 1, borderStyle: 'dashed', borderColor: Brand.border },
   message: { color: Brand.textSecondary, fontSize: 14, textAlign: 'center' },
 });
