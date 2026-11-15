@@ -118,7 +118,7 @@ export default function CommunityMembersScreen() {
           {members.data && members.data.totalPages > 1 && <PaginationBar page={members.data} onPageChange={(page) => { setOpenMenu(null); members.setPage(page); }} />}
         </ScrollView>
       )}
-      <ConfirmDialog confirmation={confirmation} busy={busy} onCancel={() => setConfirmation(null)} />
+      <ConfirmDialog confirmation={confirmation ? { ...confirmation, hideTitleIcon: true } : null} busy={busy} onCancel={() => setConfirmation(null)} />
     </CommunityScreen>
   );
 }

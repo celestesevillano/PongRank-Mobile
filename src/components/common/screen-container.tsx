@@ -1,15 +1,25 @@
 import type { PropsWithChildren } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type StyleProp, type TextStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand, Spacing } from '@/constants/theme';
 
-export function ScreenContainer({ title, children }: PropsWithChildren<{ title?: string }>) {
+export function ScreenContainer({ title, titleStyle, scrollable, children }: PropsWithChildren<{
+  title?: string;
+  titleStyle?: StyleProp<TextStyle>;
+  scrollable?: boolean;
+}>) {
+  const content = (
+    <>
+      {title ? <Text accessibilityRole="header" style={[styles.title, titleStyle]}>{title}</Text> : null}
+      {children}
+    </>
+  );
+
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {title ? <Text style={styles.title}>{title}</Text> : null}
-        {children}
+        {scrollable ? <ScrollView>{content}</ScrollView> : content}
       </SafeAreaView>
     </View>
   );

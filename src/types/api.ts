@@ -26,6 +26,8 @@ export type AuthResponse = {
   player: PlayerResponse;
 };
 
+export type CommunityStatus = 'ACTIVE' | 'ARCHIVED' | 'DELETED';
+
 export type CommunityResponse = {
   id: number;
   name: string;
@@ -33,6 +35,7 @@ export type CommunityResponse = {
   communityType: 'UNIVERSITY' | 'SCHOOL' | 'PUBLIC_PARK' | 'PLAY_GROUP' | 'OTHER';
   customLabel?: string | null;
   memberCount: number;
+  status?: CommunityStatus;
 };
 
 export type Page<T> = {
