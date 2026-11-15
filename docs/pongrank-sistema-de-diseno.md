@@ -68,6 +68,19 @@ Las acciones usan una zona táctil de al menos **44 pt**, radio de **12 pt** y f
 - La fila de Pongmigos muestra la cifra junto a «Ver lista ›» cuando es pública. Si está oculta, muestra la cifra junto a «Lista privada» con un candado.
 - En Social, con hasta cinco Pongmigos, el perfil se abre tocando la fila y el menú de tres puntos contiene «Retar a una partida» y «Eliminar amistad». Con más de cinco aparece la vista previa de cinco filas y «Ver todos mis Pongmigos ›». La lista completa tiene búsqueda y menú por persona.
 
+**Ventanas emergentes (popups)**
+- Estructura fija, centrada y angosta (máximo 320 px): **icono circular** de la acción (44 pt, borde del color de estado), **título grande** (24 pt, centrado), **texto** de apoyo y **botones**.
+- Los avisos de resultado («Solicitud enviada», errores, etc.) usan un solo botón primario **«Aceptar»**, centrado y más angosto que el diálogo. Siempre «Aceptar» (no «Entendido», «Listo» ni «OK»).
+- Las confirmaciones usan **«Cancelar»** (secundario) y la acción explícita en rojo (por ejemplo «Eliminar Pongmigo»). Los botones de un popup van **solo con texto, sin icono**.
+- El icono circular conserva el color de estado: celeste para información, verde para éxito, rojo claro para acciones destructivas.
+
+**Iconos en botones**
+- Si un botón lleva icono, va **a la izquierda** del texto, nunca a la derecha.
+- La flecha de apertura (`›`) solo se usa al extremo derecho de las **filas de navegación** (toda la fila es tocable), no dentro de botones.
+
+**Personajes**
+- **Pongi** es el coach. **Ranky** es su amiga y aparece junto a Pongi en los banners de Pongmigos y escenas de amistad. Ranky comparte el estilo, la paleta cerrada y los encuadres de Pongi.
+
 ## Aplicación en el repositorio
 
 La revisión local encontró que `Brand.red` usa `#E8262F`, `AuthButton` reduce la opacidad al deshabilitarse, y algunas pantallas de registro y marcador todavía subrayan acciones de texto. La propuesta conserva `Brand.red` para marca y navegación y usa `#D81E28` para la acción primaria con texto blanco. La migración se puede hacer con variantes compartidas de botón e insignia y una revisión visual de sus pantallas consumidoras.
