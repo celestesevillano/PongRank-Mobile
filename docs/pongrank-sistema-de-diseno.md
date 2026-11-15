@@ -123,6 +123,11 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 **Sin conexión y errores de red**
 - Pantalla o bloque con la mascota, el mensaje «No pudimos conectar con PongRank» y la acción primaria «Reintentar». Se conserva el contenido ya cargado cuando sea posible.
 
+**Dos tipos de estado vacío**
+- **Sección vacía** (la pantalla tiene más contenido útil, por ejemplo «Tu lista» sin Pongmigos): frase corta bajo el título de la sección y, si existe, una acción de texto («Buscar jugadores ›»). Sin mascota, porque la pantalla ya tiene su ilustración (el banner) y otra más la sobrecargaría.
+- **Pantalla vacía** (la lista es todo el contenido, por ejemplo «Solicitudes recibidas» sin pendientes): mascota centrada con su emoción y una frase. Ocupa el lugar de la lista.
+- Son estados independientes: se puede tener Pongmigos y cero solicitudes, o recibir una solicitud antes de tener Pongmigos. Cada vacío se decide por su propia lista.
+
 **Estados vacíos de Social** (con la mascota y una frase)
 - Sin Pongmigos: «Aún no tienes Pongmigos agregados.» (mascota triste).
 - Sin solicitudes: «No tienes solicitudes pendientes.» (mascota tranquila).
