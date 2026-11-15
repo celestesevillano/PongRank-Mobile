@@ -56,7 +56,7 @@ Las acciones usan una zona táctil de al menos **44 pt**, radio de **12 pt** y f
 
 - Referencia **iPhone 16 Pro, 402 × 874 pt**. Las pantallas pueden desplazar su contenido si hay menos altura o aumenta el texto. La barra inferior y la zona segura conservan espacio propio.
 - Márgenes laterales de **16 pt**. Escala de Mobile **2, 4, 8, 16, 24, 32, 64 pt**. Tarjetas con radios **14–16 pt**, diálogos **20–24 pt**.
-- Barra inferior en el orden **Inicio, Social, Partidas, Ranking y Perfil**. Pestaña activa con círculo rojo, icono blanco y etiqueta roja. Comunidades, Clubes y Amigos usan un segmento común con labels centradas. Los filtros de búsqueda usan chips.
+- Barra inferior en el orden **Inicio, Social, Partidas, Ranking y Perfil**. Pestaña activa con círculo rojo, icono blanco y etiqueta roja. Comunidades, Clubes y Pongmigos usan un segmento común con labels centradas. Los filtros de búsqueda usan chips.
 - Los controles usan Lucide. Las redes usan sus propios símbolos. Las confirmaciones sencillas y los formularios breves usan un diálogo centrado. La explicación de planes usa un panel inferior.
 - Comunidades usa degradado celeste, Clubes usa carbón, rojo y escudo, y el perfil público usa portada de tenis de mesa. Las ilustraciones específicas de una pantalla se usan una vez. El isotipo y los iconos funcionales se comparten como parte del sistema.
 
@@ -95,7 +95,7 @@ Cuando se propone o rediseña una pantalla, se debe proponer también su ilustra
 ## Reglas de Social (Comunidades, Clubes y Pongmigos)
 
 **Estructura y pestañas**
-- Social tiene tres segmentos: **Comunidades · Clubes · Amigos**. Siempre con el mismo componente segmentado (fondo grafito, texto centrado, segmento activo resaltado). No se usan pestañas subrayadas.
+- Social tiene tres segmentos: **Comunidades · Clubes · Pongmigos**. Siempre con el mismo componente segmentado (fondo grafito, texto centrado, segmento activo resaltado). No se usan pestañas subrayadas.
 - Los chips se reservan para filtros dentro de una lista (por ejemplo, ciudad o categoría). Un segmento cambia de sección; un chip filtra.
 - Partidas usa el mismo segmento para sus secciones. Un solo patrón de pestañas en toda la app.
 - La búsqueda de Social está arriba y busca dentro del segmento activo.
