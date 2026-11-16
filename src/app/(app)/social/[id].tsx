@@ -128,6 +128,7 @@ export default function CommunityDetailScreen() {
   const pausedForAdmin = !!activeCommunity && grace && canRenew;
 
   return (
+    <>
     <CommunityScreen title="Comunidad" scrollable={activeCommunity !== null && !pausedForAdmin} onBack={() => router.canGoBack() ? router.back() : router.replace('/social')}
       action={(
         <View style={styles.toolbarActions}>
@@ -245,8 +246,10 @@ export default function CommunityDetailScreen() {
           </View>
         </View>
       )}
-      <ConfirmDialog confirmation={confirmation} busy={busy} onCancel={() => setConfirmation(null)} />
     </CommunityScreen>
+    {/* Fuera de CommunityScreen: al refrescar el detalle esa pantalla cambia de estructura y desmontaba el popup. */}
+    <ConfirmDialog confirmation={confirmation} busy={busy} onCancel={() => setConfirmation(null)} />
+    </>
   );
 }
 
