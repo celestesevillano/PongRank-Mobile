@@ -1,12 +1,12 @@
 import * as Location from 'expo-location';
-import { MapPin, Search } from 'lucide-react-native';
-import { useState } from 'react';
+import { MapPin } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
-import { ActionRow } from '@/components/common/action-row';
 import { Brand, Spacing } from '@/constants/theme';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 function format(place: Location.LocationGeocodedAddress) {
   const street = [place.street ?? place.name, place.streetNumber].filter(Boolean).join(' ');
@@ -19,25 +19,34 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
   const [busy, setBusy] = useState<'search' | 'locate' | null>(null);
   const [message, setMessage] = useState('');
 
-  const search = async () => {
-    if (!value.trim() || busy) return;
+  const picked = useRef(false);
+  const term = useDebouncedValue(value.trim(), 700);
+
+  // Sugerencias mientras se escribe (geocodificador del dispositivo)
+  useEffect(() => {
+    if (picked.current || term.length < 4) { setOptions([]); return; }
+    let cancelled = false;
     setBusy('search');
     setMessage('');
-    try {
-      const found = await Location.geocodeAsync(value.trim());
-      const labels = await Promise.all(found.slice(0, 3).map(async (point) => {
-        const [place] = await Location.reverseGeocodeAsync(point);
-        return place ? format(place) : '';
-      }));
-      const unique = [...new Set(labels.filter(Boolean))];
-      setOptions(unique);
-      if (unique.length === 0) setMessage('No encontramos esa dirección. Puedes escribirla tal como la conoces.');
-    } catch {
-      setMessage('No pudimos buscar la dirección. Escríbela manualmente.');
-    } finally {
-      setBusy(null);
-    }
-  };
+    (async () => {
+      try {
+        const found = await Location.geocodeAsync(term);
+        const labels = await Promise.all(found.slice(0, 3).map(async (point) => {
+          const [place] = await Location.reverseGeocodeAsync(point);
+          return place ? format(place) : '';
+        }));
+        if (cancelled) return;
+        const unique = [...new Set(labels.filter(Boolean))];
+        setOptions(unique);
+        if (unique.length === 0) setMessage('No encontramos esa dirección. Puedes escribirla tal como la conoces.');
+      } catch {
+        if (!cancelled) setMessage('No pudimos buscar sugerencias. Escribe la dirección manualmente.');
+      } finally {
+        if (!cancelled) setBusy((current) => (current === 'search' ? null : current));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [term]);
 
   const locate = async () => {
     if (busy) return;
@@ -52,7 +61,7 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
       }
       const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       const [place] = await Location.reverseGeocodeAsync(coords);
-      if (place) onChange(format(place));
+      if (place) { picked.current = true; setOptions([]); onChange(format(place)); }
       else setMessage('No pudimos obtener la dirección de tu ubicación.');
     } catch {
       setMessage('No pudimos obtener tu ubicación. Escribe la dirección.');
@@ -64,13 +73,10 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
   return (
     <View style={styles.wrap}>
       <AuthInput accessibilityLabel="Dirección" placeholder="Calle, número y distrito" value={value} maxLength={250}
-        onChangeText={(text) => { onChange(text); setOptions([]); setMessage(''); }} />
-      <ActionRow>
-        <AuthButton label="Buscar dirección" icon={Search} variant="secondary" loading={busy === 'search'} disabled={!value.trim()} onPress={search} />
-        <AuthButton label="Mi ubicación" icon={MapPin} variant="secondary" loading={busy === 'locate'} onPress={locate} />
-      </ActionRow>
+        onChangeText={(text) => { picked.current = false; onChange(text); setMessage(''); }} />
+      <AuthButton label="Usar mi ubicación" icon={MapPin} variant="secondary" loading={busy === 'locate'} onPress={locate} />
       {options.map((option) => (
-        <Pressable key={option} accessibilityRole="button" style={styles.option} onPress={() => { onChange(option); setOptions([]); }}>
+        <Pressable key={option} accessibilityRole="button" style={styles.option} onPress={() => { picked.current = true; onChange(option); setOptions([]); }}>
           <MapPin size={16} color={Brand.cyan} />
           <Text style={styles.optionText}>{option}</Text>
         </Pressable>
