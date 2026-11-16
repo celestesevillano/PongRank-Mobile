@@ -72,15 +72,21 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
 
   return (
     <View style={styles.wrap}>
-      <AuthInput accessibilityLabel="Dirección" placeholder="Calle, número y distrito" value={value} maxLength={250}
-        onChangeText={(text) => { picked.current = false; onChange(text); setMessage(''); }} />
+      <View style={styles.inputBox}>
+        <AuthInput accessibilityLabel="Dirección" placeholder="Calle, número y distrito" value={value} maxLength={250}
+          onChangeText={(text) => { picked.current = false; onChange(text); setMessage(''); }} />
+        {options.length > 0 && (
+          <View style={styles.dropdown}>
+            {options.map((option) => (
+              <Pressable key={option} accessibilityRole="button" style={styles.option} onPress={() => { picked.current = true; onChange(option); setOptions([]); }}>
+                <MapPin size={16} color={Brand.cyan} />
+                <Text style={styles.optionText}>{option}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </View>
       <AuthButton label="Usar mi ubicación" icon={MapPin} variant="secondary" loading={busy === 'locate'} onPress={locate} />
-      {options.map((option) => (
-        <Pressable key={option} accessibilityRole="button" style={styles.option} onPress={() => { picked.current = true; onChange(option); setOptions([]); }}>
-          <MapPin size={16} color={Brand.cyan} />
-          <Text style={styles.optionText}>{option}</Text>
-        </Pressable>
-      ))}
       {message ? <Text style={styles.message}>{message}</Text> : null}
     </View>
   );
@@ -88,7 +94,9 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
 
 const styles = StyleSheet.create({
   wrap: { gap: Spacing.two },
-  option: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44, paddingHorizontal: Spacing.three, borderRadius: 12, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface },
+  inputBox: { zIndex: 10 },
+  dropdown: { position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, gap: 4, padding: 4, borderRadius: 14, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface, elevation: 6 },
+  option: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44, paddingHorizontal: Spacing.two, borderRadius: 10 },
   optionText: { color: Brand.text, flex: 1, fontSize: 14 },
   message: { color: Brand.textSecondary, fontSize: 13 },
 });
