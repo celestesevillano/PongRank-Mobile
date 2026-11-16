@@ -1,13 +1,12 @@
-import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { ChevronRight, Ellipsis, List, Send, Swords, UserMinus, UserPlus } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { AuthInput } from '@/components/auth/auth-input';
-import { CardLighting } from '@/components/common/card-lighting';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
-import { PlayerIdentity, PongmigoButton, PongiState, ResultDialog, challengePlayer, openPlayer, pongiArt, pongmigosStyles } from '@/components/pongmigos/pongmigos-ui';
+import { PlayerIdentity, PongmigoButton, PongiState, ResultDialog, challengePlayer, openPlayer, pongmigosStyles } from '@/components/pongmigos/pongmigos-ui';
+import { SocialBanner } from '@/components/social/social-banner';
 import { Brand } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useFetch } from '@/hooks/use-fetch';
@@ -48,14 +47,8 @@ export function PongmigosList({ preview = false }: { preview?: boolean }) {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.list}
         ListHeaderComponent={preview ? <View style={styles.header}>
-          <View style={styles.banner}>
-            <CardLighting color="#E8262F" />
-            <View style={styles.bannerCopy}>
-              <Text style={styles.bannerTitle}>Mis Pongmigos</Text>
-              {friends.data && <Text style={styles.bannerCount}>{list.length} {list.length === 1 ? 'Pongmigo' : 'Pongmigos'}</Text>}
-            </View>
-            <Image source={pongiArt.banner} style={styles.bannerArt} contentFit="contain" accessibilityElementsHidden />
-          </View>
+          <SocialBanner kind="friends" subtitle={friends.data
+            ? `${list.length} ${list.length === 1 ? 'Pongmigo' : 'Pongmigos'}` : undefined} />
           <Pressable style={styles.entry} accessibilityRole="button"
             accessibilityLabel={count > 0 ? `Solicitudes recibidas, ${count} pendientes` : 'Solicitudes recibidas'}
             onPress={() => router.push({ pathname: '/social/requests', params: { box: 'received' } })}>
@@ -117,11 +110,6 @@ const styles = StyleSheet.create({
   search: { marginBottom: 10 },
   list: { gap: 8, paddingBottom: 16 },
   header: { gap: 8 },
-  banner: { flexDirection: 'row', alignItems: 'center', minHeight: 106, borderRadius: 14, backgroundColor: '#27151A', borderWidth: 1, borderColor: '#71333C', overflow: 'hidden' },
-  bannerCopy: { flex: 1, gap: 5, padding: 12 },
-  bannerTitle: { color: Brand.text, fontSize: 21, fontWeight: '800' },
-  bannerCount: { color: '#FFC3C8', fontSize: 15, fontWeight: '700' },
-  bannerArt: { width: 104, height: 104, alignSelf: 'flex-end' },
   entry: { ...pongmigosStyles.card, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 46, padding: 8 },
   entryLabel: { color: Brand.text, fontSize: 14, fontWeight: '700', flex: 1 },
   count: { color: Brand.text, backgroundColor: '#D81E28', minWidth: 22, borderRadius: 11, paddingHorizontal: 5, paddingVertical: 3, textAlign: 'center', fontWeight: '800' },
