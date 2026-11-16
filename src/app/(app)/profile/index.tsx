@@ -58,8 +58,8 @@ function ProfileMetric({ label, value }: { label: string; value?: number }) {
 
 const styles = StyleSheet.create({
   settings: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  metrics: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, borderColor: '#29424A', backgroundColor: '#131B20', paddingVertical: 12 },
+  metrics: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, borderColor: '#71333C', backgroundColor: '#27151A', paddingVertical: 12 },
   metric: { flex: 1, alignItems: 'center', paddingHorizontal: Spacing.one, gap: 3 },
-  number: { color: Brand.cyan, fontSize: 23, fontWeight: '800', fontVariant: ['tabular-nums'] },
-  metricLabel: { color: Brand.textSecondary, textAlign: 'center', fontSize: 12 },
+  number: { color: '#FFC3C8', fontSize: 23, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  metricLabel: { color: '#FFC3C8', textAlign: 'center', fontSize: 12 },
 });

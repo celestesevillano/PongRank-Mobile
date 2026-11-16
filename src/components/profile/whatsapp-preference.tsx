@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { ActionRow } from '@/components/common/action-row';
 import { BrandIcon } from '@/components/common/brand-icon';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
@@ -83,8 +84,10 @@ export function WhatsAppPreference() {
                 />
               </View>
               {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-              <AuthButton label="Guardar y activar" onPress={activate} loading={busy} />
-              <AuthButton label="Cancelar" variant="secondary" onPress={() => setOpen(false)} disabled={busy} />
+              <ActionRow>
+                <AuthButton label="Cancelar" variant="secondary" onPress={() => setOpen(false)} disabled={busy} />
+                <AuthButton label="Activar" onPress={activate} loading={busy} />
+              </ActionRow>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>

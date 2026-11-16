@@ -221,7 +221,9 @@ export default function CommunityDetailScreen() {
             ))}
           </View>
           <View style={styles.actions}>
-            {grace && !community.isMember ? null : community.isMember ? (
+            {grace && !community.isMember ? (
+              <Text style={styles.meta}>Esta comunidad está en pausa por vencimiento de su plan y no admite nuevos miembros por ahora.</Text>
+            ) : community.isMember ? (
               <>
                 <AuthButton label="Ver ranking" icon={Trophy}
                   onPress={() => router.navigate({ pathname: '/ranking', params: { communityId } })} />

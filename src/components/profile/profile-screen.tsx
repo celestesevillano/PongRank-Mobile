@@ -65,5 +65,5 @@ const styles = StyleSheet.create({
   icon: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#102730', alignItems: 'center', justifyContent: 'center' },
   copy: { flex: 1, gap: 3 },
   pressed: { opacity: 0.75 },
-  footer: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two, paddingBottom: 12, backgroundColor: Brand.background },
+  footer: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two, paddingBottom: Spacing.three, backgroundColor: Brand.background },
 });
