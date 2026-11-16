@@ -9,7 +9,7 @@ const banners = {
     artwork: require('../../../assets/images/pongrank-comunidades-banner.webp'),
     background: '#0B2229',
     border: '#28616C',
-    accent: '#AAEFF7',
+    accent: Brand.cyan,
   },
   clubs: {
     title: 'Mis clubes',
@@ -23,7 +23,7 @@ const banners = {
     artwork: require('../../../assets/images/pongrank-pongmigos-social-rojo.webp'),
     background: '#000000',
     border: '#71333C',
-    accent: '#FFC3C8',
+    accent: Brand.red,
   },
 } as const;
 
