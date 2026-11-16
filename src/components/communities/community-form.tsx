@@ -73,7 +73,7 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
         <AuthButton label="Crear comunidad" icon={Plus} disabled={!canSubmit} loading={loading} onPress={submit} />
       </View>
       <ConfirmDialog busy={false} onCancel={() => setLimitReached(false)} confirmation={limitReached ? {
-        title: 'Llegaste al límite de tu plan', message: 'Tu plan actual no permite crear más comunidades. Mejora tu plan para tener más espacios.',
+        title: 'Ya administras el máximo', message: 'Tu plan permite crear una cantidad limitada de comunidades, y ya llegaste a ese máximo. Tus cupos libres sirven para unirte a otras comunidades.',
         label: 'Ver planes', cancelLabel: 'Cancelar', Icon: Layers,
         onConfirm: () => { setLimitReached(false); openPlans(); },
       } : null} />
