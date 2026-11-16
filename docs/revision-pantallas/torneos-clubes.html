@@ -2297,7 +2297,7 @@ html>body{padding:0}</style>
   <strong class="outcome-score" data-poster-score aria-label="Mateo G. 2, Diego S. 0">2–0</strong>
   <ul class="result-set-list" aria-label="Resultados por set"><li>Set 1 <b>11–7</b></li><li>Set 2 <b>11–8</b></li></ul>
 </section></main>
-      <footer><div class="result-actions"><button type="button" class="action outline" data-share-result disabled><i data-lucide="share-2" aria-hidden="true"></i> Compartir</button><button type="button" class="action primary" data-screen="Llave · Avance conectado" data-diagram-state="advanced">Diagrama</button></div></footer>
+      <footer><div class="result-actions"><a class="action outline" data-share-result aria-disabled="true"><i data-lucide="share-2" aria-hidden="true"></i> Compartir</a><button type="button" class="action primary" data-screen="Llave · Avance conectado" data-diagram-state="advanced">Diagrama</button></div></footer>
       <nav class="tournament-navigation" aria-label="Navegación principal"><span><span><i data-lucide="house" aria-hidden="true"></i></span>Inicio</span><span><span><i data-lucide="users" aria-hidden="true"></i></span>Social</span><span aria-current="page"><span><i data-lucide="swords" aria-hidden="true"></i></span>Partidas</span><span><span><i data-lucide="trophy" aria-hidden="true"></i></span>Ranking</span><span><span><i data-lucide="circle-user" aria-hidden="true"></i></span>Perfil</span></nav><div class="home"></div>
     </section>
   </figure>
@@ -2367,7 +2367,7 @@ html>body{padding:0}</style>
           <div class="celebration-score"><small>Final confirmada</small><strong aria-label="Mateo G. 2, Lucía R. 1" data-poster-score>2–1</strong><p data-poster-detail>Contra Lucía R.</p></div>
         </section>
       </main>
-      <footer><div class="result-actions"><button type="button" class="action outline" data-share-result disabled><i data-lucide="share-2" aria-hidden="true"></i> Compartir</button><button type="button" class="action primary" data-screen="Llave · Avance conectado" data-diagram-state="champion">Diagrama</button></div></footer>
+      <footer><div class="result-actions"><a class="action outline" data-share-result aria-disabled="true"><i data-lucide="share-2" aria-hidden="true"></i> Compartir</a><button type="button" class="action primary" data-screen="Llave · Avance conectado" data-diagram-state="champion">Diagrama</button></div></footer>
       <nav class="tournament-navigation" aria-label="Navegación principal"><span><span><i data-lucide="house" aria-hidden="true"></i></span>Inicio</span><span aria-current="page"><span><i data-lucide="users" aria-hidden="true"></i></span>Social</span><span><span><i data-lucide="swords" aria-hidden="true"></i></span>Partidas</span><span><span><i data-lucide="trophy" aria-hidden="true"></i></span>Ranking</span><span><span><i data-lucide="circle-user" aria-hidden="true"></i></span>Perfil</span></nav><div class="home"></div>
     </section>
   </figure>
@@ -3349,7 +3349,7 @@ html>body{padding:0}</style>
 #pongrank-pendientes-torneos > [data-source="torneo"] .outcome-win.celebration { min-height:0; width:100%; }
 #pongrank-pendientes-torneos > [data-source="torneo"] .outcome-win.celebration .outcome-score { color:#ffd278; }
 #pongrank-pendientes-torneos .result-actions { display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%; }
-#pongrank-pendientes-torneos .result-actions .action { width:100%;min-width:0;white-space:nowrap; }
+#pongrank-pendientes-torneos .result-actions .action { width:100%;min-width:0;white-space:nowrap;text-decoration:none; }
 </style>
 <script>
 (() => {
@@ -3551,7 +3551,6 @@ html>body{padding:0}</style>
     const event = content('event');
     const score = content('score');
     const detail = content('detail');
-    let file;
 
     ready.then(() => {
       const canvas = document.createElement('canvas');
@@ -3589,32 +3588,10 @@ html>body{padding:0}</style>
       text(event, name ? 1313 : 1208, 47, '#ffe2aa');
       text(score, 1515, 126, '#ffd278', 900);
       text(detail, 1604, 37, '#fff');
-      canvas.toBlob(blob => {
-        if (!blob) return;
-        file = new File([blob], name ? 'pongrank-campeon.png' : 'pongrank-victoria.png', { type:'image/png' });
-        button.disabled = false;
-      }, 'image/png');
+      button.href = canvas.toDataURL('image/png');
+      button.download = name ? 'pongrank-campeon.png' : 'pongrank-victoria.png';
+      button.removeAttribute('aria-disabled');
     }).catch(() => { button.hidden = true; });
-
-    button.addEventListener('click', async () => {
-      if (!file) return;
-      if (location.protocol !== 'file:' && navigator.canShare?.({ files:[file] })) {
-        try {
-          await navigator.share({ title:event, files:[file] });
-          return;
-        } catch (error) {
-          if (error.name === 'AbortError') return;
-        }
-      }
-      const url = URL.createObjectURL(file);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = file.name;
-      root.append(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
   }
 })();
 </script>
