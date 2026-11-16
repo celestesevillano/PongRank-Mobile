@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { CardLighting } from '@/components/common/card-lighting';
-import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { ScreenState } from '@/components/common/screen-state';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
 import { usePlan } from '@/context/plan';
@@ -27,7 +26,6 @@ const ball = require('../../../../assets/images/pongrank-intro-ball.png');
 export default function DashboardScreen() {
   const { player } = useSession();
   const { plan, openPlans } = usePlan();
-  const [coachNotice, setCoachNotice] = useState(false);
   const [visit, setVisit] = useState(0);
   const playerId = player?.id ?? 0;
   const coachUnlocked = plan?.coachAccess === true;
@@ -102,7 +100,7 @@ export default function DashboardScreen() {
             Icon={Bot}
             artwork={coachArt}
             coach
-            onPress={() => coachUnlocked ? setCoachNotice(true) : openPlans()}
+            onPress={() => coachUnlocked ? router.push('/coach') : openPlans()}
           />
         </View>
 
@@ -141,14 +139,6 @@ export default function DashboardScreen() {
           </View>
         ) : null}
       </ScrollView>
-      <ConfirmDialog
-        busy={false}
-        onCancel={() => setCoachNotice(false)}
-        confirmation={coachNotice ? {
-          title: 'Coach', message: 'Coach usa MediaPipe para analizar tu postura y movimiento. El análisis aún no está disponible en esta versión.',
-          label: 'Aceptar', Icon: Bot, onConfirm: () => setCoachNotice(false), infoOnly: true,
-        } : null}
-      />
     </SafeAreaView>
   );
 }
