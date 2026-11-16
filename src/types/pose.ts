@@ -10,6 +10,7 @@ type CompactLandmark = [number, number, number, number];
 
 export type PoseEngineMessage =
   | { type: 'camera-ready'; width: number; height: number }
+  | { type: 'progress'; step: 'runtime' | 'model' }
   | { type: 'ready'; delegate: 'GPU' | 'CPU' }
   | { type: 'pose'; t: number; landmarks: CompactLandmark[] }
   | { type: 'no-person'; t: number }

@@ -32,6 +32,8 @@ export function PoseCamera({ facing, paused, onMessage, onLoadError }: PoseCamer
       source={{ html, baseUrl: 'https://localhost/' }}
       originWhitelist={['*']}
       javaScriptEnabled
+      cacheEnabled
+      cacheMode="LOAD_CACHE_ELSE_NETWORK"
       allowsInlineMediaPlayback
       mediaPlaybackRequiresUserAction={false}
       mediaCapturePermissionGrantType="grant"

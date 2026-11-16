@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { PoseEngineConfig } from '@/constants/coach';
 import type { PoseEngineError, PoseEngineMessage, PoseFrame } from '@/types/pose';
 
-export type PoseEngineStatus = 'starting' | 'loading-model' | 'ready' | 'error';
+export type PoseEngineStatus = 'starting' | 'loading-runtime' | 'loading-model' | 'ready' | 'error';
 
 type FrameSize = { width: number; height: number };
 
@@ -50,7 +50,9 @@ export function usePoseTracking(onFrame?: (frame: PoseFrame, size: FrameSize) =>
       switch (message.type) {
         case 'camera-ready':
           frameSize.current = { width: message.width, height: message.height };
-          setStatus('loading-model');
+          break;
+        case 'progress':
+          setStatus(message.step === 'runtime' ? 'loading-runtime' : 'loading-model');
           break;
         case 'ready':
           setStatus('ready');

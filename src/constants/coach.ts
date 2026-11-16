@@ -6,7 +6,7 @@ export const PoseEngineConfig = {
   wasmUrl: `${MEDIAPIPE_CDN}/wasm`,
   modelUrl: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
   targetFps: 15,
-  startupTimeoutMs: 30000,
+  startupTimeoutMs: 60000,
 } as const;
 
 export const PoseLandmarkIndex = {

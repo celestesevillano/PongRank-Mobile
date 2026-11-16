@@ -75,6 +75,7 @@ async function init() {
     post({ type: 'error', code: error && error.name === 'NotAllowedError' ? 'camera-denied' : 'camera-unavailable', detail: String(error) });
     return;
   }
+  post({ type: 'progress', step: 'runtime' });
   let vision;
   try {
     vision = await import(config.bundleUrl);
@@ -82,6 +83,7 @@ async function init() {
     post({ type: 'error', code: navigator.onLine ? 'model-failed' : 'offline', detail: String(error) });
     return;
   }
+  post({ type: 'progress', step: 'model' });
   let delegate = 'GPU';
   try {
     landmarker = await createLandmarker(vision, 'GPU');
