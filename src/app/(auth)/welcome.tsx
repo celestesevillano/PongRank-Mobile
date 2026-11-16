@@ -17,6 +17,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { ActionRow } from '@/components/common/action-row';
 import { EMBLEM, INTRO_DURATION, SETTLE_AT, WelcomeIntro } from '@/components/welcome-intro';
 import { Brand, Spacing } from '@/constants/theme';
 
@@ -84,8 +85,10 @@ export default function WelcomeScreen() {
               </View>
             ))}
           </View>
-          <AuthButton label="Empezar" disabled={playing} onPress={() => router.push('/(auth)/register')} />
-          <AuthButton label="Ya tengo cuenta" variant="secondary" disabled={playing} onPress={() => router.push('/(auth)/login')} />
+          <ActionRow>
+            <AuthButton label="Ya tengo cuenta" variant="secondary" disabled={playing} onPress={() => router.push('/(auth)/login')} />
+            <AuthButton label="Empezar" disabled={playing} onPress={() => router.push('/(auth)/register')} />
+          </ActionRow>
         </Animated.View>
       </SafeAreaView>
     </View>

@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { FieldError } from '@/components/auth/field-error';
+import { PillTabs } from '@/components/common/pill-tabs';
 import { SelectField, type SelectOption } from '@/components/auth/select-field';
 import { Brand, Spacing } from '@/constants/theme';
 import { useRegistration } from '@/context/registration';
@@ -106,16 +107,12 @@ export default function AboutYouScreen() {
             <Text style={styles.sectionLabel}>
               Sexo <Text style={{ color: Brand.red }}>*</Text> <Text style={styles.required}>· obligatorio</Text>
             </Text>
-            <View style={styles.genderRow}>
-              {GENDER_OPTIONS.slice(0, 2).map((option) => (
-                <GenderButton key={option.value} option={option} selected={gender === option.value} onPress={() => setGender(option.value)} />
-              ))}
-            </View>
-            <View style={styles.genderFull}>
-              <GenderButton
-                option={GENDER_OPTIONS[2]}
-                selected={gender === GENDER_OPTIONS[2].value}
-                onPress={() => setGender(GENDER_OPTIONS[2].value)}
+            <View style={styles.genderChips}>
+              <PillTabs
+                wrap
+                options={GENDER_OPTIONS.map((option) => ({ key: option.value, label: option.label }))}
+                selected={gender ?? ('' as Gender)}
+                onSelect={setGender}
               />
             </View>
             <FieldError message={submitted && gender === null ? 'Elige una opción.' : null} />
@@ -151,6 +148,7 @@ function GenderButton({
 }
 
 const styles = StyleSheet.create({
+  genderChips: { marginTop: Spacing.two },
   container: { flex: 1, backgroundColor: Brand.background },
   safeArea: { flex: 1, paddingHorizontal: Spacing.four, gap: Spacing.three },
   back: { color: Brand.text, fontSize: 28 },
