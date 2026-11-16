@@ -15,7 +15,7 @@ import { trainingService } from '@/services/training.service';
 import { trainingQueue } from '@/services/training-queue';
 import { toApiError } from '@/utils/api-error';
 
-const coachArt = require('../../../../../assets/images/pongrank-home-coach.webp');
+const coachArt = require('../../../../../../assets/images/pongrank-home-coach.webp');
 
 const EXERCISE_OPTIONS = (Object.keys(CoachExercises) as CoachExercise[]).map((key) => ({ key, label: CoachExercises[key].title }));
 const DURATION_OPTIONS = SESSION_DURATIONS.map((seconds) => ({ key: String(seconds), label: seconds < 60 ? `${seconds} s` : `${seconds / 60} min` }));

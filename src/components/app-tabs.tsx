@@ -30,9 +30,6 @@ export default function AppTabs() {
           options={{ title, tabBarIcon: ({ focused }) => <TabIcon Icon={Icon} focused={focused} /> }}
         />
       ))}
-      <Tabs.Screen name="find-match" options={{ href: null }} />
-      <Tabs.Screen name="new-match" options={{ href: null }} />
-      <Tabs.Screen name="match/[id]" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -67,13 +67,13 @@ export default function PublicPlayerScreen() {
         <View style={styles.layout}>
         <ScrollView style={styles.layout} contentContainerStyle={styles.scroll}>
           <View style={styles.card}>
-            <Image source={require('../../../../../assets/images/pongrank-public-profile.jpg')} contentFit="cover" style={styles.cover} accessibilityElementsHidden />
+            <Image source={require('../../../../../../assets/images/pongrank-public-profile.jpg')} contentFit="cover" style={styles.cover} accessibilityElementsHidden />
             <View style={styles.details}>
               <View style={styles.identity}>
                 {publicInfo?.photo ? <ProfileAvatar name={other.name} photo={publicInfo.photo} /> : null}
                 <PlayerIdentity player={other} hideAvatar={Boolean(publicInfo?.photo)} />
                 {!publicInfo?.photo ? (
-                  <Image source={require('../../../../../assets/images/pongrank-intro-paddle.png')} contentFit="contain" style={styles.brand} accessibilityElementsHidden />
+                  <Image source={require('../../../../../../assets/images/pongrank-intro-paddle.png')} contentFit="contain" style={styles.brand} accessibilityElementsHidden />
                 ) : null}
               </View>
               {publicInfo?.city ? <Text style={pongmigosStyles.body}>{publicInfo.city}</Text> : null}

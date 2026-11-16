@@ -21,8 +21,8 @@ import { useFetch } from '@/hooks/use-fetch';
 import { communitiesService } from '@/services/communities.service';
 import { toApiError } from '@/utils/api-error';
 
-const rankyPause = require('../../../../assets/images/ranky-gestion-pausada.webp');
-const deletedArtwork = require('../../../../assets/images/pongi-comunidad-eliminada.webp');
+const rankyPause = require('../../../../../assets/images/ranky-gestion-pausada.webp');
+const deletedArtwork = require('../../../../../assets/images/pongi-comunidad-eliminada.webp');
 
 export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
