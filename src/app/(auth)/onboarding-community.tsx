@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { OnboardingHeader } from '@/components/auth/onboarding-header';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
@@ -64,23 +65,7 @@ export default function OnboardingCommunityScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.back}>{'‹'}</Text>
-        </Pressable>
-
-        <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Paso 4 de 4</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { flex: 1 }]} />
-            <View style={[styles.progressFill, { flex: 1 }]} />
-            <View style={[styles.progressFill, { flex: 1 }]} />
-            <View style={[styles.progressFill, { flex: 1 }]} />
-          </View>
-        </View>
-
-        <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
-
-        <Text style={styles.title}>Elige tu comunidad</Text>
+        <OnboardingHeader step={4} title="Elige tu comunidad" />
         <AuthInput placeholder="Buscar comunidad" value={query} onChangeText={setQuery} autoCapitalize="none" />
 
         {error && <Text style={styles.error}>{error}</Text>}

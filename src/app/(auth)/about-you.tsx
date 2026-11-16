@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { OnboardingHeader } from '@/components/auth/onboarding-header';
 import { FieldError } from '@/components/auth/field-error';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { SelectField, type SelectOption } from '@/components/auth/select-field';
@@ -65,22 +66,7 @@ export default function AboutYouScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.back}>{'‹'}</Text>
-        </Pressable>
-
-        <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Paso 2 de 4</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { flex: 1 }]} />
-            <View style={[styles.progressFill, { flex: 1 }]} />
-            <View style={styles.progressFillEmpty} />
-            <View style={styles.progressFillEmpty} />
-          </View>
-        </View>
-
-        <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
-        <Text style={styles.title}>Cuéntanos sobre ti</Text>
+        <OnboardingHeader step={2} title="Cuéntanos sobre ti" />
         <Text style={styles.subtitle}>Los usamos para armar rankings y categorías justas. Puedes cambiarlos luego en tu perfil.</Text>
 
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
@@ -110,6 +96,8 @@ export default function AboutYouScreen() {
             <View style={styles.genderChips}>
               <PillTabs
                 wrap
+                fill
+                check={false}
                 options={GENDER_OPTIONS.map((option) => ({ key: option.value, label: option.label }))}
                 selected={gender ?? ('' as Gender)}
                 onSelect={setGender}

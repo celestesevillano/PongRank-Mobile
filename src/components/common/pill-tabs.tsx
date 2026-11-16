@@ -11,9 +11,13 @@ type PillTabsProps<T extends string> = {
   variant?: 'segment' | 'chip';
   // Solo chips: se acomodan en varias filas en lugar de desplazarse
   wrap?: boolean;
+  // Con wrap: cada chip ocupa media fila y el último crece a todo el ancho
+  fill?: boolean;
+  // Muestra el check en el chip seleccionado (por defecto sí)
+  check?: boolean;
 };
 
-export function PillTabs<T extends string>({ options, selected, onSelect, variant = 'chip', wrap = false }: PillTabsProps<T>) {
+export function PillTabs<T extends string>({ options, selected, onSelect, variant = 'chip', wrap = false, fill = false, check = true }: PillTabsProps<T>) {
   if (variant === 'segment') {
     return (
       <View style={styles.segment} accessibilityRole="tablist">
@@ -34,8 +38,8 @@ export function PillTabs<T extends string>({ options, selected, onSelect, varian
         {options.map(({ key, label }) => {
           const active = key === selected;
           return (
-            <Pressable key={key} hitSlop={4} onPress={() => onSelect(key)} style={[styles.pill, active && styles.pillActive]} accessibilityRole="tab" accessibilityState={{ selected: active }}>
-              {active && <Check size={14} color="#FFB3B7" strokeWidth={2.5} />}
+            <Pressable key={key} hitSlop={4} onPress={() => onSelect(key)} style={[styles.pill, fill && styles.fill, active && styles.pillActive]} accessibilityRole="tab" accessibilityState={{ selected: active }}>
+              {active && check && <Check size={14} color="#FFB3B7" strokeWidth={2.5} />}
               <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
             </Pressable>
           );
@@ -64,6 +68,7 @@ const styles = StyleSheet.create({
   segmentActive: { backgroundColor: '#2A2A2E' },
   segmentLabel: { color: Brand.textSecondary, fontSize: 14, fontWeight: '600', textAlign: 'center' },
   segmentLabelActive: { color: Brand.text },
+  fill: { flexGrow: 1, flexBasis: '44%' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginBottom: Spacing.three },
   scroll: { flexGrow: 0, marginBottom: Spacing.three },
   row: { gap: Spacing.two },
