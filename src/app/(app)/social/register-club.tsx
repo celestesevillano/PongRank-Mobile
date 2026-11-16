@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
+import { ClubCard } from '@/components/clubs/club-card';
 import { AddressField } from '@/components/clubs/address-field';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { CommunityScreen } from '@/components/communities/community-screen';
@@ -55,6 +56,10 @@ export default function RegisterClubScreen() {
             <AuthInput accessibilityLabel="Enlace al documento de afiliación a la FDPTM" placeholder="https://" value={document}
               onChangeText={setDocument} autoCapitalize="none" keyboardType="url" maxLength={500} />
           </View>
+          {name.trim() && address.trim() ? <>
+            <Text accessibilityRole="header" style={styles.label}>Vista previa</Text>
+            <ClubCard name={name.trim()} description={address.trim()} featured />
+          </> : null}
           <Text style={styles.note}>Es el comprobante de que tu club está afiliado a la Federación Deportiva Peruana de Tenis de Mesa. Un administrador lo revisará antes de publicar tu club.</Text>
         </ScrollView>
         <View style={styles.footer}>
