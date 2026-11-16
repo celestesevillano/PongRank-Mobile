@@ -107,16 +107,9 @@ export default function AboutYouScreen() {
               Sexo <Text style={{ color: Brand.red }}>*</Text> <Text style={styles.required}>· obligatorio</Text>
             </Text>
             <View style={styles.genderRow}>
-              {GENDER_OPTIONS.slice(0, 2).map((option) => (
-                <GenderButton key={option.value} option={option} selected={gender === option.value} onPress={() => setGender(option.value)} />
+              {GENDER_OPTIONS.map((option) => (
+                <GenderChip key={option.value} option={option} selected={gender === option.value} onPress={() => setGender(option.value)} />
               ))}
-            </View>
-            <View style={styles.genderFull}>
-              <GenderButton
-                option={GENDER_OPTIONS[2]}
-                selected={gender === GENDER_OPTIONS[2].value}
-                onPress={() => setGender(GENDER_OPTIONS[2].value)}
-              />
             </View>
             <FieldError message={submitted && gender === null ? 'Elige una opción.' : null} />
           </View>
@@ -129,7 +122,7 @@ export default function AboutYouScreen() {
   );
 }
 
-function GenderButton({
+function GenderChip({
   option,
   selected,
   onPress,
@@ -142,10 +135,10 @@ function GenderButton({
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      style={[styles.genderButton, selected && styles.genderButtonActive]}
+      style={[styles.chip, selected && styles.chipActive]}
       onPress={onPress}
     >
-      <Text style={[styles.genderLabel, selected && styles.genderLabelActive]}>{option.label}</Text>
+      <Text style={[styles.chipLabel, selected && styles.chipLabelActive]}>{option.label}</Text>
     </Pressable>
   );
 }
@@ -169,20 +162,19 @@ const styles = StyleSheet.create({
   monthCell: { flex: 1.5 },
   ageRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, marginTop: Spacing.two },
   ageText: { color: Brand.textSecondary, fontSize: 13 },
-  genderRow: { flexDirection: 'row', gap: Spacing.two },
-  genderFull: { marginTop: Spacing.two },
-  genderButton: {
-    flex: 1,
-    minHeight: 52,
+  genderRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  chip: {
+    minHeight: 44,
+    paddingHorizontal: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Brand.border,
-    borderRadius: Spacing.three,
+    borderRadius: 999,
     backgroundColor: Brand.surface,
   },
-  genderButtonActive: { borderColor: Brand.red, backgroundColor: 'rgba(232, 38, 47, 0.15)' },
-  genderLabel: { color: Brand.textSecondary, fontSize: 15, fontWeight: '600' },
-  genderLabelActive: { color: Brand.text },
+  chipActive: { borderColor: Brand.red, backgroundColor: 'rgba(232, 38, 47, 0.15)' },
+  chipLabel: { color: Brand.textSecondary, fontSize: 15, fontWeight: '600' },
+  chipLabelActive: { color: Brand.text },
   privacy: { color: Brand.textSecondary, fontSize: 12, textAlign: 'center', marginBottom: Spacing.three },
 });

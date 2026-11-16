@@ -84,8 +84,10 @@ export default function WelcomeScreen() {
               </View>
             ))}
           </View>
-          <AuthButton label="Empezar" disabled={playing} onPress={() => router.push('/(auth)/register')} />
-          <AuthButton label="Ya tengo cuenta" variant="secondary" disabled={playing} onPress={() => router.push('/(auth)/login')} />
+          <View style={styles.buttons}>
+            <AuthButton label="Empezar" disabled={playing} onPress={() => router.push('/(auth)/register')} />
+            <AuthButton label="Ya tengo cuenta" variant="secondary" disabled={playing} onPress={() => router.push('/(auth)/login')} />
+          </View>
         </Animated.View>
       </SafeAreaView>
     </View>
@@ -145,10 +147,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: 'center',
   },
-  loginLink: {
-    color: Brand.textSecondary,
-    textAlign: 'center',
-    marginTop: Spacing.two,
+  buttons: {
+    gap: 16,
     marginBottom: Spacing.three,
   },
 });
