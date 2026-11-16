@@ -51,13 +51,13 @@ export default function SocialSearchScreen() {
         )}
         {filter === 'players' && name.length < MIN_PLAYER_QUERY_LENGTH && <Text style={styles.hint}>Escribe al menos dos caracteres del nombre o usuario.</Text>}
         {(filter === 'all' || filter === 'clubs') && (
-          <Results key={`clubs:${name}`} title="Clubes" empty="No encontramos clubes con ese nombre."
+          <Results key={`clubs:${name}`} title="Clubes" empty="No encontramos clubes con ese nombre." artwork={filter !== 'all' ? pongiArt.search : undefined}
             fetchPage={(params, signal) => clubsService.search({ ...params, name: name || undefined }, signal)}
             renderItem={(club) => <ClubCard name={club.name} description={club.address}
               onPress={() => router.push({ pathname: '/social/club', params: { id: club.id } })} />} />
         )}
         {(filter === 'all' || filter === 'communities') && (
-          <Results key={`communities:${name}`} title="Comunidades" empty="No encontramos comunidades con ese nombre."
+          <Results key={`communities:${name}`} title="Comunidades" empty="No encontramos comunidades con ese nombre." artwork={filter !== 'all' ? pongiArt.search : undefined}
             fetchPage={(params, signal) => communitiesService.search({ ...params, name: name || undefined }, signal)}
             renderItem={(community) => <CommunityCard community={community}
               onPress={() => router.push({ pathname: '/social/[id]', params: { id: community.id } })} />} />

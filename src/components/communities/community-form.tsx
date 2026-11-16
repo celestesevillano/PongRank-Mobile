@@ -1,9 +1,10 @@
-import { Plus } from 'lucide-react-native';
+import { Plus, Users } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { CommunityCard } from '@/components/communities/community-card';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { Brand, Spacing } from '@/constants/theme';
@@ -26,6 +27,7 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
   const [customLabel, setCustomLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [nameTaken, setNameTaken] = useState(false);
+  const [createdName, setCreatedName] = useState<string | null>(null);
 
   const canSubmit = name.trim().length >= 3 && !nameTaken && (type !== 'OTHER' || Boolean(customLabel.trim()));
 
@@ -34,8 +36,7 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
     setLoading(true);
     try {
       await communitiesService.create({ name: name.trim(), description: description.trim() || undefined, communityType: type, customLabel: type === 'OTHER' ? customLabel.trim() : undefined });
-      showToast('Comunidad creada.');
-      onCreated();
+      setCreatedName(name.trim());
     } catch (err) {
       const error = toApiError(err);
       if (error.status === 409) setNameTaken(true);
@@ -64,7 +65,13 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
           </>
         ) : null}
       </ScrollView>
-      <AuthButton label="Crear comunidad" icon={Plus} disabled={!canSubmit} loading={loading} onPress={submit} />
+      <View style={styles.footer}>
+        <AuthButton label="Crear comunidad" icon={Plus} disabled={!canSubmit} loading={loading} onPress={submit} />
+      </View>
+      <ConfirmDialog busy={false} onCancel={onCreated} confirmation={createdName ? {
+        title: 'Comunidad creada', message: `${createdName} ya está lista. Invita a otros jugadores para que se unan.`,
+        label: 'Aceptar', Icon: Users, success: true, infoOnly: true, onConfirm: onCreated,
+      } : null} />
     </KeyboardAvoidingView>
   );
 }
@@ -96,7 +103,8 @@ export function CommunityTypeFields({ type, onTypeChange, customLabel, onLabelCh
 }
 
 const styles = StyleSheet.create({
-  layout: { flex: 1, gap: Spacing.two, paddingBottom: 12 },
+  layout: { flex: 1, gap: Spacing.two },
+  footer: { paddingBottom: Spacing.three },
   form: { gap: Spacing.two, paddingBottom: Spacing.three },
   label: { color: Brand.text, fontWeight: '600' },
   error: { color: '#FF6B72' },

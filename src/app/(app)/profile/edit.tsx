@@ -128,9 +128,9 @@ function ProfileEditor({ player }: { player: PlayerResponse }) {
           <Text style={styles.heading}>Foto de perfil</Text>
         </View>
         <ActionRow>
-          <AuthButton label="Elegir foto" icon={ImagePlus} variant="secondary" disabled={unavailable} loading={picking} onPress={choosePhoto} />
+          <AuthButton label="Elegir foto" icon={ImagePlus} disabled={unavailable} loading={picking} onPress={choosePhoto} />
           {data.photo ? (
-            <AuthButton label="Quitar foto" icon={Trash2} variant="text" disabled={unavailable} onPress={() => {
+            <AuthButton label="Quitar foto" icon={Trash2} variant="secondary" disabled={unavailable} onPress={() => {
               setData((current) => ({ ...current, photo: null }));
             }} />
           ) : null}
@@ -188,15 +188,17 @@ function ProfileEditor({ player }: { player: PlayerResponse }) {
                     </View>
                   ))}
                   {modalError ? <Text accessibilityRole="alert" style={styles.error}>{modalError}</Text> : null}
-                  <AuthButton label="Guardar redes" icon={Check} onPress={saveLinks} />
-                  <AuthButton label="Cancelar" variant="secondary" onPress={() => setDialog(undefined)} />
+                  <ActionRow>
+                    <AuthButton label="Cancelar" variant="secondary" onPress={() => setDialog(undefined)} />
+                    <AuthButton label="Guardar" onPress={saveLinks} />
+                  </ActionRow>
                 </>
               ) : (
                 <>
-                  <Text accessibilityRole="header" style={styles.title}>Vista previa del perfil público</Text>
+                  <Text accessibilityRole="header" style={styles.title}>Vista previa del perfil</Text>
                   <ProfileIdentity name={name.trim() || player.name} username={player.username} data={data} />
                   <ProfileNetworks links={data.links} />
-                  <AuthButton label="Volver a editar" variant="secondary" onPress={() => setDialog(undefined)} />
+                  <AuthButton label="Volver a editar" onPress={() => setDialog(undefined)} />
                 </>
               )}
             </View>
