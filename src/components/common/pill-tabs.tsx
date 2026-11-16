@@ -9,9 +9,11 @@ type PillTabsProps<T extends string> = {
   onSelect: (key: T) => void;
   // 'segment': cambia de sección (ancho completo, texto centrado). 'chip': filtra una lista.
   variant?: 'segment' | 'chip';
+  // Solo chips: se acomodan en varias filas en lugar de desplazarse
+  wrap?: boolean;
 };
 
-export function PillTabs<T extends string>({ options, selected, onSelect, variant = 'chip' }: PillTabsProps<T>) {
+export function PillTabs<T extends string>({ options, selected, onSelect, variant = 'chip', wrap = false }: PillTabsProps<T>) {
   if (variant === 'segment') {
     return (
       <View style={styles.segment} accessibilityRole="tablist">
@@ -20,6 +22,21 @@ export function PillTabs<T extends string>({ options, selected, onSelect, varian
           return (
             <Pressable key={key} onPress={() => onSelect(key)} style={[styles.segmentItem, active && styles.segmentActive]} accessibilityRole="tab" accessibilityState={{ selected: active }}>
               <Text style={[styles.segmentLabel, active && styles.segmentLabelActive]}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    );
+  }
+  if (wrap) {
+    return (
+      <View style={styles.wrap} accessibilityRole="tablist">
+        {options.map(({ key, label }) => {
+          const active = key === selected;
+          return (
+            <Pressable key={key} hitSlop={4} onPress={() => onSelect(key)} style={[styles.pill, active && styles.pillActive]} accessibilityRole="tab" accessibilityState={{ selected: active }}>
+              {active && <Check size={14} color="#FFB3B7" strokeWidth={2.5} />}
+              <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
             </Pressable>
           );
         })}
@@ -47,6 +64,7 @@ const styles = StyleSheet.create({
   segmentActive: { backgroundColor: '#2A2A2E' },
   segmentLabel: { color: Brand.textSecondary, fontSize: 14, fontWeight: '600', textAlign: 'center' },
   segmentLabelActive: { color: Brand.text },
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginBottom: Spacing.three },
   scroll: { flexGrow: 0, marginBottom: Spacing.three },
   row: { gap: Spacing.two },
   pill: { height: 44, flexDirection: 'row', gap: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, borderColor: Brand.border, alignItems: 'center', justifyContent: 'center' },

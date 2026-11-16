@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { Target, TrendingUp, Users } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -85,9 +85,7 @@ export default function WelcomeScreen() {
             ))}
           </View>
           <AuthButton label="Empezar" disabled={playing} onPress={() => router.push('/(auth)/register')} />
-          {playing ? <Text style={styles.loginLink}>Ya tengo cuenta</Text> : (
-            <Link href="/(auth)/login" style={styles.loginLink}>Ya tengo cuenta</Link>
-          )}
+          <AuthButton label="Ya tengo cuenta" variant="secondary" disabled={playing} onPress={() => router.push('/(auth)/login')} />
         </Animated.View>
       </SafeAreaView>
     </View>

@@ -76,13 +76,10 @@ export default function LoginScreen() {
 
         <AuthButton label="Iniciar sesión" disabled={!canSubmit} loading={loading} onPress={handleSubmit} />
 
-        <Pressable onPress={() => router.push('/(auth)/forgot-password')}>
-          <Text style={styles.registerLink}>¿Olvidaste tu contraseña?</Text>
-        </Pressable>
+        <AuthButton label="¿Olvidaste tu contraseña?" variant="text" onPress={() => router.push('/(auth)/forgot-password')} />
 
-        <Pressable onPress={() => router.replace('/(auth)/register')}>
-          <Text style={styles.registerLink}>¿No tienes cuenta? Crear una</Text>
-        </Pressable>
+        <Text style={styles.registerLink}>¿No tienes cuenta?</Text>
+        <AuthButton label="Crear cuenta" variant="secondary" onPress={() => router.replace('/(auth)/register')} />
       </SafeAreaView>
     </View>
   );

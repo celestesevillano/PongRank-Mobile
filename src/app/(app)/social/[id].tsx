@@ -225,15 +225,19 @@ export default function CommunityDetailScreen() {
               <Text style={styles.meta}>Esta comunidad está en pausa por vencimiento de su plan y no admite nuevos miembros por ahora.</Text>
             ) : community.isMember ? (
               <>
-                <AuthButton label="Ver ranking" icon={Trophy}
-                  onPress={() => router.navigate({ pathname: '/ranking', params: { communityId } })} />
-                {!grace && community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" variant="text" onPress={openMembers} />}
+                <ActionRow>
+                  {!grace && community.myRole === 'COMMUNITY_ADMIN' && <AuthButton label="Ver miembros" variant="secondary" onPress={openMembers} />}
+                  <AuthButton label="Ver ranking" icon={Trophy}
+                    onPress={() => router.navigate({ pathname: '/ranking', params: { communityId } })} />
+                </ActionRow>
               </>
             ) : full ? (
               <>
                 <Text style={styles.meta}>Sin cupos disponibles · {used} de {limit} espacios</Text>
-                <AuthButton label="Ver planes" icon={Layers} onPress={openPlans} />
-                <AuthButton label="Gestionar mis espacios" variant="text" onPress={() => router.dismissTo('/social')} />
+                <ActionRow>
+                  <AuthButton label="Mis espacios" variant="secondary" onPress={() => router.dismissTo('/social')} />
+                  <AuthButton label="Ver planes" icon={Layers} onPress={openPlans} />
+                </ActionRow>
               </>
             ) : (
               <AuthButton label="Unirme a la comunidad" icon={UserPlus} loading={busy} onPress={() => void changeMembership('join')} />
