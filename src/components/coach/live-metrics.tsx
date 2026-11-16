@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Spacing } from '@/constants/theme';
+import type { CoachExercise } from '@/constants/coach';
 import type { LiveMetrics as LiveMetricsValue } from '@/hooks/use-coach-analysis';
 
 export const scoreColor = (score: number | null) => (score === null ? Brand.textSecondary : score >= 75 ? '#2ECC71' : score >= 50 ? '#FFD278' : Brand.red);
 
-export function LiveMetrics({ metrics, paused }: { metrics: LiveMetricsValue; paused: boolean }) {
+export function LiveMetrics({ metrics, paused, exercise }: { metrics: LiveMetricsValue; paused: boolean; exercise: CoachExercise }) {
   return (
     <View style={styles.panel} accessibilityLiveRegion="polite">
       <Text style={[styles.tip, paused && styles.tipPaused]} numberOfLines={2}>
@@ -13,7 +14,11 @@ export function LiveMetrics({ metrics, paused }: { metrics: LiveMetricsValue; pa
       </Text>
       <View style={styles.row}>
         <Metric label="Postura" value={metrics.postureScore === null ? '—' : `${metrics.postureScore}`} unit="/100" color={scoreColor(metrics.postureScore)} />
-        <Metric label="Rodillas" value={metrics.kneeAngle === null ? '—' : `${metrics.kneeAngle}`} unit="°" color={Brand.cyan} />
+        {exercise === 'stance' ? (
+          <Metric label="Rodillas" value={metrics.kneeAngle === null ? '—' : `${metrics.kneeAngle}`} unit="°" color={Brand.cyan} />
+        ) : (
+          <Metric label="Golpes" value={`${metrics.swings}`} unit="" color={Brand.cyan} />
+        )}
         <Metric label="Swing máx." value={metrics.swingPeak.toFixed(1)} unit="m/s" color={Brand.cyan} />
       </View>
     </View>

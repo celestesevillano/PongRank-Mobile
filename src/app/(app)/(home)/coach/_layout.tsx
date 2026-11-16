@@ -1,0 +1,7 @@
+import { Stack } from 'expo-router';
+
+import { Brand } from '@/constants/theme';
+
+export default function CoachLayout() {
+  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Brand.background } }} />;
+}

@@ -5,6 +5,7 @@ export type FrameSize = { width: number; height: number };
 type Point = { x: number; y: number };
 
 const MIN_VISIBILITY = 0.5;
+const MIN_WRIST_VISIBILITY = 0.3;
 const SHOULDER_WIDTH_METERS = 0.4;
 const MAX_FRAME_GAP_MS = 400;
 export const SWING_VELOCITY_LIMIT = 50;
@@ -101,15 +102,13 @@ export function analyzePosture(frame: PoseFrame, size: FrameSize): PostureAnalys
   return { score: Math.round(score), kneeAngle, shoulderRotation: shoulderRotation(frame), checks, weakest };
 }
 
-export function wristSpeed(previous: PoseFrame, current: PoseFrame, size: FrameSize) {
+export function wristSpeed(previous: PoseFrame, current: PoseFrame, size: FrameSize, shoulderWidth: number) {
   const elapsedMs = current.timestamp - previous.timestamp;
-  if (elapsedMs <= 0 || elapsedMs > MAX_FRAME_GAP_MS) return null;
-  const shoulderWidth = shoulderWidthPixels(current, size);
-  if (!shoulderWidth || shoulderWidth < 1) return null;
+  if (elapsedMs <= 0 || elapsedMs > MAX_FRAME_GAP_MS || shoulderWidth < 1) return null;
   const metersPerPixel = SHOULDER_WIDTH_METERS / shoulderWidth;
 
   const speeds = [L.leftWrist, L.rightWrist]
-    .filter((index) => visible(previous.landmarks[index], current.landmarks[index]))
+    .filter((index) => [previous.landmarks[index], current.landmarks[index]].every((point) => point && point.visibility >= MIN_WRIST_VISIBILITY))
     .map((index) => (distance(toPixels(previous.landmarks[index], size), toPixels(current.landmarks[index], size)) * metersPerPixel) / (elapsedMs / 1000));
   return speeds.length ? clamp(Math.max(...speeds), 0, SWING_VELOCITY_LIMIT) : null;
 }

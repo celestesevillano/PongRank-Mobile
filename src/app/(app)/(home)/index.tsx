@@ -100,7 +100,7 @@ export default function DashboardScreen() {
             Icon={Bot}
             artwork={coachArt}
             coach
-            onPress={() => coachUnlocked ? router.push('/coach/session') : openPlans()}
+            onPress={() => coachUnlocked ? router.push('/coach') : openPlans()}
           />
         </View>
 

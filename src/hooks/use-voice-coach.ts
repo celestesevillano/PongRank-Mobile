@@ -1,5 +1,5 @@
 import * as Speech from 'expo-speech';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const STEADY_MS = 1200;
 const MIN_GAP_MS = 4000;
@@ -49,5 +49,15 @@ export function useVoiceCoach(message: string | null, enabled: boolean) {
 
   useEffect(() => () => void Speech.stop(), []);
 
-  return { voiceStatus: voice === undefined ? 'checking' : voice ? 'ready' : 'missing' } as const;
+  const announce = useCallback(
+    (text: string) => {
+      if (!voice || !enabled) return;
+      lastSpoken.current = { text, at: Date.now() };
+      Speech.stop();
+      Speech.speak(text, { voice: voice.identifier, language: voice.language, rate: 1.05 });
+    },
+    [voice, enabled],
+  );
+
+  return { voiceStatus: voice === undefined ? 'checking' : voice ? 'ready' : 'missing', announce } as const;
 }

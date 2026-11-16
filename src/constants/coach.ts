@@ -24,3 +24,19 @@ export const PoseLandmarkIndex = {
   leftAnkle: 27,
   rightAnkle: 28,
 } as const;
+
+export const CoachExercises = {
+  stance: {
+    title: 'Posición de espera',
+    description: 'Mantén la postura de espera: rodillas flexionadas, pies algo más abiertos que los hombros y la paleta delante.',
+  },
+  shadow: {
+    title: 'Golpes de sombra',
+    description: 'Haz drives al aire con buena técnica, como si hubiera pelota. Contamos tus golpes y su velocidad.',
+  },
+} as const;
+
+export type CoachExercise = keyof typeof CoachExercises;
+
+export const SESSION_DURATIONS = [30, 60, 120] as const;
+export const COUNTDOWN_SECONDS = 10;
