@@ -78,8 +78,10 @@ export default function LoginScreen() {
 
         <AuthButton label="¿Olvidaste tu contraseña?" variant="text" onPress={() => router.push('/(auth)/forgot-password')} />
 
-        <Text style={styles.registerLink}>¿No tienes cuenta?</Text>
-        <AuthButton label="Crear cuenta" variant="secondary" onPress={() => router.replace('/(auth)/register')} />
+        <View style={styles.signupRow}>
+          <Text style={styles.signupText}>¿No tienes cuenta?</Text>
+          <AuthButton label="Crear cuenta" variant="text" style={styles.signupButton} onPress={() => router.replace('/(auth)/register')} />
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -95,5 +97,8 @@ const styles = StyleSheet.create({
   form: { gap: Spacing.three, marginTop: Spacing.two },
   eyeButton: { position: 'absolute', right: Spacing.three, top: 0, bottom: 0, justifyContent: 'center' },
   error: { color: Brand.red, fontSize: 13 },
+  signupRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.one },
+  signupButton: { paddingHorizontal: Spacing.one },
+  signupText: { color: Brand.textSecondary },
   registerLink: { color: Brand.textSecondary, textAlign: 'center', marginTop: Spacing.two, marginBottom: Spacing.three },
 });

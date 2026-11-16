@@ -1,3 +1,4 @@
+import Slider from '@react-native-community/slider';
 import { Image } from 'expo-image';
 import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
@@ -5,7 +6,6 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
-import { PillTabs } from '@/components/common/pill-tabs';
 import { Brand, Spacing } from '@/constants/theme';
 import { useRegistration } from '@/context/registration';
 import { useSession } from '@/context/session';
@@ -103,7 +103,7 @@ export default function OnboardingRatingScreen() {
           <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
 
           <Text style={styles.title}>Tu nivel inicial</Text>
-          <Text style={styles.subtitle}>Elige el nivel que más se parece a ti</Text>
+          <Text style={styles.subtitle}>Desliza hasta el nivel que más se parece a ti</Text>
 
           <View style={styles.levelCard}>
             <Text style={styles.levelCaption}>TU NIVEL</Text>
@@ -111,12 +111,30 @@ export default function OnboardingRatingScreen() {
             <Text style={styles.levelHint}>{selected.hint}</Text>
           </View>
 
-          <PillTabs
-            wrap
-            options={INITIAL_LEVELS.map((option) => ({ key: option.value, label: option.label }))}
-            selected={level}
-            onSelect={(value) => { if (!saving) handleLevelChange(INITIAL_LEVELS.findIndex((option) => option.value === value)); }}
-          />
+          <View>
+            <Slider
+              accessibilityLabel="Nivel inicial"
+              minimumValue={0}
+              maximumValue={INITIAL_LEVELS.length - 1}
+              step={1}
+              disabled={saving}
+              value={levelIndex}
+              onValueChange={handleLevelChange}
+              minimumTrackTintColor={Brand.red}
+              maximumTrackTintColor={Brand.border}
+              thumbTintColor="#FFFFFF"
+            />
+            <View style={styles.ticks}>
+              {INITIAL_LEVELS.map((option, index) => (
+                <View key={option.value} style={[styles.tick, index === levelIndex && styles.tickActive]} />
+              ))}
+            </View>
+            <View style={styles.levelLabels}>
+              <Text style={styles.levelLabel}>{INITIAL_LEVELS[0].label}</Text>
+              <Text style={[styles.levelLabel, styles.levelLabelActive]}>{selected.label}</Text>
+              <Text style={styles.levelLabel}>{INITIAL_LEVELS[INITIAL_LEVELS.length - 1].label}</Text>
+            </View>
+          </View>
 
           {canDeclareFederation && (
             <>
