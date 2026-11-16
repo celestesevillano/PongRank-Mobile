@@ -11,7 +11,6 @@ import type { PlayerSummary } from '@/types/api';
 import type { ApiError } from '@/utils/api-error';
 
 export const pongiArt = {
-  banner: require('../../../assets/images/pongi-ranky-pongmigos.webp'),
   inbox: require('../../../assets/images/pongi-pongmigos-buzon.webp'),
   search: require('../../../assets/images/pongi-pongmigos-busqueda.webp'),
   rival: require('../../../assets/images/pongi-pongmigos-rival.webp'),

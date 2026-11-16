@@ -15,6 +15,7 @@ import { useFetch } from '@/hooks/use-fetch';
 import { clubsService } from '@/services/clubs.service';
 import { communitiesService } from '@/services/communities.service';
 
+import { SocialBanner } from '@/components/social/social-banner';
 import { PongiState } from '@/components/pongmigos/pongmigos-ui';
 import { PongmigosList } from '@/components/pongmigos/pongmigos-list';
 import { PillTabs } from '@/components/common/pill-tabs';
@@ -154,10 +155,9 @@ function MyClubs() {
 
   return (
     <>
-      <View style={styles.headingRow}>
-        <Text style={styles.heading}>Mis clubes</Text>
-        {plan?.maxSpaces !== undefined && plan.usedSpaces !== undefined &&
-          <Text style={styles.message}>Tus espacios · {plan.usedSpaces} de {plan.maxSpaces}</Text>}
+      <View style={styles.clubBanner}>
+        <SocialBanner kind="clubs" subtitle={plan?.maxSpaces !== undefined && plan.usedSpaces !== undefined
+          ? `${plan.usedSpaces} de ${plan.maxSpaces} espacios usados` : undefined} />
       </View>
       {(loading || error) ? (
         <View style={styles.listArea}><ScreenState loading={loading} error={error} onRetry={refetch} /></View>
@@ -176,7 +176,7 @@ function MyClubs() {
 const styles = StyleSheet.create({
   socialTitle: { fontSize: 34 },
   search: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingHorizontal: Spacing.three, marginBottom: Spacing.three, borderRadius: 14, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface },
-  headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two, marginBottom: Spacing.two },
+  clubBanner: { marginBottom: Spacing.two },
   heading: { color: Brand.text, fontSize: 18, fontWeight: '700', flexShrink: 1 },
   listArea: { flex: 1 },
   historyButton: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
