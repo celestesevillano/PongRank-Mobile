@@ -90,9 +90,7 @@ export default function RegisterScreen() {
 
         <AuthButton label="Continuar" disabled={!canSubmit} onPress={handleSubmit} />
 
-        <Pressable onPress={() => router.replace('/(auth)/login')}>
-          <Text style={styles.loginLink}>Ya tengo cuenta</Text>
-        </Pressable>
+        <AuthButton label="Ya tengo cuenta" variant="text" onPress={() => router.replace('/(auth)/login')} />
       </SafeAreaView>
     </View>
   );

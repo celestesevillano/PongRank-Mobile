@@ -49,7 +49,8 @@ export function SocialBanner({ kind, subtitle }: { kind: keyof typeof banners; s
 
 const styles = StyleSheet.create({
   banner: {
-    minHeight: 109,
+    aspectRatio: 3,
+    minHeight: 104,
     justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 1,

@@ -31,9 +31,9 @@ export default function RequestsScreen() {
         data={data ?? []}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={loading ? <ActivityIndicator color={Brand.red} />
+        ListEmptyComponent={<View style={styles.centered}>{loading ? <ActivityIndicator color={Brand.red} />
           : error ? <PongiState error={error} retry={refetch} />
-          : <PongiState artwork={sent ? pongiArt.cancelled : pongiArt.inbox} text={sent ? 'No tienes solicitudes enviadas.' : 'No tienes solicitudes pendientes.'} />}
+          : <PongiState artwork={sent ? pongiArt.cancelled : pongiArt.inbox} text={sent ? 'No tienes solicitudes enviadas.' : 'No tienes solicitudes pendientes.'} />}</View>}
         ListFooterComponent={error && data?.length ? <PongiState error={error} retry={refetch} /> : undefined}
         renderItem={({ item }) => {
           const other = friendOf(item, id);
@@ -50,7 +50,7 @@ export default function RequestsScreen() {
                 <PongmigoButton label="Ver perfil" icon={ArrowRight} variant="text" onPress={() => openPlayer(other)} />
               </View>
               {sent ? <>
-                <View style={styles.badge}><Clock size={13} color="#F9D282" /><Text style={styles.badgeText}>Pendiente</Text></View>
+                <View style={styles.badge}><Clock size={13} color="#B9BBC1" /><Text style={styles.badgeText}>Pendiente</Text></View>
                 <PongmigoButton label="Cancelar solicitud" icon={X} busy={busy('cancel')} disabled={blocked || (pending !== null && !busy('cancel'))} onPress={() => act('cancel')} />
               </> : (
                 <ActionRow>
@@ -69,8 +69,9 @@ export default function RequestsScreen() {
 
 const styles = StyleSheet.create({
   list: { flexGrow: 1, gap: 8, paddingBottom: 16 },
+  centered: { flex: 1, justifyContent: 'center' },
   request: { ...pongmigosStyles.card, padding: 12, gap: 8 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  badge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 5, backgroundColor: '#302418', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
-  badgeText: { color: '#F9D282', fontSize: 12, fontWeight: '700' },
+  badge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 5, backgroundColor: '#232326', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
+  badgeText: { color: '#B9BBC1', fontSize: 12, fontWeight: '700' },
 });

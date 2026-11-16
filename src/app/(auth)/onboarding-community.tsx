@@ -1,9 +1,11 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AuthButton } from '@/components/auth/auth-button';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
@@ -99,17 +101,15 @@ export default function OnboardingCommunityScreen() {
                     <Text style={styles.communityName}>{item.name}</Text>
                     <Text style={styles.communityMeta}>{item.memberCount} miembros</Text>
                   </View>
-                  <Pressable
-                    style={[styles.joinButton, joined && styles.joinButtonDone]}
+                  <AuthButton
+                    label={joined ? 'Unido' : 'Unirme'}
+                    icon={joined ? Check : undefined}
+                    variant="secondary"
+                    loading={joiningId === item.id}
+                    disabled={joined}
                     onPress={() => handleJoin(item)}
-                    disabled={joined || joiningId === item.id}
-                  >
-                    {joiningId === item.id ? (
-                      <ActivityIndicator color="#FFFFFF" size="small" />
-                    ) : (
-                      <Text style={styles.joinButtonLabel}>{joined ? 'Unido ✓' : 'Unirme'}</Text>
-                    )}
-                  </Pressable>
+                    style={styles.joinButton}
+                  />
                 </View>
               );
             }}
@@ -121,9 +121,7 @@ export default function OnboardingCommunityScreen() {
           Unirte te da además un ranking dentro de tu grupo específico.
         </Text>
 
-        <Pressable onPress={finish}>
-          <Text style={styles.skip}>Saltar por ahora</Text>
-        </Pressable>
+        <AuthButton label="Saltar por ahora" variant="text" onPress={finish} />
       </SafeAreaView>
     </View>
   );
@@ -153,7 +151,7 @@ const styles = StyleSheet.create({
   },
   communityName: { color: Brand.text, fontSize: 15, fontWeight: '600' },
   communityMeta: { color: Brand.textSecondary, fontSize: 12, marginTop: 2 },
-  joinButton: { backgroundColor: Brand.red, borderRadius: 999, paddingHorizontal: Spacing.three, paddingVertical: Spacing.one },
+  joinButton: { minWidth: 104, paddingVertical: Spacing.two },
   joinButtonDone: { backgroundColor: Brand.border },
   joinButtonLabel: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   footerHint: { color: Brand.textSecondary, fontSize: 11, textAlign: 'center' },
