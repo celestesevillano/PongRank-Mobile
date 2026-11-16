@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronRight, Clock3, Layers, LogOut, Megaphone, Pencil, Send, Trophy, UserPlus, Users, X } from 'lucide-react-native';
+import { ChartNoAxesColumnIncreasing, ChevronRight, Clock3, GitFork, Layers, LogOut, Megaphone, Pencil, Send, Trophy, UserPlus, Users, X } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -177,6 +177,8 @@ export default function ClubDetailsScreen() {
                 onPress={() => router.push({ pathname: '/social/club-people', params: { id: clubId, mode: 'ranking' } })} />
               <ClubLink label="Avisos" Icon={Megaphone} subtitle="Anuncios del club"
                 onPress={() => router.push({ pathname: '/social/club-announcements', params: { id: clubId } })} />
+              {isAdmin && <ClubLink label="Revisar llave" Icon={GitFork}
+                onPress={() => router.push({ pathname: '/social/bracket-review', params: { clubId } })} />}
               <ClubLink label={isAdmin ? 'Gestionar miembros' : 'Ver miembros'} Icon={Users}
                 subtitle={members.data ? `${members.data.length} miembros` : undefined} onPress={() => openPeople('members')} last />
             </View>
