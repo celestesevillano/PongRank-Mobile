@@ -76,7 +76,7 @@ export default function WelcomeScreen() {
 
         <Animated.View style={actions} pointerEvents={playing ? 'none' : 'auto'}
           accessibilityElementsHidden={playing} importantForAccessibility={playing ? 'no-hide-descendants' : 'auto'}>
-          <Text style={styles.title}>Encuentra tu próximo rival</Text>
+          <Text accessibilityRole="header" style={styles.title}>{'Encuentra tu\npróximo rival'}</Text>
           <View style={styles.features}>
             {FEATURES.map(({ Icon, label }) => (
               <View key={label} style={styles.featureItem}>
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.five,
     gap: Spacing.three,
   },
   hero: {
@@ -128,10 +129,11 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Brand.text,
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '700',
+    textAlign: 'center',
     marginTop: Spacing.four,
-    marginBottom: Spacing.three,
+    marginBottom: Spacing.four,
   },
   features: {
     flexDirection: 'row',

@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { OnboardingHeader } from '@/components/auth/onboarding-header';
 import { AuthInput } from '@/components/auth/auth-input';
 import { Brand, Spacing } from '@/constants/theme';
 import { useRegistration } from '@/context/registration';
@@ -35,24 +36,7 @@ export default function RegisterScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.back}>{'‹'}</Text>
-        </Pressable>
-
-        <View style={styles.progressRow}>
-          <Text style={styles.progressLabel}>Paso 1 de 4</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { flex: 1 }]} />
-            <View style={styles.progressFillEmpty} />
-            <View style={styles.progressFillEmpty} />
-            <View style={styles.progressFillEmpty} />
-          </View>
-        </View>
-
-        <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
-        <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
-
-        <Text style={styles.title}>Crea tu cuenta</Text>
+        <OnboardingHeader step={1} title="Crea tu cuenta" />
 
         <View style={styles.form}>
           <View>
@@ -90,7 +74,10 @@ export default function RegisterScreen() {
 
         <AuthButton label="Continuar" disabled={!canSubmit} onPress={handleSubmit} />
 
-        <AuthButton label="Ya tengo cuenta" variant="text" onPress={() => router.replace('/(auth)/login')} />
+        <View style={styles.loginRow}>
+          <Text style={styles.loginPrompt}>¿Ya tienes cuenta?</Text>
+          <AuthButton label="Iniciar sesión" variant="text" style={styles.loginButton} onPress={() => router.replace('/(auth)/login')} />
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -112,5 +99,8 @@ const styles = StyleSheet.create({
   eyeButton: { position: 'absolute', right: Spacing.three, top: 0, bottom: 0, justifyContent: 'center' },
   hint: { color: Brand.textSecondary, fontSize: 12 },
   error: { color: Brand.red, fontSize: 13 },
+  loginRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.one },
+  loginPrompt: { color: Brand.textSecondary },
+  loginButton: { paddingHorizontal: Spacing.one },
   loginLink: { color: Brand.cyan, textAlign: 'center', marginTop: Spacing.two, marginBottom: Spacing.three },
 });

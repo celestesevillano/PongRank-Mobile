@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { OnboardingHeader } from '@/components/auth/onboarding-header';
 import { Brand, Spacing } from '@/constants/theme';
 import { useRegistration } from '@/context/registration';
 import { useSession } from '@/context/session';
@@ -85,24 +86,7 @@ export default function OnboardingRatingScreen() {
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.content}>
-          <Pressable disabled={saving} onPress={() => router.back()} hitSlop={12}>
-            <Text style={styles.back}>{'‹'}</Text>
-          </Pressable>
-
-          <View style={styles.progressRow}>
-            <Text style={styles.progressLabel}>Paso 3 de 4</Text>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { flex: 1 }]} />
-              <View style={[styles.progressFill, { flex: 1 }]} />
-              <View style={[styles.progressFill, { flex: 1 }]} />
-              <View style={styles.progressFillEmpty} />
-            </View>
-          </View>
-
-          <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
-          <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
-
-          <Text style={styles.title}>Tu nivel inicial</Text>
+          <OnboardingHeader step={3} title="Tu nivel inicial" backDisabled={saving} />
           <Text style={styles.subtitle}>Desliza hasta el nivel que más se parece a ti</Text>
 
           <View style={styles.levelCard}>
