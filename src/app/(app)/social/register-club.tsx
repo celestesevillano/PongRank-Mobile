@@ -52,7 +52,7 @@ export default function RegisterClubScreen() {
           <Text style={styles.note}>Es el comprobante de que tu club está afiliado a la Federación Deportiva Peruana de Tenis de Mesa. Un administrador lo revisará antes de publicar tu club.</Text>
         </ScrollView>
         <View style={styles.footer}>
-          <AuthButton label="Enviar a revisión" icon={Send} disabled={!canSubmit} loading={saving} onPress={submit} />
+          <AuthButton label="Registrar club" icon={Send} disabled={!canSubmit} loading={saving} onPress={submit} />
         </View>
       </KeyboardAvoidingView>
       <ConfirmDialog busy={false} onCancel={() => undefined} confirmation={sentClubId !== null ? {
@@ -66,7 +66,7 @@ export default function RegisterClubScreen() {
 
 const styles = StyleSheet.create({
   layout: { flex: 1 },
-  footer: { paddingBottom: Spacing.three },
+  footer: { paddingBottom: Spacing.four },
   form: { gap: Spacing.two, paddingBottom: Spacing.three },
   label: { color: Brand.text, fontWeight: '600' },
   note: { color: Brand.textSecondary, fontSize: 14 },
