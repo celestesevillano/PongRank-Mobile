@@ -1,4 +1,4 @@
-import { Plus, Users } from 'lucide-react-native';
+import { Layers, Plus, Users } from 'lucide-react-native';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -8,6 +8,7 @@ import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { CommunityCard } from '@/components/communities/community-card';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { Brand, Spacing } from '@/constants/theme';
+import { usePlan } from '@/context/plan';
 import { useToast } from '@/context/toast';
 import { communitiesService, type CommunityType } from '@/services/communities.service';
 import { toApiError } from '@/utils/api-error';
@@ -28,6 +29,8 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
   const [loading, setLoading] = useState(false);
   const [nameTaken, setNameTaken] = useState(false);
   const [createdName, setCreatedName] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+  const { openPlans } = usePlan();
 
   const canSubmit = name.trim().length >= 3 && !nameTaken && (type !== 'OTHER' || Boolean(customLabel.trim()));
 
@@ -40,6 +43,7 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
     } catch (err) {
       const error = toApiError(err);
       if (error.status === 409) setNameTaken(true);
+      else if (error.status === 403) setLimitReached(true);
       else showToast(error.message, 'error');
     } finally {
       setLoading(false);
@@ -68,6 +72,11 @@ export function CommunityForm({ onCreated }: { onCreated: () => void }) {
       <View style={styles.footer}>
         <AuthButton label="Crear comunidad" icon={Plus} disabled={!canSubmit} loading={loading} onPress={submit} />
       </View>
+      <ConfirmDialog busy={false} onCancel={() => setLimitReached(false)} confirmation={limitReached ? {
+        title: 'Llegaste al límite de tu plan', message: 'Tu plan actual no permite crear más comunidades. Mejora tu plan para tener más espacios.',
+        label: 'Ver planes', cancelLabel: 'Cancelar', Icon: Layers,
+        onConfirm: () => { setLimitReached(false); openPlans(); },
+      } : null} />
       <ConfirmDialog busy={false} onCancel={onCreated} confirmation={createdName ? {
         title: 'Comunidad creada', message: `${createdName} ya está lista. Invita a otros jugadores para que se unan.`,
         label: 'Aceptar', Icon: Users, success: true, infoOnly: true, onConfirm: onCreated,
