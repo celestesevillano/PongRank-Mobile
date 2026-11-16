@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
@@ -90,7 +90,10 @@ export default function RegisterScreen() {
 
         <AuthButton label="Continuar" disabled={!canSubmit} onPress={handleSubmit} />
 
-        <AuthButton label="Ya tengo cuenta" variant="text" onPress={() => router.replace('/(auth)/login')} />
+        <View style={styles.loginRow}>
+          <Text style={styles.loginText}>¿Ya tienes cuenta?</Text>
+          <AuthButton label="Iniciar sesión" variant="text" style={styles.loginButton} onPress={() => router.replace('/(auth)/login')} />
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -105,12 +108,13 @@ const styles = StyleSheet.create({
   progressTrack: { flexDirection: 'row', gap: 4 },
   progressFill: { height: 3, borderRadius: 2, backgroundColor: Brand.red },
   progressFillEmpty: { flex: 1, height: 3, borderRadius: 2, backgroundColor: Brand.border },
-  icon: { width: 56, height: 56, alignSelf: 'center' },
-  wordmark: { width: 160, height: 32, alignSelf: 'center' },
+  icon: { width: 48, height: 48, alignSelf: 'center' },
+  wordmark: { width: 140, height: 28, alignSelf: 'center' },
   title: { color: Brand.text, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: Spacing.two },
   form: { gap: Spacing.three, marginTop: Spacing.two },
   eyeButton: { position: 'absolute', right: Spacing.three, top: 0, bottom: 0, justifyContent: 'center' },
   hint: { color: Brand.textSecondary, fontSize: 12 },
-  error: { color: Brand.red, fontSize: 13 },
-  loginLink: { color: Brand.cyan, textAlign: 'center', marginTop: Spacing.two, marginBottom: Spacing.three },
+  loginRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.one },
+  loginButton: { paddingHorizontal: Spacing.one },
+  loginText: { color: Brand.textSecondary },
 });

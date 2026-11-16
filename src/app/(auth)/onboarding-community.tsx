@@ -79,6 +79,7 @@ export default function OnboardingCommunityScreen() {
         </View>
 
         <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
+        <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
 
         <Text style={styles.title}>Elige tu comunidad</Text>
         <AuthInput placeholder="Buscar comunidad" value={query} onChangeText={setQuery} autoCapitalize="none" />
@@ -136,8 +137,9 @@ const styles = StyleSheet.create({
   progressTrack: { flexDirection: 'row', gap: 4 },
   progressFill: { height: 3, borderRadius: 2, backgroundColor: Brand.red },
   progressFillEmpty: { flex: 1, height: 3, borderRadius: 2, backgroundColor: Brand.border },
-  icon: { width: 44, height: 44, alignSelf: 'center' },
-  title: { color: Brand.text, fontSize: 26, fontWeight: '700', textAlign: 'center' },
+  icon: { width: 48, height: 48, alignSelf: 'center' },
+  wordmark: { width: 140, height: 28, alignSelf: 'center' },
+  title: { color: Brand.text, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: Spacing.two },
   error: { color: Brand.red, fontSize: 13 },
   empty: { color: Brand.textSecondary, textAlign: 'center', marginTop: Spacing.four },
   communityRow: {
@@ -152,8 +154,5 @@ const styles = StyleSheet.create({
   communityName: { color: Brand.text, fontSize: 15, fontWeight: '600' },
   communityMeta: { color: Brand.textSecondary, fontSize: 12, marginTop: 2 },
   joinButton: { minWidth: 104, paddingVertical: Spacing.two },
-  joinButtonDone: { backgroundColor: Brand.border },
-  joinButtonLabel: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   footerHint: { color: Brand.textSecondary, fontSize: 11, textAlign: 'center' },
-  skip: { color: Brand.cyan, textAlign: 'center', marginBottom: Spacing.three },
 });

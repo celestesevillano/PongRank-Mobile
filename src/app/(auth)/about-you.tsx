@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { FieldError } from '@/components/auth/field-error';
-import { PillTabs } from '@/components/common/pill-tabs';
 import { SelectField, type SelectOption } from '@/components/auth/select-field';
 import { Brand, Spacing } from '@/constants/theme';
 import { useRegistration } from '@/context/registration';
@@ -80,6 +79,7 @@ export default function AboutYouScreen() {
         </View>
 
         <Image source={require('@/assets/images/pongrank-paddle.png')} style={styles.icon} contentFit="contain" />
+        <Image source={require('@/assets/images/pongrank-wordmark.png')} style={styles.wordmark} contentFit="contain" />
         <Text style={styles.title}>Cuéntanos sobre ti</Text>
         <Text style={styles.subtitle}>Los usamos para armar rankings y categorías justas. Puedes cambiarlos luego en tu perfil.</Text>
 
@@ -107,13 +107,19 @@ export default function AboutYouScreen() {
             <Text style={styles.sectionLabel}>
               Sexo <Text style={{ color: Brand.red }}>*</Text> <Text style={styles.required}>· obligatorio</Text>
             </Text>
-            <View style={styles.genderChips}>
-              <PillTabs
-                wrap
-                options={GENDER_OPTIONS.map((option) => ({ key: option.value, label: option.label }))}
-                selected={gender ?? ('' as Gender)}
-                onSelect={setGender}
-              />
+            <View style={styles.genderRows}>
+              <View style={styles.genderRow}>
+                {GENDER_OPTIONS.slice(0, 2).map((option) => (
+                  <GenderChip key={option.value} option={option} selected={gender === option.value} onPress={() => setGender(option.value)} />
+                ))}
+              </View>
+              <View style={styles.genderRow}>
+                <GenderChip
+                  option={GENDER_OPTIONS[2]}
+                  selected={gender === GENDER_OPTIONS[2].value}
+                  onPress={() => setGender(GENDER_OPTIONS[2].value)}
+                />
+              </View>
             </View>
             <FieldError message={submitted && gender === null ? 'Elige una opción.' : null} />
           </View>
@@ -126,7 +132,7 @@ export default function AboutYouScreen() {
   );
 }
 
-function GenderButton({
+function GenderChip({
   option,
   selected,
   onPress,
@@ -139,16 +145,15 @@ function GenderButton({
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      style={[styles.genderButton, selected && styles.genderButtonActive]}
+      style={[styles.chip, selected && styles.chipActive]}
       onPress={onPress}
     >
-      <Text style={[styles.genderLabel, selected && styles.genderLabelActive]}>{option.label}</Text>
+      <Text numberOfLines={1} style={[styles.chipLabel, selected && styles.chipLabelActive]}>{option.label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  genderChips: { marginTop: Spacing.two },
   container: { flex: 1, backgroundColor: Brand.background },
   safeArea: { flex: 1, paddingHorizontal: Spacing.four, gap: Spacing.three },
   back: { color: Brand.text, fontSize: 28 },
@@ -158,6 +163,7 @@ const styles = StyleSheet.create({
   progressFill: { height: 3, borderRadius: 2, backgroundColor: Brand.red },
   progressFillEmpty: { flex: 1, height: 3, borderRadius: 2, backgroundColor: Brand.border },
   icon: { width: 48, height: 48, alignSelf: 'center' },
+  wordmark: { width: 140, height: 28, alignSelf: 'center' },
   title: { color: Brand.text, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: Spacing.two },
   subtitle: { color: Brand.textSecondary, textAlign: 'center', fontSize: 13 },
   form: { gap: Spacing.four, paddingTop: Spacing.two },
@@ -167,20 +173,21 @@ const styles = StyleSheet.create({
   monthCell: { flex: 1.5 },
   ageRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, marginTop: Spacing.two },
   ageText: { color: Brand.textSecondary, fontSize: 13 },
+  genderRows: { gap: Spacing.two },
   genderRow: { flexDirection: 'row', gap: Spacing.two },
-  genderFull: { marginTop: Spacing.two },
-  genderButton: {
+  chip: {
     flex: 1,
-    minHeight: 52,
+    minHeight: 44,
+    paddingHorizontal: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Brand.border,
-    borderRadius: Spacing.three,
+    borderRadius: 999,
     backgroundColor: Brand.surface,
   },
-  genderButtonActive: { borderColor: Brand.red, backgroundColor: 'rgba(232, 38, 47, 0.15)' },
-  genderLabel: { color: Brand.textSecondary, fontSize: 15, fontWeight: '600' },
-  genderLabelActive: { color: Brand.text },
+  chipActive: { borderColor: Brand.primary, backgroundColor: Brand.primary },
+  chipLabel: { color: Brand.textSecondary, fontSize: 15, fontWeight: '600' },
+  chipLabelActive: { color: '#FFFFFF' },
   privacy: { color: Brand.textSecondary, fontSize: 12, textAlign: 'center', marginBottom: Spacing.three },
 });

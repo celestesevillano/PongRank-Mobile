@@ -74,7 +74,7 @@ export default function WelcomeScreen() {
           <Text style={styles.tagline}>JUEGA. SUBE. COMPITE.</Text>
         </Animated.View>
 
-        <Animated.View style={actions} pointerEvents={playing ? 'none' : 'auto'}
+        <Animated.View style={[styles.actions, actions]} pointerEvents={playing ? 'none' : 'auto'}
           accessibilityElementsHidden={playing} importantForAccessibility={playing ? 'no-hide-descendants' : 'auto'}>
           <Text style={styles.title}>Encuentra tu próximo rival</Text>
           <View style={styles.features}>
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
+    paddingBottom: 48,
     gap: Spacing.three,
   },
   hero: {
@@ -111,8 +112,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   paddle: {
-    width: 220,
-    height: 220,
+    width: 200,
+    height: 200,
   },
   wordmark: {
     width: '100%',
@@ -126,17 +127,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: Spacing.two,
   },
+  actions: {
+    gap: Spacing.three,
+  },
   title: {
     color: Brand.text,
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
-    marginTop: Spacing.four,
-    marginBottom: Spacing.three,
+    textAlign: 'center',
+    marginTop: Spacing.three,
   },
   features: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: Spacing.four,
+    marginBottom: Spacing.two,
   },
   featureItem: {
     flex: 1,
@@ -147,11 +151,5 @@ const styles = StyleSheet.create({
     color: Brand.textSecondary,
     fontSize: 11,
     textAlign: 'center',
-  },
-  loginLink: {
-    color: Brand.textSecondary,
-    textAlign: 'center',
-    marginTop: Spacing.two,
-    marginBottom: Spacing.three,
   },
 });
