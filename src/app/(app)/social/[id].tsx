@@ -62,12 +62,11 @@ export default function CommunityDetailScreen() {
       else await communitiesService.removeMember(communityId, player.id);
       void refresh();
       if (action === 'join') {
-        detail.refetch();
-        ranking.refetch();
+        // Se recarga al cerrar el aviso: recargar antes hacía que la pantalla de atrás «parpadeara» como si se reiniciara.
         setConfirmation({
           title: 'Ya eres parte del grupo', message: `Te uniste a ${community.name}.`,
           label: 'Aceptar', Icon: Check, infoOnly: true, success: true,
-          onConfirm: () => setConfirmation(null),
+          onConfirm: () => { setConfirmation(null); detail.refetch(); ranking.refetch(); },
         });
       } else {
         showToast(`Saliste de ${community.name}.`);
