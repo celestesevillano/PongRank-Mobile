@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BackButton } from '@/components/common/back-button';
 import { Brand, Spacing } from '@/constants/theme';
 
 const TOTAL_STEPS = 4;
@@ -10,9 +11,7 @@ const TOTAL_STEPS = 4;
 export function OnboardingHeader({ step, title, backDisabled }: { step: number; title: string; backDisabled?: boolean }) {
   return (
     <View style={styles.header}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Volver" disabled={backDisabled} onPress={() => router.back()} hitSlop={12}>
-        <Text style={styles.back}>{'‹'}</Text>
-      </Pressable>
+      <BackButton disabled={backDisabled} onPress={() => router.back()} />
       <View style={styles.progressRow}>
         <Text style={styles.progressLabel}>Paso {step} de {TOTAL_STEPS}</Text>
         <View style={styles.progressTrack}>
