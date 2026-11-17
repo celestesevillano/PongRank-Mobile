@@ -33,14 +33,13 @@ const club = (maximum: number): Benefit => ({
 
 export function planBenefits(plan: MembershipPlan, quotas?: MyPlanResponse): Benefit[] {
   const total = quotas?.maxSpaces ?? (plan === 'FREEMIUM' ? 2 : plan === 'BASIC' ? 4 : 6);
-  const clubs = quotas?.maxClubsTotal ?? (plan === 'BASIC' ? 2 : 5);
   const spaces: Benefit = {
     Icon: Users, title: `${total} espacios`,
     description: plan === 'ENTERPRISE'
       ? 'Tu club y las comunidades que crees o a las que te unas.'
       : plan === 'FREEMIUM'
         ? 'Únete a comunidades. Cada una usa 1 espacio.'
-        : `Comunidades y hasta ${clubs} clubes. Cada uno usa 1 espacio.`,
+        : 'Comunidades y clubes. Cada uno usa 1 espacio.',
   };
   switch (plan) {
     case 'FREEMIUM': return [spaces];
