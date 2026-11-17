@@ -1,5 +1,11 @@
-import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Plus, Search } from 'lucide-react-native';
+import { AuthButton } from '@/components/auth/auth-button';
+import { ActionRow } from '@/components/common/action-row';
+import { PillTabs } from '@/components/common/pill-tabs';
+import { matchArt, MatchBanner, MatchState } from '@/components/matches/match-ui';
 
 import { PaginationBar } from '@/components/common/pagination-bar';
 import { ScreenContainer } from '@/components/common/screen-container';
@@ -16,37 +22,43 @@ type Tab = 'active' | 'history' | 'tournaments';
 export default function MatchesScreen() {
   const { player } = useSession();
   const playerId = player?.id ?? 0;
-  const [tab, setTab] = useState<Tab>('active');
+  const { section } = useLocalSearchParams<{ section?: string }>();
+  const [tab, setTab] = useState<Tab>(section === 'history' ? 'history' : 'active');
+  useFocusEffect(useCallback(() => { if (section === 'history') setTab('history'); }, [section]));
 
   return (
-    <ScreenContainer title="Partidas">
-      <View style={styles.tabs}>
-        <TabButton label="Activas" selected={tab === 'active'} onPress={() => setTab('active')} />
-        <TabButton label="Historial" selected={tab === 'history'} onPress={() => setTab('history')} />
-        <TabButton label="Torneos" selected={tab === 'tournaments'} onPress={() => setTab('tournaments')} />
-      </View>
+    <ScreenContainer>
+      <MatchBanner title="Partidas"><Text style={styles.hint}>Tu actividad en la mesa</Text></MatchBanner>
+      <PillTabs variant="segment" options={[{ key: 'active', label: 'Activas' }, { key: 'history', label: 'Historial' }, { key: 'tournaments', label: 'Torneos' }]} selected={tab} onSelect={setTab} />
       {tab === 'active' && <ActiveMatches playerId={playerId} />}
       {tab === 'history' && <MatchHistory playerId={playerId} />}
-      {tab === 'tournaments' && <TournamentsPlaceholder />}
+      {tab === 'tournaments' && <TournamentMatches playerId={playerId} />}
     </ScreenContainer>
   );
 }
 
 function ActiveMatches({ playerId }: { playerId: number }) {
   const { data, loading, error, refetch } = useFetch((signal) => matchesService.active(playerId, signal), [playerId]);
+  useFocusEffect(useCallback(() => { refetch(); }, [refetch]));
 
-  return (
-    <View style={styles.list}>
-      <ScreenState loading={loading} error={error} empty={data?.length === 0} emptyMessage="No tienes partidas activas." onRetry={refetch} />
-      {data?.map((match) => <MatchCard key={match.id} match={match} playerId={playerId} />)}
-      {data && <Text style={styles.hint}>Solo puedes tener una partida activa a la vez.</Text>}
-    </View>
-  );
+  return <>
+    {loading || error
+      ? <View style={styles.center}><ScreenState loading={loading} error={error} onRetry={refetch} /></View>
+      : data?.length
+        ? <FlatList style={styles.list} data={data} keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={styles.cards} renderItem={({ item }) => <MatchCard match={item} playerId={playerId} />} />
+        : <View style={styles.center}><MatchState title="Sin partidas activas" message="Crea una partida o busca una abierta." art={matchArt.idle} /></View>}
+    <View style={styles.footer}><ActionRow>
+      <AuthButton label="Nueva partida" icon={Plus} onPress={() => router.push('/new-match')} />
+      <AuthButton label="Buscar partida" icon={Search} variant="secondary" onPress={() => router.push('/find-match')} />
+    </ActionRow></View>
+  </>;
 }
 
 function MatchHistory({ playerId }: { playerId: number }) {
   const matches = usePaginated((params, signal) => matchesService.byPlayer(playerId, { ...params, status: 'CONFIRMED' }, signal), [playerId]);
 
+  useFocusEffect(useCallback(() => { matches.refetch(); }, [matches.refetch]));
   return (
     <>
       <ScreenState
@@ -69,24 +81,19 @@ function MatchHistory({ playerId }: { playerId: number }) {
   );
 }
 
-function TournamentsPlaceholder() {
-  return <Text style={styles.hint}>Aquí verás los torneos de tus clubes: próximos e historial.</Text>;
-}
-
-function TabButton({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} style={[styles.tab, selected && styles.tabSelected]}>
-      <Text style={[styles.tabLabel, selected && styles.tabLabelSelected]}>{label}</Text>
-    </Pressable>
-  );
+function TournamentMatches({ playerId }: { playerId: number }) {
+  const { data, loading, error, refetch } = useFetch((signal) => matchesService.forTournaments(playerId, signal), [playerId]);
+  useFocusEffect(useCallback(() => { refetch(); }, [refetch]));
+  if (loading || error) return <ScreenState loading={loading} error={error} onRetry={refetch} />;
+  if (!data?.length) return <View style={styles.center}><MatchState title="Sin partidas de torneo" message="Consulta los torneos desde tu club." art={matchArt.tournaments} /></View>;
+  return <FlatList style={styles.list} data={data} keyExtractor={(item) => String(item.id)}
+    contentContainerStyle={styles.cards} renderItem={({ item }) => <MatchCard match={item} playerId={playerId} />} />;
 }
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: Brand.border, marginBottom: Spacing.three },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: Spacing.two, borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabSelected: { borderBottomColor: Brand.red },
-  tabLabel: { color: Brand.textSecondary, fontWeight: '600' },
-  tabLabelSelected: { color: Brand.red },
-  list: { gap: Spacing.two },
-  hint: { color: Brand.textSecondary, fontSize: 12, textAlign: 'center', marginTop: Spacing.three },
+  list: { flex: 1 },
+  cards: { gap: Spacing.two, paddingBottom: Spacing.two },
+  footer: { paddingVertical: Spacing.three },
+  center: { flex: 1, justifyContent: 'center' },
+  hint: { color: Brand.textSecondary, fontSize: 13 },
 });
