@@ -14,7 +14,12 @@ function format(place: Location.LocationGeocodedAddress) {
 }
 
 // Dirección con ayudas: escribir, buscar coincidencias o usar la ubicación actual (sin claves de mapas).
-export function AddressField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export function AddressField({ value, onChange, onPick, showLocate = true }: {
+  value: string; onChange: (value: string) => void;
+  // Se llama al elegir una sugerencia o usar la ubicación actual
+  onPick?: (value: string) => void;
+  showLocate?: boolean;
+}) {
   const [options, setOptions] = useState<string[]>([]);
   const [busy, setBusy] = useState<'search' | 'locate' | null>(null);
   const [message, setMessage] = useState('');
@@ -61,7 +66,7 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
       }
       const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       const [place] = await Location.reverseGeocodeAsync(coords);
-      if (place) { picked.current = true; setOptions([]); onChange(format(place)); }
+      if (place) { picked.current = true; setOptions([]); onChange(format(place)); onPick?.(format(place)); }
       else setMessage('No pudimos obtener la dirección de tu ubicación.');
     } catch {
       setMessage('No pudimos obtener tu ubicación. Escribe la dirección.');
@@ -78,7 +83,7 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
         {options.length > 0 && (
           <View style={styles.dropdown}>
             {options.map((option) => (
-              <Pressable key={option} accessibilityRole="button" style={styles.option} onPress={() => { picked.current = true; onChange(option); setOptions([]); }}>
+              <Pressable key={option} accessibilityRole="button" style={styles.option} onPress={() => { picked.current = true; onChange(option); setOptions([]); onPick?.(option); }}>
                 <MapPin size={16} color={Brand.cyan} />
                 <Text style={styles.optionText}>{option}</Text>
               </Pressable>
@@ -86,7 +91,7 @@ export function AddressField({ value, onChange }: { value: string; onChange: (va
           </View>
         )}
       </View>
-      <AuthButton label="Usar mi ubicación" icon={MapPin} variant="secondary" loading={busy === 'locate'} onPress={locate} />
+      {showLocate ? <AuthButton label="Usar mi ubicación" icon={MapPin} variant="secondary" loading={busy === 'locate'} onPress={locate} /> : null}
       {message ? <Text style={styles.message}>{message}</Text> : null}
     </View>
   );
