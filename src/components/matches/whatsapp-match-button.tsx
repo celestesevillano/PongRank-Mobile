@@ -1,4 +1,4 @@
-import { Linking, Pressable, StyleSheet, Text } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BrandIcon } from '@/components/common/brand-icon';
 import { Brand, Spacing } from '@/constants/theme';
@@ -7,7 +7,7 @@ import { useToast } from '@/context/toast';
 import type { PlayerSummary } from '@/types/api';
 import { whatsAppInternationalNumber } from '@/utils/whatsapp';
 
-export function WhatsAppMatchButton({ opponent, showUnavailable = false }: { opponent: PlayerSummary; showUnavailable?: boolean }) {
+export function WhatsAppMatchButton({ opponent, showUnavailable = false, compact = false, style }: { opponent: PlayerSummary; showUnavailable?: boolean; compact?: boolean; style?: StyleProp<ViewStyle> }) {
   const { player } = useSession();
   const { showToast } = useToast();
   const phone = whatsAppInternationalNumber(opponent.whatsapp);
@@ -32,11 +32,11 @@ export function WhatsAppMatchButton({ opponent, showUnavailable = false }: { opp
         accessibilityState={{ disabled: !phone }}
         disabled={!phone}
         onPress={open}
-        style={({ pressed }) => [styles.button, !phone && styles.disabled, pressed && styles.pressed]}>
+        style={({ pressed }) => [styles.button, style, !phone && styles.disabled, pressed && styles.pressed]}>
         <BrandIcon name="whatsapp" color={phone ? Brand.text : Brand.textDisabled} size={18} />
-        <Text style={[styles.label, !phone && styles.disabledLabel]}>Coordinar por WhatsApp</Text>
+        <Text style={[styles.label, !phone && styles.disabledLabel]}>{compact ? 'Coordinar' : 'Coordinar por WhatsApp'}</Text>
       </Pressable>
-      {!phone ? <Text style={styles.note}>Tu rival no comparte WhatsApp para esta partida.</Text> : null}
+      {!phone && !compact ? <Text style={styles.note}>Tu rival no comparte WhatsApp para esta partida.</Text> : null}
     </>
   );
 }
