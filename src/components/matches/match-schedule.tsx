@@ -11,7 +11,7 @@ export function matchTime(when: Date | string) {
   return new Date(when).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-export function MatchSchedule({ value, onChange }: { value: Date | null; onChange: (date: Date | null) => void }) {
+export function MatchSchedule({ value, onChange, required = false }: { value: Date | null; onChange: (date: Date | null) => void; required?: boolean }) {
   const [picker, setPicker] = useState<'date' | 'time' | null>(null);
   const [draft, setDraft] = useState(() => new Date(Date.now() + 3600000));
   const close = () => setPicker(null);
@@ -19,13 +19,13 @@ export function MatchSchedule({ value, onChange }: { value: Date | null; onChang
 
   return <>
     <ActionRow>
-      <AuthButton label="Ahora mismo" variant="secondary" icon={Clock} accessibilityState={{ selected: !value }} style={!value ? styles.selected : undefined} onPress={() => onChange(null)} />
-      <AuthButton label="Programar" variant="secondary" icon={CalendarClock} onPress={() => {
+      {!required && <AuthButton label="Ahora mismo" variant="secondary" icon={Clock} accessibilityState={{ selected: !value }} style={!value ? styles.selected : undefined} onPress={() => onChange(null)} />}
+      <AuthButton label={required ? value ? matchTime(value) : "Elegir fecha y hora" : "Programar"} variant="secondary" icon={CalendarClock} onPress={() => {
         setDraft(value && value.getTime() > Date.now() ? value : new Date(Date.now() + 3600000));
         setPicker('date');
       }} />
     </ActionRow>
-    {!!value && <Text style={styles.label}>{matchTime(value)}</Text>}
+    {!required && !!value && <Text style={styles.label}>{matchTime(value)}</Text>}
     {picker && (Platform.OS === 'android'
       ? <DateTimePicker key={picker} value={draft} mode={picker} minimumDate={picker === 'date' ? new Date() : undefined}
           onDismiss={close} onValueChange={(_, date) => {
@@ -35,7 +35,7 @@ export function MatchSchedule({ value, onChange }: { value: Date | null; onChang
           }} />
       : <Modal transparent visible onRequestClose={close} animationType="fade">
           <View style={styles.backdrop}><View style={styles.dialog}>
-            <Text style={styles.title}>Programar partida</Text>
+            <Text style={styles.title}>{required ? "Fecha y hora del torneo" : "Programar partida"}</Text>
             {Platform.OS === 'web' ? <Text style={styles.label}>El selector está disponible en iOS y Android.</Text>
               : <DateTimePicker value={draft} mode="datetime" display="spinner" minimumDate={new Date()} themeVariant="dark"
                   accentColor={Brand.cyan} onValueChange={(_, date) => setDraft(date)} />}

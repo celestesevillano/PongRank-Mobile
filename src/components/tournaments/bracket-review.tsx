@@ -8,9 +8,10 @@ import { Brand, Spacing } from '@/constants/theme';
 import { BracketDiagram } from './bracket-diagram';
 import { buildBracket, validateParticipantCount, type Entrant } from './bracket-model';
 
-export function BracketReview({ entrants, onPublish }: {
+export function BracketReview({ entrants, onPublish, publishing = false }: {
   entrants: readonly Entrant[];
   onPublish?: () => void;
+  publishing?: boolean;
 }) {
   const bracket = useMemo(() => buildBracket(entrants), [entrants]);
   const validationMessage = validateParticipantCount(entrants.length);
@@ -41,7 +42,7 @@ export function BracketReview({ entrants, onPublish }: {
         ) : <Text style={styles.copy}>{validationMessage}.</Text>}
       </View>
       <View style={styles.footer}>
-        <AuthButton label="Publicar torneo" icon={Send} disabled={!bracket} onPress={publish} />
+        <AuthButton label="Publicar torneo" icon={Send} disabled={!bracket} loading={publishing} onPress={publish} />
       </View>
       <ConfirmDialog busy={false} onCancel={closeNotice} confirmation={showNotice ? {
         title: bracket ? 'Vista de revisión' : validationMessage ?? 'Revisa los participantes',
