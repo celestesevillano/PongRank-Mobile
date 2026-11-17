@@ -4,6 +4,7 @@ import type { PropsWithChildren, ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/components/common/back-button';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
 
 export function ProfileScreen({ title, back, footer, action, children }: PropsWithChildren<{
@@ -14,14 +15,7 @@ export function ProfileScreen({ title, back, footer, action, children }: PropsWi
       <View style={styles.frame}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
           {back ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Volver a ${back.label}`}
-              onPress={() => router.canGoBack() ? router.back() : router.replace(back.route)}
-              style={styles.back}>
-              <ChevronLeft color={Brand.textSecondary} size={19} />
-              <Text style={styles.secondary}>{back.label}</Text>
-            </Pressable>
+            <BackButton accessibilityLabel={`Volver a ${back.label}`} onPress={() => router.canGoBack() ? router.back() : router.replace(back.route)} />
           ) : null}
           <View style={styles.header}>
             <Text accessibilityRole="header" style={styles.heading}>{title}</Text>

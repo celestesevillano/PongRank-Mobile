@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
-import { ChevronLeft, MapPin, Plus, UserPlus } from 'lucide-react-native';
+import { MapPin, Plus, UserPlus } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
+import { BackButton } from '@/components/common/back-button';
 import { AuthButton } from '@/components/auth/auth-button';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { ScreenContainer } from '@/components/common/screen-container';
@@ -31,7 +32,7 @@ const emptyText: Record<Tab, string> = {
 export default function FindMatchScreen() {
   const { coords, status, retry } = useLocation();
   return <ScreenContainer title="Buscar partida">
-    <AuthButton label="Volver" icon={ChevronLeft} variant="ghost" style={styles.back} onPress={() => router.back()} />
+    <BackButton onPress={() => router.back()} />
     {status === 'ready' && coords ? <OpenMatches coords={coords} /> : <View style={styles.center}>
       {status === 'loading' ? <ActivityIndicator color={Brand.red} />
         : <MatchState title="Activa tu ubicación" art={matchArt.location}

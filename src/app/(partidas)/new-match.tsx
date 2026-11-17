@@ -1,9 +1,12 @@
+import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, ChevronRight, Clock, LocateFixed, MapPin, Search, Swords, Users } from 'lucide-react-native';
+import { ChevronRight, Clock, LocateFixed, MapPin, Search, Swords, Users } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { AddressField } from '@/components/clubs/address-field';
+import { BackButton } from '@/components/common/back-button';
 import { MatchSchedule, matchTime } from '@/components/matches/match-schedule';
 import { LocationNotice } from '@/components/common/location-notice';
 import { PillTabs } from '@/components/common/pill-tabs';
@@ -19,7 +22,10 @@ import { useLocation } from '@/hooks/use-location';
 import { useMatchAddress } from '@/hooks/use-match-address';
 import { circleOptions, matchRivals, type Circle, type MatchRival } from '@/services/match-circles.service';
 import { matchesService, type Coordinates, type MatchCreateInput } from '@/services/matches.service';
-import { placesAvailable, placesService, type PlaceSuggestion } from '@/services/places.service';
+import { placesService, type PlaceSuggestion } from '@/services/places.service';
+
+// Siempre se usa el geocodificador del teléfono (sin Google Places).
+const placesAvailable = false;
 import { toApiError } from '@/utils/api-error';
 
 const formats = (Object.keys(formatLabels) as MatchCreateInput['format'][]).map((key) => ({ key, label: formatLabels[key] }));
@@ -65,6 +71,24 @@ export default function NewMatchScreen() {
     });
     return () => controller.abort();
   }, [step, debouncedQuery, place]);
+
+  // Sin llave de Google Places: se resuelve la dirección elegida con el geocodificador del teléfono
+  async function pickByAddress(label: string) {
+    setResolvingPlace(true);
+    try {
+      const [point] = await Location.geocodeAsync(label);
+      if (point) {
+        setPlace({ name: label, coords: { latitude: point.latitude, longitude: point.longitude } });
+        setPlaceQuery(label);
+      } else {
+        showToast('No pudimos ubicar esa dirección. Prueba con otra.', 'error');
+      }
+    } catch {
+      showToast('No pudimos ubicar esa dirección. Prueba con otra.', 'error');
+    } finally {
+      setResolvingPlace(false);
+    }
+  }
 
   async function selectPlace(suggestion: PlaceSuggestion) {
     setResolvingPlace(true);
@@ -112,7 +136,7 @@ export default function NewMatchScreen() {
   }
 
   return <ScreenContainer>
-    <AuthButton label="Volver" icon={ChevronLeft} variant="ghost" onPress={back} style={styles.back} disabled={busy} />
+    <BackButton onPress={back} disabled={busy} />
     <View style={styles.step}><Text style={styles.muted}>Paso {step} de 4</Text>
       <View style={styles.bars}>{[1, 2, 3, 4].map((segment) => <View key={segment} style={[styles.bar, segment <= step && styles.filled]} />)}</View>
     </View>
@@ -133,7 +157,7 @@ export default function NewMatchScreen() {
       <Text accessibilityRole="header" style={styles.title}>Elige a tu rival</Text>
       <View style={styles.field}><Search size={18} color={Brand.textSecondary} /><TextInput style={styles.input} placeholder="Buscar jugador"
         placeholderTextColor={Brand.textSecondary} value={query} onChangeText={setQuery} accessibilityLabel="Buscar jugador" /></View>
-      <PillTabs options={circleOptions} selected={circle} onSelect={(value) => { setCircle(value); setOpponent(null); }} />
+      <View style={styles.chips}><PillTabs options={circleOptions} selected={circle} onSelect={(value) => { setCircle(value); setOpponent(null); }} /></View>
       <FlatList data={rivals.loading || rivals.error ? [] : visible} style={styles.flex}
         keyExtractor={(item) => String(item.id)} keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => <Pressable accessibilityRole="radio" accessibilityState={{ checked: item.id === selectedRival?.id }}
@@ -164,6 +188,8 @@ export default function NewMatchScreen() {
               disabled={resolvingPlace} onPress={() => { void selectPlace(item); }}><Text style={styles.label} numberOfLines={2}>{item.description}</Text></Pressable>)}
           </View>}
         </View>}
+        {!placesAvailable && <AddressField value={placeQuery} showLocate={false} onChange={(value) => { setPlaceQuery(value); setPlace(undefined); }}
+          onPick={(label) => { void pickByAddress(label); }} />}
         <AuthButton label="Usar mi ubicación actual" icon={LocateFixed} variant="secondary" disabled={resolvingPlace} onPress={() => {
           setPlace(undefined); setPlaceQuery(''); setSuggestions([]); if (!coords) void retry();
         }} />
@@ -201,7 +227,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   stack: { gap: 12, paddingBottom: 12 },
   footer: { paddingVertical: Spacing.three },
-  back: { alignSelf: 'flex-start', paddingHorizontal: 0, marginTop: 4 },
+  chips: { marginTop: 12 },
   step: { alignItems: 'center', gap: 9, paddingBottom: 16 },
   bars: { flexDirection: 'row', gap: 5 },
   bar: { flex: 1, height: 3, borderRadius: 3, backgroundColor: Brand.border },
