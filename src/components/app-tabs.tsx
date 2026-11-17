@@ -14,8 +14,6 @@ const tabs = [
   { name: 'profile', title: 'Perfil', Icon: CircleUser },
 ] as const;
 
-const HIDDEN_ROUTES = ['find-match', 'new-match', 'match/[id]'] as const;
-
 export default function AppTabs() {
   return (
     <Tabs
@@ -31,9 +29,6 @@ export default function AppTabs() {
           name={name}
           options={{ title, tabBarIcon: ({ focused }) => <TabIcon Icon={Icon} focused={focused} /> }}
         />
-      ))}
-      {HIDDEN_ROUTES.map((name) => (
-        <Tabs.Screen key={name} name={name} options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }} />
       ))}
     </Tabs>
   );

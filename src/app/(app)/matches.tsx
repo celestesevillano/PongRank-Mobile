@@ -28,7 +28,7 @@ export default function MatchesScreen() {
 
   return (
     <ScreenContainer>
-      <MatchBanner title="Partidas"><Text style={styles.hint}>Tu actividad en la mesa</Text></MatchBanner>
+      <MatchBanner title="Partidas" prominent><Text style={styles.hint}>Tu actividad en la mesa</Text></MatchBanner>
       <PillTabs variant="segment" options={[{ key: 'active', label: 'Activas' }, { key: 'history', label: 'Historial' }, { key: 'tournaments', label: 'Torneos' }]} selected={tab} onSelect={setTab} />
       {tab === 'active' && <ActiveMatches playerId={playerId} />}
       {tab === 'history' && <MatchHistory playerId={playerId} />}
@@ -95,5 +95,5 @@ const styles = StyleSheet.create({
   cards: { gap: Spacing.two, paddingBottom: Spacing.two },
   footer: { paddingVertical: Spacing.three },
   center: { flex: 1, justifyContent: 'center' },
-  hint: { color: Brand.textSecondary, fontSize: 13 },
+  hint: { color: '#EBC4CB', fontSize: 13 },
 });

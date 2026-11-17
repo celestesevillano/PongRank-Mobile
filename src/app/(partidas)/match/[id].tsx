@@ -9,6 +9,8 @@ import { ActionRow } from '@/components/common/action-row';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { ScreenState } from '@/components/common/screen-state';
+import { matchTime } from '@/components/matches/match-schedule';
+import { useLiveMatch } from '@/hooks/use-live-match';
 import { LiveScoreboard } from '@/components/matches/live-scoreboard';
 import { formatLabels, matchArt, matchPlace, MatchBanner, MatchMeta, MatchNotice, MatchResult, MatchState, shareMatch } from '@/components/matches/match-ui';
 import { WhatsAppMatchButton } from '@/components/matches/whatsapp-match-button';
@@ -23,7 +25,7 @@ import type { MatchDetail, SetScore } from '@/types/api';
 import { toApiError } from '@/utils/api-error';
 import { setsWon } from '@/utils/scoring';
 
-type PlayStage = 'confirmation' | 'ready' | 'waiting' | 'score';
+type PlayStage = 'confirmation' | 'ready';
 const toMatches = () => router.replace('/matches');
 
 export default function MatchDetailScreen() {
@@ -59,11 +61,15 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
   const myProposal = participating && match.status === (first ? 'PROPOSED_P1' : 'PROPOSED_P2');
   const mayReview = participating && proposed && !myProposal;
   const canPlay = participating && match.status === 'CREATED' && !!match.player2 && !!opponent;
+  const live = useLiveMatch(match.id, canPlay && stage === 'ready', onChanged);
+  const myReady = first ? live.state?.player1Ready : live.state?.player2Ready;
+  const theirReady = first ? live.state?.player2Ready : live.state?.player1Ready;
+  const playing = !!(myReady && theirReady && live.state?.status === 'CREATED');
   const final = match.status === 'CONFIRMED';
   const cancelled = match.status === 'CANCELLED';
   const waitingRival = match.status === 'CREATED' && !match.player2;
   const place = useMatchAddress(match.latitude, match.longitude) ?? initialPlace ?? matchPlace(match);
-  const time = new Date(match.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  const time = match.scheduledAt ? matchTime(match.scheduledAt) : new Date(match.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
   const name = opponent?.name ?? 'Tu rival';
   const source = origin ?? (match.matchType === 'FRIEND' ? 'Pongmigos' : match.matchType === 'COMMUNITY' ? 'Comunidad' : match.matchType === 'TOURNAMENT' ? 'Torneo' : 'Partida libre');
   const count = setsWon(match.sets);
@@ -114,8 +120,8 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
       <AuthButton label="Empezar partida" icon={Swords} onPress={() => setStage('ready')} />
       <WhatsAppMatchButton opponent={opponent} showUnavailable compact />
     </ActionRow>;
-  } else if (canPlay && (stage === 'ready' || stage === 'waiting')) {
-    const ready = stage === 'waiting';
+  } else if (canPlay && !playing) {
+    const ready = !!myReady;
     body = <>
       <Text accessibilityRole="header" style={styles.heading}>Antes de jugar</Text>
       <MatchBanner title={match.tournamentName ?? 'Partida amistosa'}>{matchInfo}</MatchBanner>
@@ -124,21 +130,21 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
         <View style={styles.vsPlayers}>
           <View style={styles.vsPlayer}><Text style={styles.label}>Tú</Text><Text style={[styles.badge, ready && styles.badgeReady]}>{ready ? 'Listo' : 'Por confirmar'}</Text></View>
           <View style={styles.vs}><Text style={styles.vsText}>VS</Text></View>
-          <View style={styles.vsPlayer}><Text numberOfLines={2} style={styles.label}>{name}</Text><Text style={styles.badge}>Por confirmar</Text></View>
+          <View style={styles.vsPlayer}><Text numberOfLines={2} style={styles.label}>{name}</Text><Text style={[styles.badge, theirReady && styles.badgeReady]}>{theirReady ? 'Listo' : 'Por confirmar'}</Text></View>
         </View>
       </View>
-      {ready ? <MatchNotice icon={Clock} title={`Esperando a ${name}`} message="Cuando ambos estén listos, pueden llevar el marcador desde un solo teléfono." />
+      {ready ? <MatchNotice icon={Clock} title={`Esperando a ${name}`} message="El marcador se abrirá cuando ambos estén listos." />
         : <Text style={styles.muted}>Confirma que estás listo para empezar.</Text>}
     </>;
     actions = <ActionRow>
       <AuthButton label="Rechazar partida" variant="secondary" onPress={() => setCancelPrompt(true)} />
-      <AuthButton label={ready ? 'Empezar marcador' : 'Estoy listo'} onPress={() => setStage(ready ? 'score' : 'waiting')} />
+      <AuthButton label={ready ? 'Esperando al rival' : 'Estoy listo'} disabled={ready || !live.state} loading={live.busy} onPress={() => live.perform('READY')} />
     </ActionRow>;
-  } else if (canPlay) {
+  } else if (canPlay && live.state) {
     body = <>
       <View style={styles.scoreHeader}><Text accessibilityRole="header" style={styles.heading}>vs. {name}</Text><Text style={styles.muted}>{formatLabels[match.format]}</Text></View>
-      <LiveScoreboard format={match.format} opponentName={name} player1IsMe={first} submitting={busy}
-        onSubmit={(sets: SetScore[]) => { void run(() => matchesService.submitScore(match.id, sets)); }} />
+      <LiveScoreboard state={live.state} opponentName={name} player1IsMe={first} submitting={busy} busy={live.busy}
+        onPoint={() => live.perform('POINT')} onUndo={() => live.perform('UNDO')} onSubmit={(sets: SetScore[]) => { void run(() => matchesService.submitScore(match.id, sets)); }} />
     </>;
   } else if (waitingRival) {
     centered = true;
@@ -209,10 +215,13 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
   return <>
     <AuthButton label="Volver" variant="text" style={styles.back} disabled={busy} onPress={() => {
       if (disputing) setDisputing(false);
-      else if (canPlay && stage !== 'confirmation' && stage !== 'score') setStage('confirmation');
+      else if (canPlay && stage !== 'confirmation' && !playing) setStage('confirmation');
       else router.canGoBack() ? router.back() : toMatches();
     }} />
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, centered && styles.centered]}>{body}</ScrollView>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, centered && styles.centered]}>
+      {body}
+      {canPlay && stage === 'ready' && live.error && <MatchNotice icon={Clock} title="Marcador en vivo" message={live.error.isNetwork ? 'Se perdió la conexión. Estamos intentando reconectar.' : 'No pudimos actualizar el marcador. Revisa el estado antes de continuar.'} />}
+    </ScrollView>
     <View style={styles.footer}>{actions ?? <AuthButton label={final ? 'Ver historial' : 'Ver mis partidas'}
       onPress={final ? () => router.replace({ pathname: '/matches', params: { section: 'history' } }) : toMatches} />}</View>
     <ConfirmDialog busy={busy} onCancel={() => setCancelPrompt(false)} confirmation={cancelPrompt ? {

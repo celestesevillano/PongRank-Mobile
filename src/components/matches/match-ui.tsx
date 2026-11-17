@@ -1,8 +1,9 @@
 import { Image, type ImageSource } from 'expo-image';
 import * as Sharing from 'expo-sharing';
-import type { ComponentRef, ReactNode } from 'react';
+import { useId, type ComponentRef, type ReactNode } from 'react';
 import { Platform, Share, StyleSheet, Text, View } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
+import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { captureRef, releaseCapture } from 'react-native-view-shot';
 
 import { Brand, Spacing } from '@/constants/theme';
@@ -32,12 +33,35 @@ export function matchPlace(match: MatchResponse) {
   return match.communityName ?? (match.latitude != null && match.longitude != null ? 'Lugar de encuentro' : null);
 }
 
-export function MatchBanner({ title, children }: { title: string; children?: ReactNode }) {
+export function MatchBanner({ title, children, prominent = false }: { title: string; children?: ReactNode; prominent?: boolean }) {
+  const id = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const glow = `match-banner-glow-${id}`;
+  const fade = `match-banner-fade-${id}`;
+
   return (
-    <View style={styles.banner}>
-      <Image source={matchArt.banner} style={styles.bannerImage} contentFit="cover" contentPosition="right center" accessible={false} />
-      <View style={styles.bannerText}>
-        <Text accessibilityRole="header" style={styles.bannerTitle}>{title}</Text>
+    <View style={[styles.banner, prominent && styles.prominentBanner]}>
+      {prominent && <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 400 135" preserveAspectRatio="none" pointerEvents="none">
+        <Defs>
+          <RadialGradient id={glow} cx="100%" cy="50%" rx="100%" ry="75%">
+            <Stop offset="0" stopColor="#65202C" />
+            <Stop offset="0.64" stopColor="#211014" />
+            <Stop offset="1" stopColor="#130B0D" />
+          </RadialGradient>
+        </Defs>
+        <Rect width="400" height="135" fill={`url(#${glow})`} />
+      </Svg>}
+      <Image source={matchArt.banner} style={prominent ? styles.prominentArt : styles.bannerImage} contentFit="cover" contentPosition="right center" accessible={false} />
+      {prominent && <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 400 135" preserveAspectRatio="none" pointerEvents="none">
+        <Defs>
+          <LinearGradient id={fade} x1="0%" y1="0%" x2="100%" y2="0%">
+            <Stop offset="0.35" stopColor="#130B0D" />
+            <Stop offset="0.65" stopColor="#130B0D" stopOpacity={0} />
+          </LinearGradient>
+        </Defs>
+        <Rect width="400" height="135" fill={`url(#${fade})`} />
+      </Svg>}
+      <View style={[styles.bannerText, prominent && styles.prominentText]}>
+        <Text accessibilityRole="header" style={[styles.bannerTitle, prominent && styles.prominentTitle]}>{title}</Text>
         {children}
       </View>
     </View>
@@ -95,6 +119,10 @@ export async function shareMatch(card: ComponentRef<typeof View> | null, message
 
 const styles = StyleSheet.create({
   banner: { overflow: 'hidden', minHeight: 108, backgroundColor: '#291017', borderColor: '#733440', borderWidth: 1, borderRadius: 16, justifyContent: 'center', padding: 14 },
+  prominentBanner: { minHeight: 135, marginTop: 8, marginBottom: 8, padding: 16, backgroundColor: '#130B0D', borderColor: '#71313B' },
+  prominentArt: { position: 'absolute', right: 0, top: '-24%', height: '148%', aspectRatio: 1.5 },
+  prominentText: { width: '72%', gap: 6 },
+  prominentTitle: { fontSize: 29, lineHeight: 33 },
   bannerImage: { position: 'absolute', top: 0, bottom: 0, right: 0, width: '52%' },
   bannerText: { width: '69%', gap: 5 },
   bannerTitle: { color: Brand.text, fontSize: 23, fontWeight: '800' },

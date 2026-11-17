@@ -9,7 +9,20 @@ export type MatchCreateInput = {
   format: 'BO3' | 'BO5' | 'BO7';
   opponentId?: number;
   communityId?: number;
+  scheduledAt?: string;
 } & Partial<Coordinates>;
+
+export type LiveMatchState = {
+  revision: number;
+  status: string;
+  player1Ready: boolean;
+  player2Ready: boolean;
+  completedSets: SetScore[];
+  scorePlayer1: number;
+  scorePlayer2: number;
+  lastPointBy: 1 | 2 | null;
+  finished: boolean;
+};
 
 export const ACTIVE_STATUSES = ['CREATED', 'PROPOSED_P1', 'PROPOSED_P2', 'DISPUTED'] as const;
 export const HISTORY_STATUSES = ['CONFIRMED', 'DISPUTED', 'CANCELLED', 'WALKOVER'] as const;
@@ -49,6 +62,12 @@ export const matchesService = {
     http.get<MatchResponse[]>('/matches/open', { params: location, signal }).then((r) => r.data),
 
   get: (matchId: number, signal?: AbortSignal) => http.get<MatchDetail>(`/matches/${matchId}`, { signal }).then((r) => r.data),
+
+  live: (matchId: number, signal?: AbortSignal) =>
+    http.get<LiveMatchState>(`/matches/${matchId}/live`, { signal }).then((response) => response.data),
+
+  updateLive: (matchId: number, action: 'READY' | 'POINT' | 'UNDO', revision?: number) =>
+    http.post<LiveMatchState>(`/matches/${matchId}/live`, { action, revision }).then((response) => response.data),
 
   submitScore: (matchId: number, sets: SetScore[]) =>
     http.post<MatchDetail>(`/matches/${matchId}/submit`, { sets }).then((r) => r.data),
