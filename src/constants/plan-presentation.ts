@@ -20,40 +20,27 @@ export const PLAN_ART = {
 
 const statistics: Benefit = {
   Icon: ChartNoAxesCombined,
-  title: 'Sigue tu progreso',
-  description: 'Consulta cómo cambia tu rating, tu porcentaje de victorias, tu racha y tu mejor victoria.',
+  title: 'Estadísticas',
+  description: 'Rating, victorias, racha y mejor victoria.',
 };
 const coach: Benefit = {
-  Icon: Bot, title: 'Acceso a Coach Pongi', description: 'El análisis de postura y movimiento aún no está disponible en la app.', availability: true,
+  Icon: Bot, title: 'Coach Pongi', description: 'Análisis de postura y movimiento.', availability: true,
 };
 const club = (maximum: number): Benefit => ({
-  Icon: Shield, title: 'Crea y administra tu club',
-  description: `Puedes tener ${maximum} club${maximum === 1 ? '' : 'es'} en total. El club que administras ocupa un espacio.`,
+  Icon: Shield, title: maximum === 1 ? '1 club propio' : `${maximum} clubes propios`,
+  description: 'Lo creas y administras tú.',
 });
 
 export function planBenefits(plan: MembershipPlan, quotas?: MyPlanResponse): Benefit[] {
+  const total = quotas?.maxSpaces ?? (plan === 'FREEMIUM' ? 2 : plan === 'BASIC' ? 4 : 6);
   const spaces: Benefit = {
-    Icon: Users,
-    title: 'Tus espacios',
-    description: 'Puedes unirte a comunidades. Cada comunidad en la que participas ocupa un espacio.',
-  };
-  const created = quotas?.maxCommunitiesCreated ?? 1;
-  const clubs = quotas?.maxClubsTotal ?? (plan === 'BASIC' ? 2 : 5);
-  const total = quotas?.maxSpaces ?? (plan === 'BASIC' ? 4 : 6);
-  const paidSpaces: Benefit = {
-    Icon: Users, title: `Participa en hasta ${total} espacios`,
-    description: `Puedes crear hasta ${created} ${created === 1 ? 'comunidad' : 'comunidades'} y pertenecer a hasta ${clubs} ${clubs === 1 ? 'club' : 'clubes'} dentro de ese cupo.`,
+    Icon: Users, title: `${total} espacios`,
+    description: 'Para comunidades y clubes. Cada una usa 1.',
   };
   switch (plan) {
     case 'FREEMIUM': return [spaces];
-    case 'BASIC': return [statistics, paidSpaces];
-    case 'PRO': return [statistics, coach, paidSpaces];
-    case 'ENTERPRISE':
-      return [
-        club(quotas?.maxClubsTotal ?? 1),
-        { ...paidSpaces, description: `Tu club y las comunidades que crees o a las que te unas cuentan dentro de ese cupo.` },
-        statistics,
-        coach,
-      ];
+    case 'BASIC': return [spaces, statistics];
+    case 'PRO': return [spaces, statistics, coach];
+    case 'ENTERPRISE': return [club(quotas?.maxClubsTotal ?? 1), spaces, statistics, coach];
   }
 }
