@@ -122,7 +122,8 @@ export default function CommunityDetailScreen() {
     });
   };
 
-  const activeCommunity = !detail.loading && !detail.error && community?.status === 'ACTIVE' ? community : null;
+  // Mientras se refresca el detalle se conserva el contenido anterior: así el popup de éxito no queda sobre una pantalla que parece reiniciarse.
+  const activeCommunity = !detail.error && community?.status === 'ACTIVE' ? community : null;
   const canEdit = !grace && activeCommunity?.myRole === 'COMMUNITY_ADMIN';
   const canLeave = activeCommunity?.isMember && !grace;
   const pausedForAdmin = !!activeCommunity && grace && canRenew;
@@ -151,8 +152,8 @@ export default function CommunityDetailScreen() {
         <View style={styles.centeredState}>
           <PongiState error={detail.error} errorMessage={detail.error.isNetwork ? 'No pudimos conectar con PongRank.' : 'No pudimos cargar la comunidad.'} retry={detail.refetch} />
         </View>
-      ) : <ScreenState loading={detail.loading} error={null} />}
-      {!detail.loading && !detail.error && community && closed && (
+      ) : <ScreenState loading={detail.loading && !community} error={null} />}
+      {!detail.error && community && closed && (
         <View style={styles.centeredState}>
           <PongiState
             artwork={deletedArtwork}
@@ -210,10 +211,10 @@ export default function CommunityDetailScreen() {
               <Trophy color="#FFD278" size={20} />
               <Text accessibilityRole="header" style={styles.podiumTitle}>Top 3 de la comunidad</Text>
             </View>
-            <ScreenState loading={ranking.loading} error={ranking.error} empty={ranking.data?.content.length === 0}
+            <ScreenState loading={ranking.loading && !ranking.data} error={ranking.error} empty={ranking.data?.content.length === 0}
               emptyMessage="Aún no hay jugadores en el ranking." errorMessage="No pudimos cargar el ranking."
               onRetry={ranking.refetch} retryIcon={RotateCw} />
-            {!ranking.loading && !ranking.error && ranking.data?.content.map((entry) => (
+            {!ranking.error && ranking.data?.content.map((entry) => (
               <View key={entry.playerId} style={[styles.row, entry.position === 1 && styles.firstRow]}>
                 <RankingPosition position={entry.position} />
                 <Text style={styles.player}>{entry.playerName}</Text>
