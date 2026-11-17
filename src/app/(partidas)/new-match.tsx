@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronRight, Clock, LocateFixed, MapPin, Search, Swords, Users } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
@@ -16,16 +16,10 @@ import { PlayerIdentity } from '@/components/pongmigos/pongmigos-ui';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useToast } from '@/context/toast';
-import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useFetch } from '@/hooks/use-fetch';
-import { useLocation } from '@/hooks/use-location';
 import { useMatchAddress } from '@/hooks/use-match-address';
 import { circleOptions, matchRivals, type Circle, type MatchRival } from '@/services/match-circles.service';
 import { matchesService, type Coordinates, type MatchCreateInput } from '@/services/matches.service';
-import { placesService, type PlaceSuggestion } from '@/services/places.service';
-
-// Siempre se usa el geocodificador del teléfono (sin Google Places).
-const placesAvailable = false;
 import { toApiError } from '@/utils/api-error';
 
 const formats = (Object.keys(formatLabels) as MatchCreateInput['format'][]).map((key) => ({ key, label: formatLabels[key] }));
@@ -45,7 +39,6 @@ export default function NewMatchScreen() {
   const [format, setFormat] = useState<MatchCreateInput['format']>('BO3');
   const [placeQuery, setPlaceQuery] = useState('');
   const [place, setPlace] = useState<{ name: string; coords: Coordinates }>();
-  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [time, setTime] = useState<Date | null>(null);
   const [busy, setBusy] = useState(false);
   const [resolvingPlace, setResolvingPlace] = useState(false);
@@ -56,23 +49,8 @@ export default function NewMatchScreen() {
   const needsLocation = !opponent || circle === 'club';
   const chosenCoordinates = place?.coords ?? coords;
   const address = place?.name ?? currentAddress ?? (coords ? 'Ubicación actual' : 'Sin ubicación');
-  const debouncedQuery = useDebouncedValue(placeQuery.trim(), 350);
 
-  useEffect(() => {
-    if (step !== 3 || !placesAvailable || debouncedQuery.length < 3 || place) {
-      setSuggestions([]);
-      return;
-    }
-    const controller = new AbortController();
-    void placesService.autocomplete(debouncedQuery, controller.signal).then((items) => {
-      if (!controller.signal.aborted) setSuggestions(items);
-    }).catch(() => {
-      if (!controller.signal.aborted) setSuggestions([]);
-    });
-    return () => controller.abort();
-  }, [step, debouncedQuery, place]);
-
-  // Sin llave de Google Places: se resuelve la dirección elegida con el geocodificador del teléfono
+  // Resuelve la dirección elegida con el geocodificador del teléfono.
   async function pickByAddress(label: string) {
     setResolvingPlace(true);
     try {
@@ -85,20 +63,6 @@ export default function NewMatchScreen() {
       }
     } catch {
       showToast('No pudimos ubicar esa dirección. Prueba con otra.', 'error');
-    } finally {
-      setResolvingPlace(false);
-    }
-  }
-
-  async function selectPlace(suggestion: PlaceSuggestion) {
-    setResolvingPlace(true);
-    try {
-      const position = await placesService.coordinates(suggestion.placeId);
-      setPlace({ name: suggestion.description, coords: position });
-      setPlaceQuery(suggestion.description);
-      setSuggestions([]);
-    } catch {
-      showToast('No pudimos usar ese lugar. Intenta con otro.', 'error');
     } finally {
       setResolvingPlace(false);
     }
@@ -178,20 +142,10 @@ export default function NewMatchScreen() {
     {step === 3 && <>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.stack}>
         <Text accessibilityRole="header" style={styles.title}>¿Dónde y cuándo?</Text>
-        {placesAvailable && <View style={styles.venue}>
-          <Text style={styles.label}>Lugar</Text>
-          <View style={styles.field}><MapPin size={18} color={Brand.textSecondary} /><TextInput style={styles.input}
-            placeholder="Busca una dirección o un lugar" placeholderTextColor={Brand.textSecondary} value={placeQuery}
-            accessibilityLabel="Lugar" onChangeText={(value) => { setPlaceQuery(value); setPlace(undefined); setSuggestions([]); }} /></View>
-          {!!suggestions.length && <View style={styles.suggestions}>
-            {suggestions.slice(0, 4).map((item) => <Pressable key={item.placeId} accessibilityRole="button" style={styles.suggestion}
-              disabled={resolvingPlace} onPress={() => { void selectPlace(item); }}><Text style={styles.label} numberOfLines={2}>{item.description}</Text></Pressable>)}
-          </View>}
-        </View>}
-        {!placesAvailable && <AddressField value={placeQuery} showLocate={false} onChange={(value) => { setPlaceQuery(value); setPlace(undefined); }}
-          onPick={(label) => { void pickByAddress(label); }} />}
+        <AddressField value={placeQuery} showLocate={false} onChange={(value) => { setPlaceQuery(value); setPlace(undefined); }}
+          onPick={(label) => { void pickByAddress(label); }} />
         <AuthButton label="Usar mi ubicación actual" icon={LocateFixed} variant="secondary" disabled={resolvingPlace} onPress={() => {
-          setPlace(undefined); setPlaceQuery(''); setSuggestions([]); if (!coords) void retry();
+          setPlace(undefined); setPlaceQuery(''); if (!coords) void retry();
         }} />
         {coords || place ? <Text style={styles.muted}>{address}</Text>
           : <LocationNotice status={status === 'ready' ? 'unavailable' : status} onRetry={retry} />}
@@ -240,9 +194,6 @@ const styles = StyleSheet.create({
   label: { color: Brand.text, fontSize: 15, fontWeight: '700', flexShrink: 1 },
   muted: { color: Brand.textSecondary, fontSize: 13, flexShrink: 1 },
   empty: { paddingVertical: 12 },
-  venue: { gap: 6, zIndex: 2 },
-  suggestions: { position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#232326', borderWidth: 1, borderColor: Brand.border, borderRadius: 12, elevation: 5 },
-  suggestion: { minHeight: 44, paddingHorizontal: 12, justifyContent: 'center', borderBottomWidth: StyleSheet.hairlineWidth, borderColor: Brand.border },
   panel: { gap: 9, padding: 13, borderRadius: 14, borderColor: Brand.border, borderWidth: 1, backgroundColor: Brand.surface },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });
