@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { CalendarClock, Clock, Flag, MapPin, Share2, Swords, Users, X } from 'lucide-react-native';
-import { useCallback, useRef, useState, type ComponentRef } from 'react';
+import { useCallback, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BackButton } from '@/components/common/back-button';
@@ -106,7 +106,7 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
     <MatchMeta icon={Swords} text={formatLabels[match.format]} color={Brand.red} />
   </>;
   let body;
-  let actions;
+  let actions: React.ReactNode | null | undefined;
   let centered = false;
 
   if (canPlay && opponent && stage === 'confirmation') {
@@ -147,6 +147,7 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
       <LiveScoreboard state={live.state} opponentName={name} player1IsMe={first} submitting={busy} busy={live.busy}
         onPoint={() => live.perform('POINT')} onUndo={() => live.perform('UNDO')} onSubmit={(sets: SetScore[]) => { void run(() => matchesService.submitScore(match.id, sets)); }} />
     </>;
+    actions = null;
   } else if (waitingRival) {
     centered = true;
     body = <>
@@ -223,8 +224,8 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
       {body}
       {canPlay && stage === 'ready' && live.error && <MatchNotice icon={Clock} title="Marcador en vivo" message={live.error.isNetwork ? 'Se perdió la conexión. Estamos intentando reconectar.' : 'No pudimos actualizar el marcador. Revisa el estado antes de continuar.'} />}
     </ScrollView>
-    <View style={styles.footer}>{actions ?? <AuthButton label={final ? 'Ver historial' : 'Ver mis partidas'}
-      onPress={final ? () => router.replace({ pathname: '/matches', params: { section: 'history' } }) : toMatches} />}</View>
+    {actions !== null && <View style={styles.footer}>{actions ?? <AuthButton label={final ? 'Ver historial' : 'Ver mis partidas'}
+      onPress={final ? () => router.replace({ pathname: '/matches', params: { section: 'history' } }) : toMatches} />}</View>}
     <ConfirmDialog busy={busy} onCancel={() => setCancelPrompt(false)} confirmation={cancelPrompt ? {
       title: '¿Cancelar la partida?', message: 'La partida dejará de estar activa.', label: 'Cancelar partida',
       cancelLabel: 'Volver', Icon: X, destructive: true, onConfirm: () => { void run(() => matchesService.cancel(match.id)); },
@@ -234,7 +235,7 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center' },
-  content: { flexGrow: 1, gap: Spacing.three, paddingBottom: Spacing.three },
+  content: { flexGrow: 1, gap: Spacing.three, paddingBottom: Spacing.four },
   centered: { justifyContent: 'center' },
   back: { alignSelf: 'flex-start', marginTop: 4 },
   heading: { color: Brand.text, fontSize: 25, fontWeight: '800' },
@@ -253,6 +254,6 @@ const styles = StyleSheet.create({
   vsText: { color: '#FFD278', fontSize: 11, fontWeight: '800' },
   scoreHeader: { alignItems: 'center', gap: 4 },
   reportRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  footer: { paddingVertical: Spacing.three },
+  footer: { paddingVertical: Spacing.four, paddingBottom: Spacing.five },
   input: { textAlignVertical: 'top', minHeight: 100, padding: 12, color: Brand.text, backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border, borderRadius: 12 },
 });

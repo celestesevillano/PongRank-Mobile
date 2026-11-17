@@ -43,7 +43,7 @@ export function LiveScoreboard({ state, opponentName, player1IsMe, busy, submitt
     </Text>)}</View>
     <Text style={styles.setLabel}>Set {sets.length + Number(!state.finished)}</Text>
     <View style={styles.board}>{player1IsMe ? <>{mine}{rival}</> : <>{rival}{mine}</>}</View>
-    <AuthButton label="Deshacer último punto" variant="secondary" style={styles.undo}
+    <AuthButton label="Deshacer último punto" variant={state.finished ? 'secondary' : 'primary'} style={styles.undo}
       disabled={busy || submitting || state.lastPointBy !== (player1IsMe ? 1 : 2)} onPress={onUndo} />
     {state.finished && <AuthButton label="Revisar marcador" disabled={busy} onPress={() => setReviewing(true)} />}
   </View>;
