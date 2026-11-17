@@ -21,21 +21,26 @@ export const PLAN_ART = {
 const statistics: Benefit = {
   Icon: ChartNoAxesCombined,
   title: 'Estadísticas',
-  description: 'Rating, victorias, racha y mejor victoria.',
+  description: 'Tu rating, porcentaje de victorias, racha y mejor victoria.',
 };
 const coach: Benefit = {
   Icon: Bot, title: 'Coach Pongi', description: 'Analiza tu postura y movimiento con la cámara.',
 };
 const club = (maximum: number): Benefit => ({
   Icon: Shield, title: maximum === 1 ? '1 club propio' : `${maximum} clubes propios`,
-  description: 'Lo creas y administras tú.',
+  description: 'Lo creas y administras tú. Ocupa 1 de tus espacios.',
 });
 
 export function planBenefits(plan: MembershipPlan, quotas?: MyPlanResponse): Benefit[] {
   const total = quotas?.maxSpaces ?? (plan === 'FREEMIUM' ? 2 : plan === 'BASIC' ? 4 : 6);
+  const clubs = quotas?.maxClubsTotal ?? (plan === 'BASIC' ? 2 : 5);
   const spaces: Benefit = {
     Icon: Users, title: `${total} espacios`,
-    description: 'Para comunidades y clubes. Cada una usa 1.',
+    description: plan === 'ENTERPRISE'
+      ? 'Tu club y las comunidades que crees o a las que te unas.'
+      : plan === 'FREEMIUM'
+        ? 'Únete a comunidades. Cada una usa 1 espacio.'
+        : `Comunidades y hasta ${clubs} clubes. Cada uno usa 1 espacio.`,
   };
   switch (plan) {
     case 'FREEMIUM': return [spaces];
