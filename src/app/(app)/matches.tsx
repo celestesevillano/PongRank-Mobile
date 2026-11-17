@@ -59,25 +59,30 @@ function MatchHistory({ playerId }: { playerId: number }) {
   const matches = usePaginated((params, signal) => matchesService.byPlayer(playerId, { ...params, status: 'CONFIRMED' }, signal), [playerId]);
 
   useFocusEffect(useCallback(() => { matches.refetch(); }, [matches.refetch]));
-  return (
-    <>
-      <ScreenState
-        loading={matches.loading}
-        error={matches.error}
-        empty={matches.data?.content.length === 0}
-        emptyMessage="Aún no tienes partidas jugadas."
-        onRetry={matches.refetch}
-      />
-      {matches.data && !matches.loading && (
-        <FlatList
-          data={matches.data.content}
-          keyExtractor={(item) => String(item.id)}
-          ItemSeparatorComponent={() => <View style={{ height: Spacing.two }} />}
-          ListFooterComponent={<PaginationBar page={matches.data} onPageChange={matches.setPage} />}
-          renderItem={({ item }) => <MatchCard match={item} playerId={playerId} />}
+  if (matches.loading || matches.error) {
+    return <View style={styles.center}><ScreenState loading={matches.loading} error={matches.error} onRetry={matches.refetch} /></View>;
+  }
+  if (!matches.data) return null;
+  if (matches.data.totalElements === 0) {
+    return (
+      <View style={styles.center}>
+        <MatchState
+          title="Sin partidas en el historial"
+          message="Aquí verás tus partidas cuando se confirme el resultado."
+          art={matchArt.review}
         />
-      )}
-    </>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={matches.data.content}
+      keyExtractor={(item) => String(item.id)}
+      ItemSeparatorComponent={() => <View style={{ height: Spacing.two }} />}
+      ListFooterComponent={<PaginationBar page={matches.data} onPageChange={matches.setPage} />}
+      renderItem={({ item }) => <MatchCard match={item} playerId={playerId} />}
+    />
   );
 }
 
