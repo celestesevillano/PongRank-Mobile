@@ -11,7 +11,7 @@ export type MatchCreateInput = {
   communityId?: number;
 } & Partial<Coordinates>;
 
-export const ACTIVE_STATUSES = ['CREATED', 'PROPOSED_P1', 'PROPOSED_P2'] as const;
+export const ACTIVE_STATUSES = ['CREATED', 'PROPOSED_P1', 'PROPOSED_P2', 'DISPUTED'] as const;
 export const HISTORY_STATUSES = ['CONFIRMED', 'DISPUTED', 'CANCELLED', 'WALKOVER'] as const;
 
 export const matchesService = {
@@ -34,6 +34,15 @@ export const matchesService = {
       ACTIVE_STATUSES.map((status) => matchesService.byPlayer(playerId, { status, size: 10 }, signal)),
     );
     return pages.flatMap((page) => page.content).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+
+  forTournaments: async (playerId: number, signal?: AbortSignal) => {
+    const matches = new Map<number, MatchResponse>();
+    for (let index = 0; ; index++) {
+      const page = await matchesService.byPlayer(playerId, { page: index, size: 50, sort: ['createdAt,desc', 'id,desc'] }, signal);
+      for (const match of page.content) if (match.matchType === 'TOURNAMENT') matches.set(match.id, match);
+      if (page.last || page.content.length === 0) return [...matches.values()];
+    }
   },
 
   open: (location: Coordinates, signal?: AbortSignal) =>

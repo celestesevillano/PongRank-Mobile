@@ -1,344 +1,217 @@
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowRight, CheckCircle2, ChevronRight, Circle, Clock, MapPin, Search, Users } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ChevronLeft, ChevronRight, Clock, LocateFixed, MapPin, Search, Swords, Users } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { ActionRow } from '@/components/common/action-row';
 import { LocationNotice } from '@/components/common/location-notice';
+import { PillTabs } from '@/components/common/pill-tabs';
 import { ScreenContainer } from '@/components/common/screen-container';
-import { PlayerIdentity, PongmigoButton, PongiState, pongiArt } from '@/components/pongmigos/pongmigos-ui';
+import { formatLabels, matchArt, MatchMeta, MatchState } from '@/components/matches/match-ui';
+import { PlayerIdentity } from '@/components/pongmigos/pongmigos-ui';
 import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useToast } from '@/context/toast';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useFetch } from '@/hooks/use-fetch';
 import { useLocation } from '@/hooks/use-location';
-import { friendOf, friendshipsService } from '@/services/friendships.service';
-import { matchesService, type MatchCreateInput } from '@/services/matches.service';
+import { useMatchAddress } from '@/hooks/use-match-address';
+import { circleOptions, matchRivals, type Circle, type MatchRival } from '@/services/match-circles.service';
+import { matchesService, type Coordinates, type MatchCreateInput } from '@/services/matches.service';
 import { placesAvailable, placesService, type PlaceSuggestion } from '@/services/places.service';
-import type { MatchResponse, PlayerSummary } from '@/types/api';
-import { toApiError, type ApiError } from '@/utils/api-error';
+import { toApiError } from '@/utils/api-error';
 
-const FORMATS: { label: string; value: MatchCreateInput['format'] }[] = [
-  { label: 'Mejor de 3', value: 'BO3' },
-  { label: 'Mejor de 5', value: 'BO5' },
-  { label: 'Mejor de 7', value: 'BO7' },
-];
-
-type Step = 'who' | 'where' | 'format' | 'waiting';
-const STEP_TITLE: Record<Step, string> = { who: 'Crear partida', where: 'Crear partida', format: 'Crear partida', waiting: 'Partida publicada' };
+const formats = (Object.keys(formatLabels) as MatchCreateInput['format'][]).map((key) => ({ key, label: formatLabels[key] }));
+const clockText = (date: Date) => date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+type Step = 1 | 2 | 3 | 4;
 
 export default function NewMatchScreen() {
   const { opponentId } = useLocalSearchParams<{ opponentId?: string }>();
   const { player } = useSession();
   const { showToast } = useToast();
-  const { coords, setCoords, status, retry } = useLocation();
-  const [step, setStep] = useState<Step>('who');
-  const [opponent, setOpponent] = useState<PlayerSummary | null>(null);
-  const [friends, setFriends] = useState<PlayerSummary[]>([]);
-  const [friendsLoading, setFriendsLoading] = useState(true);
-  const [friendsError, setFriendsError] = useState<ApiError | null>(null);
-  const [retryFriends, setRetryFriends] = useState(0);
-  const [friendQuery, setFriendQuery] = useState('');
+  const { coords, status, retry } = useLocation();
+  const currentAddress = useMatchAddress(coords?.latitude, coords?.longitude);
+  const [step, setStep] = useState<Step>(opponentId ? 2 : 1);
+  const [circle, setCircle] = useState<Circle>('friends');
+  const [opponent, setOpponent] = useState<MatchRival | null>(null);
+  const [query, setQuery] = useState('');
   const [format, setFormat] = useState<MatchCreateInput['format']>('BO3');
   const [placeQuery, setPlaceQuery] = useState('');
-  const [placeLabel, setPlaceLabel] = useState<string | null>(null);
+  const [place, setPlace] = useState<{ name: string; coords: Coordinates }>();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [created, setCreated] = useState<MatchResponse | null>(null);
-  const debouncedQuery = useDebouncedValue(placeQuery, 350);
+  const [time, setTime] = useState(() => new Date());
+  const [busy, setBusy] = useState(false);
+  const [resolvingPlace, setResolvingPlace] = useState(false);
 
-  const playerId = player?.id;
-  useEffect(() => {
-    if (!playerId) return;
-    const controller = new AbortController();
-    setFriendsLoading(true);
-    setFriendsError(null);
-    friendshipsService.accepted(playerId, controller.signal)
-      .then((list) => {
-        if (controller.signal.aborted) return;
-        const players = list.map((item) => friendOf(item, playerId));
-        setFriends(players);
-        setOpponent(players.find((candidate) => candidate.id === Number(opponentId)) ?? null);
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted) setFriendsError(toApiError(error));
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setFriendsLoading(false);
-      });
-    return () => controller.abort();
-  }, [playerId, opponentId, retryFriends]);
+  const rivals = useFetch((signal) => step === 2 ? matchRivals(circle, player?.id ?? 0, signal) : Promise.resolve([]), [step, circle, player?.id]);
+  const visible = rivals.data?.filter((item) => item.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())) ?? [];
+  const selectedRival = opponent ?? (circle === 'friends' ? visible.find((item) => item.id === Number(opponentId)) : undefined);
+  const needsLocation = !opponent || circle === 'club';
+  const chosenCoordinates = place?.coords ?? coords;
+  const address = place?.name ?? currentAddress ?? (coords ? 'Ubicación actual' : 'Sin ubicación');
+  const debouncedQuery = useDebouncedValue(placeQuery.trim(), 350);
 
   useEffect(() => {
-    if (!placesAvailable || debouncedQuery.trim().length < 3 || placeLabel) {
+    if (step !== 3 || !placesAvailable || debouncedQuery.length < 3 || place) {
       setSuggestions([]);
       return;
     }
     const controller = new AbortController();
-    placesService
-      .autocomplete(debouncedQuery.trim(), controller.signal)
-      .then(setSuggestions)
-      .catch(() => setSuggestions([]));
+    void placesService.autocomplete(debouncedQuery, controller.signal).then((items) => {
+      if (!controller.signal.aborted) setSuggestions(items);
+    }).catch(() => {
+      if (!controller.signal.aborted) setSuggestions([]);
+    });
     return () => controller.abort();
-  }, [debouncedQuery, placeLabel]);
+  }, [step, debouncedQuery, place]);
 
-  const visibleFriends = useMemo(
-    () => friends.filter((friend) => friend.name.toLowerCase().includes(friendQuery.trim().toLowerCase())),
-    [friends, friendQuery],
-  );
-
-  const pickPlace = async (suggestion: PlaceSuggestion) => {
+  async function selectPlace(suggestion: PlaceSuggestion) {
+    setResolvingPlace(true);
     try {
-      setCoords(await placesService.coordinates(suggestion.placeId));
-      setPlaceLabel(suggestion.description);
+      const position = await placesService.coordinates(suggestion.placeId);
+      setPlace({ name: suggestion.description, coords: position });
       setPlaceQuery(suggestion.description);
       setSuggestions([]);
     } catch {
       showToast('No pudimos usar ese lugar. Intenta con otro.', 'error');
-    }
-  };
-
-  // Contra un amigo la ubicación es opcional; una partida abierta la necesita para que otros la encuentren.
-  const canLeaveWhere = opponent !== null || coords !== null;
-
-  const submit = async () => {
-    setSubmitting(true);
-    try {
-      const match = await matchesService.create(
-        opponent
-          ? { matchType: 'FRIEND', format, opponentId: opponent.id, ...(coords ?? {}) }
-          : { matchType: 'LOCATION', format, ...coords },
-      );
-      setCreated(match);
-      setStep('waiting');
-    } catch (err) {
-      showToast(toApiError(err).message, 'error');
     } finally {
-      setSubmitting(false);
+      setResolvingPlace(false);
     }
-  };
+  }
 
-  const cancel = async () => {
-    if (!created) return;
+  async function submit() {
+    if (busy || (needsLocation && !chosenCoordinates)) return;
+    const context = !opponent || circle === 'club' ? 'LOCATION' : circle === 'community' ? 'COMMUNITY' : 'FRIEND';
+    setBusy(true);
     try {
-      await matchesService.cancel(created.id);
-      showToast('Partida cancelada.');
-    } catch (err) {
-      showToast(toApiError(err).message, 'error');
+      const match = await matchesService.create({
+        matchType: context, format, opponentId: opponent?.id,
+        communityId: context === 'COMMUNITY' ? opponent?.groupId : undefined,
+        ...(chosenCoordinates ?? {}),
+      });
+      router.replace({ pathname: '/match/[id]', params: { id: match.id, origin: opponent?.groupName ?? (opponent ? 'Pongmigos' : 'Partida libre'),
+        place: place?.name ?? currentAddress ?? undefined } });
+    } catch (error) {
+      showToast(toApiError(error).message, 'error');
+    } finally {
+      setBusy(false);
     }
-    router.replace('/matches');
-  };
+  }
 
-  const goBack = () => {
-    if (step === 'where') setStep('who');
-    else if (step === 'format') setStep('where');
+  function back() {
+    if (step === 4) setStep(3);
+    else if (step === 3) setStep(opponent ? 2 : 1);
+    else if (step === 2) setStep(1);
     else router.back();
-  };
+  }
 
-  return (
-    <ScreenContainer title={STEP_TITLE[step]}>
-      {step !== 'waiting' && (
-        <Pressable onPress={goBack} hitSlop={12}>
-          <Text style={styles.back}>‹ Volver</Text>
-        </Pressable>
-      )}
-
-      {step === 'who' && (
-        <View style={styles.rivalStage}>
-          <Image pointerEvents="none" source={pongiArt.rival} style={styles.rivalArt} contentFit="contain" accessibilityElementsHidden />
-          <Text style={styles.section} accessibilityRole="header">Elige rival</Text>
-          <View style={styles.searchBox}>
-            <Search color={Brand.textSecondary} size={18} />
-            <TextInput style={styles.searchInput} placeholder="Buscar un Pongmigo" placeholderTextColor={Brand.textSecondary}
-              accessibilityLabel="Buscar un Pongmigo" value={friendQuery} onChangeText={setFriendQuery} />
-          </View>
-          <FlatList
-            data={friendsError ? [] : visibleFriends}
-            keyExtractor={(item) => String(item.id)}
-            keyboardShouldPersistTaps="handled"
-            renderItem={({ item }) => {
-              const selected = item.id === opponent?.id;
-              const SelectionIcon = selected ? CheckCircle2 : Circle;
-              return (
-                <Pressable style={[styles.row, selected && styles.selectedRival]} accessibilityRole="radio"
-                  accessibilityState={{ checked: selected }} onPress={() => setOpponent(item)}>
-                  <PlayerIdentity player={item} />
-                  <SelectionIcon size={20} color={selected ? '#22D3EE' : Brand.textSecondary} />
-                </Pressable>
-              );
-            }}
-            ListEmptyComponent={friendsLoading ? <ActivityIndicator color={Brand.red} style={styles.loader} />
-              : friendsError ? <PongiState error={friendsError} retry={() => setRetryFriends((value) => value + 1)} />
-              : <Text style={styles.hint}>{friends.length ? 'No hay Pongmigos con ese nombre.' : 'Aún no tienes Pongmigos'}</Text>}
-            ListFooterComponent={<Pressable
-              style={styles.row} accessibilityRole="button" onPress={() => { setOpponent(null); setStep('where'); }}>
-              <View style={styles.avatar}><Users color={Brand.textSecondary} size={20} /></View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>Dejar abierta</Text>
-                <Text style={styles.hint}>Cualquiera de nivel similar podrá unirse</Text>
-              </View>
-              <ChevronRight color={Brand.textSecondary} size={18} />
-            </Pressable>}
-          />
-          <PongmigoButton label="Continuar" icon={ArrowRight} disabled={!opponent || friendsLoading || Boolean(friendsError)}
-            style={styles.rivalContinue} onPress={() => setStep('where')} />
-        </View>
-      )}
-
-      {step === 'where' && (
-        <>
-          <Text style={styles.section}>¿Dónde y cuándo?</Text>
-          {placesAvailable && (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder={opponent ? 'Buscar ubicación (opcional)' : 'Buscar ubicación'}
-                placeholderTextColor={Brand.textSecondary}
-                value={placeQuery}
-                onChangeText={(text) => {
-                  setPlaceQuery(text);
-                  setPlaceLabel(null);
-                }}
-              />
-              {suggestions.map((suggestion) => (
-                <Pressable key={suggestion.placeId} style={styles.suggestion} onPress={() => pickPlace(suggestion)}>
-                  <Text style={styles.suggestionText}>{suggestion.description}</Text>
-                </Pressable>
-              ))}
-            </>
-          )}
-          {coords ? (
-            <Text style={styles.hint}>{placeLabel ? `Lugar elegido: ${placeLabel}` : 'Usaremos tu ubicación actual.'}</Text>
-          ) : (
-            <LocationNotice status={status === 'ready' ? 'unavailable' : status} onRetry={retry} />
-          )}
-          <View style={styles.when}>
-            <Clock color={Brand.red} size={18} />
-            <Text style={styles.whenText}>Ahora mismo</Text>
-          </View>
-          <Text style={styles.hint}>Programar la hora llegará más adelante.</Text>
-          <AuthButton label="Siguiente" disabled={!canLeaveWhere} onPress={() => setStep('format')} style={styles.submit} />
-        </>
-      )}
-
-      {step === 'format' && (
-        <>
-          <Text style={styles.section}>Formato del partido</Text>
-          <View style={styles.formats}>
-            {FORMATS.map((item) => (
-              <Pressable key={item.value} onPress={() => setFormat(item.value)} style={[styles.format, format === item.value && styles.formatActive]}>
-                <Text style={styles.formatLabel}>{item.label}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Text style={styles.hint}>Cada set se juega a 11 puntos. Si hay empate en 10, gana quien saque 2 puntos de ventaja.</Text>
-
-          <View style={styles.summary}>
-            <Text style={styles.rowTitle}>Resumen de tu partida</Text>
-            <SummaryRow label="Oponente" value={opponent ? opponent.name : 'Partida abierta'} />
-            <SummaryRow label="Ubicación" value={placeLabel ?? (coords ? 'Tu ubicación actual' : 'Sin ubicación')} />
-            <SummaryRow label="Cuándo" value="Ahora mismo" />
-          </View>
-          <AuthButton label="Crear partida" loading={submitting} onPress={submit} style={styles.submit} />
-        </>
-      )}
-
-      {step === 'waiting' && (
-        <View style={styles.waiting}>
-          <View style={styles.clock}>
-            <Clock color="#22D3EE" size={48} />
-          </View>
-          <Text style={styles.waitingTitle}>{opponent ? `Esperando a ${opponent.name}...` : 'Esperando rival...'}</Text>
-          <Text style={styles.hint}>
-            {opponent ? 'Tu rival recibirá la invitación y podrá aceptarla.' : 'Tu partida está publicada y visible para otros jugadores.'}
-          </Text>
-          <View style={styles.summary}>
-            <SummaryRow label="Formato" value={FORMATS.find((f) => f.value === format)?.label ?? ''} />
-            <View style={styles.summaryRow}>
-              <MapPin color={Brand.red} size={14} />
-              <Text style={styles.summaryValue}>{placeLabel ?? 'Tu ubicación actual'}</Text>
-            </View>
-          </View>
-          <AuthButton label="Ver mis partidas" onPress={() => router.replace('/matches')} style={styles.submit} />
-          <Pressable onPress={cancel} hitSlop={12}>
-            <Text style={styles.cancel}>Cancelar partida</Text>
-          </Pressable>
-        </View>
-      )}
-    </ScreenContainer>
-  );
-}
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.summaryRow}>
-      <Text style={styles.summaryLabel}>{label}</Text>
-      <Text style={styles.summaryValue}>{value}</Text>
+  return <ScreenContainer>
+    <AuthButton label="Volver" icon={ChevronLeft} variant="ghost" onPress={back} style={styles.back} disabled={busy} />
+    <View style={styles.step}><Text style={styles.muted}>Paso {step} de 4</Text>
+      <View style={styles.bars}>{[1, 2, 3, 4].map((segment) => <View key={segment} style={[styles.bar, segment <= step && styles.filled]} />)}</View>
     </View>
-  );
+
+    {step === 1 && <View style={styles.stack}>
+      <Text accessibilityRole="header" style={styles.title}>¿Contra quién quieres jugar?</Text>
+      <Pressable accessibilityRole="button" style={styles.choice} onPress={() => { setOpponent(null); setStep(2); }}>
+        <Users size={21} color={Brand.cyan} /><View style={styles.flex}><Text style={styles.label}>Mi círculo social</Text>
+          <Text style={styles.muted}>Elige a alguien de Pongmigos, tus comunidades o tus clubes.</Text></View><ChevronRight size={18} color={Brand.textSecondary} />
+      </Pressable>
+      <Pressable accessibilityRole="button" style={styles.choice} onPress={() => { setOpponent(null); setStep(3); }}>
+        <Swords size={21} color={Brand.cyan} /><View style={styles.flex}><Text style={styles.label}>Dejar abierta</Text>
+          <Text style={styles.muted}>Publica la partida para que otro jugador pueda unirse.</Text></View><ChevronRight size={18} color={Brand.textSecondary} />
+      </Pressable>
+    </View>}
+
+    {step === 2 && <>
+      <Text accessibilityRole="header" style={styles.title}>Elige a tu rival</Text>
+      <View style={styles.field}><Search size={18} color={Brand.textSecondary} /><TextInput style={styles.input} placeholder="Buscar jugador"
+        placeholderTextColor={Brand.textSecondary} value={query} onChangeText={setQuery} accessibilityLabel="Buscar jugador" /></View>
+      <PillTabs options={circleOptions} selected={circle} onSelect={(value) => { setCircle(value); setOpponent(null); }} />
+      <FlatList data={rivals.loading || rivals.error ? [] : visible} style={styles.flex}
+        keyExtractor={(item) => String(item.id)} keyboardShouldPersistTaps="handled"
+        renderItem={({ item }) => <Pressable accessibilityRole="radio" accessibilityState={{ checked: item.id === selectedRival?.id }}
+          style={[styles.choice, item.id === selectedRival?.id && styles.selected]} onPress={() => setOpponent(item)}>
+          {item.player ? <PlayerIdentity player={item.player} showRating /> : <Text style={styles.label}>{item.name}</Text>}
+          {!!item.groupName && <Text style={styles.muted}>{item.groupName}</Text>}
+        </Pressable>}
+        ListEmptyComponent={<View style={styles.empty}>
+          {rivals.loading ? <Text style={styles.muted}>Cargando jugadores…</Text> :
+            <MatchState title={rivals.error ? 'No pudimos cargar los jugadores' : 'No encontramos jugadores'} art={rivals.error?.isNetwork ? matchArt.offline : matchArt.search}>
+              {!!rivals.error && <AuthButton label="Reintentar" onPress={rivals.refetch} />}
+            </MatchState>}
+        </View>} />
+      <View style={styles.footer}><AuthButton label="Continuar" disabled={!selectedRival || rivals.loading || !!rivals.error}
+        onPress={() => { if (selectedRival) { setOpponent(selectedRival); setStep(3); } }} /></View>
+    </>}
+
+    {step === 3 && <>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.stack}>
+        <Text accessibilityRole="header" style={styles.title}>¿Dónde y cuándo?</Text>
+        {placesAvailable && <View style={styles.venue}>
+          <Text style={styles.label}>Lugar</Text>
+          <View style={styles.field}><MapPin size={18} color={Brand.textSecondary} /><TextInput style={styles.input}
+            placeholder="Busca una dirección o un lugar" placeholderTextColor={Brand.textSecondary} value={placeQuery}
+            accessibilityLabel="Lugar" onChangeText={(value) => { setPlaceQuery(value); setPlace(undefined); setSuggestions([]); }} /></View>
+          {!!suggestions.length && <View style={styles.suggestions}>
+            {suggestions.slice(0, 4).map((item) => <Pressable key={item.placeId} accessibilityRole="button" style={styles.suggestion}
+              disabled={resolvingPlace} onPress={() => { void selectPlace(item); }}><Text style={styles.label} numberOfLines={2}>{item.description}</Text></Pressable>)}
+          </View>}
+        </View>}
+        <AuthButton label="Usar mi ubicación actual" icon={LocateFixed} variant="secondary" disabled={resolvingPlace} onPress={() => {
+          setPlace(undefined); setPlaceQuery(''); setSuggestions([]); if (!coords) void retry();
+        }} />
+        {coords || place ? <Text style={styles.muted}>{address}</Text>
+          : <LocationNotice status={status === 'ready' ? 'unavailable' : status} onRetry={retry} />}
+        <Text style={styles.label}>Hora</Text>
+        <ActionRow><AuthButton label="Ahora mismo" variant="secondary" icon={Clock} onPress={() => setTime(new Date())} />
+          <View style={styles.field}><Text style={styles.label}>{clockText(time)}</Text></View></ActionRow>
+      </ScrollView>
+      <View style={styles.footer}><AuthButton label="Continuar" onPress={() => setStep(4)}
+        disabled={(needsLocation && !chosenCoordinates) || resolvingPlace} /></View>
+    </>}
+
+    {step === 4 && <>
+      <ScrollView contentContainerStyle={styles.stack}>
+        <Text accessibilityRole="header" style={styles.title}>Formato de la partida</Text>
+        <PillTabs options={formats} selected={format} onSelect={setFormat} />
+        <View style={styles.panel}><Text style={styles.label}>Sets a 11 puntos</Text>
+          <Text style={styles.muted}>Si empatan a 10, hacen falta 2 puntos de ventaja.</Text></View>
+        <View style={[styles.panel, styles.selected]}>
+          <Text style={styles.label}>Resumen</Text>
+          <View style={styles.identity}>{opponent?.player ? <PlayerIdentity player={opponent.player} showRating />
+            : <Text style={styles.label}>{opponent?.name ?? 'Partida abierta'}</Text>}</View>
+          <MatchMeta icon={MapPin} text={address} />
+          <MatchMeta icon={Clock} text={clockText(time)} />
+          <MatchMeta icon={Swords} text={formatLabels[format]} />
+        </View>
+      </ScrollView>
+      <View style={styles.footer}><AuthButton label="Crear partida" loading={busy} onPress={submit} /></View>
+    </>}
+  </ScreenContainer>;
 }
 
 const styles = StyleSheet.create({
-  rivalStage: { flex: 1, minHeight: 0 },
-  rivalArt: { position: 'absolute', top: '22%', bottom: '14%', width: '64%', alignSelf: 'center', opacity: 0.25 },
-  rivalContinue: { marginTop: 8, marginBottom: 12 },
-  selectedRival: { borderColor: '#22D3EE', backgroundColor: '#122A32' },
-  back: { color: Brand.textSecondary, marginBottom: Spacing.three },
-  section: { color: Brand.text, fontSize: 18, fontWeight: '700', marginTop: Spacing.two, marginBottom: Spacing.two },
-  input: { backgroundColor: Brand.surface, borderRadius: Spacing.three, borderWidth: 1, borderColor: Brand.border, color: Brand.text, padding: Spacing.three },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-    backgroundColor: Brand.surface,
-    borderRadius: Spacing.three,
-    borderWidth: 1,
-    borderColor: Brand.border,
-    paddingHorizontal: Spacing.three,
-    marginBottom: Spacing.two,
-  },
-  searchInput: { flex: 1, color: Brand.text, paddingVertical: Spacing.three },
-  loader: { marginVertical: Spacing.three },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-    padding: Spacing.three,
-    marginTop: Spacing.two,
-    backgroundColor: Brand.surface,
-    borderRadius: Spacing.three,
-    borderWidth: 1,
-    borderColor: Brand.border,
-  },
-  rowTitle: { color: Brand.text, fontSize: 15, fontWeight: '700' },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
-  suggestion: { paddingVertical: Spacing.two, borderBottomWidth: 1, borderBottomColor: Brand.border },
-  suggestionText: { color: Brand.text },
-  hint: { color: Brand.textSecondary, fontSize: 13, marginTop: Spacing.two },
-  when: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-    marginTop: Spacing.three,
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    borderWidth: 1.5,
-    borderColor: Brand.red,
-    backgroundColor: 'rgba(232, 38, 47, 0.12)',
-  },
-  whenText: { color: Brand.text, fontWeight: '600' },
-  formats: { flexDirection: 'row', gap: Spacing.two },
-  format: { flex: 1, alignItems: 'center', paddingVertical: Spacing.three, borderRadius: Spacing.three, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface },
-  formatActive: { borderColor: Brand.red },
-  formatLabel: { color: Brand.text, fontWeight: '600' },
-  summary: { marginTop: Spacing.three, padding: Spacing.three, gap: Spacing.two, backgroundColor: Brand.surface, borderRadius: Spacing.three, borderWidth: 1, borderColor: Brand.border },
-  summaryRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
-  summaryLabel: { color: Brand.textSecondary, fontSize: 13 },
-  summaryValue: { color: Brand.text, fontSize: 14, fontWeight: '600', flexShrink: 1, textAlign: 'right' },
-  submit: { marginTop: Spacing.four },
-  waiting: { alignItems: 'center', gap: Spacing.two, paddingTop: Spacing.four },
-  clock: { width: 104, height: 104, borderRadius: 52, borderWidth: 2, borderColor: '#F5A524', alignItems: 'center', justifyContent: 'center' },
-  waitingTitle: { color: Brand.text, fontSize: 24, fontWeight: '700', marginTop: Spacing.three, textAlign: 'center' },
-  cancel: { color: Brand.red, fontWeight: '600', marginTop: Spacing.three },
+  flex: { flex: 1 },
+  stack: { gap: 12, paddingBottom: 12 },
+  footer: { paddingVertical: Spacing.three },
+  back: { alignSelf: 'flex-start', paddingHorizontal: 0, marginTop: 4 },
+  step: { alignItems: 'center', gap: 9, paddingBottom: 16 },
+  bars: { flexDirection: 'row', gap: 5 },
+  bar: { flex: 1, height: 3, borderRadius: 3, backgroundColor: Brand.border },
+  filled: { backgroundColor: Brand.red },
+  title: { color: Brand.text, fontSize: 24, fontWeight: '800', marginBottom: 8 },
+  field: { minHeight: 46, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderRadius: 12, borderColor: Brand.border, borderWidth: 1, backgroundColor: Brand.surface },
+  input: { color: Brand.text, flex: 1, minHeight: 44 },
+  choice: { flexDirection: 'row', alignItems: 'center', gap: 9, padding: 12, marginTop: 6, borderRadius: 14, borderWidth: 1, borderColor: Brand.border, backgroundColor: Brand.surface },
+  selected: { borderColor: '#307D8A', backgroundColor: '#10252C' },
+  label: { color: Brand.text, fontSize: 15, fontWeight: '700', flexShrink: 1 },
+  muted: { color: Brand.textSecondary, fontSize: 13, flexShrink: 1 },
+  empty: { paddingVertical: 12 },
+  venue: { gap: 6, zIndex: 2 },
+  suggestions: { position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#232326', borderWidth: 1, borderColor: Brand.border, borderRadius: 12, elevation: 5 },
+  suggestion: { minHeight: 44, paddingHorizontal: 12, justifyContent: 'center', borderBottomWidth: StyleSheet.hairlineWidth, borderColor: Brand.border },
+  panel: { gap: 9, padding: 13, borderRadius: 14, borderColor: Brand.border, borderWidth: 1, backgroundColor: Brand.surface },
+  identity: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });
