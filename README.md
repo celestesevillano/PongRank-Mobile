@@ -55,9 +55,9 @@ tests/          pruebas de la lógica del cuadro de torneos
 
 | Integrante | Código | Principales aportes | Participación |
 | --- | --- | --- | --- |
-| Adriana Celeste Sevillano Común | 202310146 | Backend, sistema de diseño, pantallas y flujos de Mobile, pruebas y coordinación | 100 % |
-| Treicy Calsina Gutiérrez | 202520007 | Despliegue (API y EAS) y Web | 100 % |
-| Adriana Celeste Alvarado León | 202420154 | Coach (análisis de postura), Web y correcciones de navegación | 100 % |
-| Andrea Alejandra Vidal Coello | 202410193 | _completar_ | 100 % |
+| Adriana Celeste Sevillano Común | 202310146 | Mayor parte del desarrollo: backend, sistema de diseño y pantallas y flujos de Mobile, pruebas y coordinación del equipo | 100 % |
+| Treicy Calsina Gutiérrez | 202520007 | Despliegue y levantamiento de todas las URLs (API, web y app); creación y gestión de usuarios para la demo | 100 % |
+| Adriana Celeste Alvarado León | 202420154 | Coach de postura (análisis con la cámara) y flujo de Partidas | 100 % |
+| Andrea Alejandra Vidal Coello | 202410193 | Revisión del proyecto y flujo de amistad (Pongmigos) | 100 % |
 
 > Cada integrante cumplió completamente sus responsabilidades (100 %).
