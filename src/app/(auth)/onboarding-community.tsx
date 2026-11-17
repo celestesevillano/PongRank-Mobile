@@ -54,7 +54,9 @@ export default function OnboardingCommunityScreen() {
       setJoinedIds((prev) => new Set(prev).add(community.id));
       showToast(`Te uniste a ${community.name}.`);
     } catch (err) {
-      setError(toApiError(err).message);
+      const failure = toApiError(err);
+      // 409: el backend rechaza unirse a comunidades pausadas por vencimiento de su plan
+      setError(failure.status === 409 ? 'Esa comunidad está en pausa y no admite nuevos miembros por ahora. Elige otra.' : failure.message);
     } finally {
       setJoiningId(null);
     }
