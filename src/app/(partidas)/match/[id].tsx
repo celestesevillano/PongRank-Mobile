@@ -4,6 +4,7 @@ import { CalendarClock, Clock, Flag, MapPin, Share2, Swords, Users, X } from 'lu
 import { useCallback, useRef, useState, type ComponentRef } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { BackButton } from '@/components/common/back-button';
 import { AuthButton } from '@/components/auth/auth-button';
 import { ActionRow } from '@/components/common/action-row';
 import { ConfirmDialog } from '@/components/common/confirm-dialog';
@@ -213,7 +214,7 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
   }
 
   return <>
-    <AuthButton label="Volver" variant="text" style={styles.back} disabled={busy} onPress={() => {
+    <BackButton disabled={busy} onPress={() => {
       if (disputing) setDisputing(false);
       else if (canPlay && stage !== 'confirmation' && !playing) setStage('confirmation');
       else router.canGoBack() ? router.back() : toMatches();
