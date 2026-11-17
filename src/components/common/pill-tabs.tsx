@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   segmentLabelActive: { color: Brand.text },
   fill: { flexGrow: 1, flexBasis: '44%' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginBottom: Spacing.three },
-  scroll: { flexGrow: 0, marginBottom: Spacing.three },
+  scroll: { flexGrow: 0, flexShrink: 0, marginBottom: Spacing.three },
   row: { gap: Spacing.two },
   pill: { height: 44, flexDirection: 'row', gap: 6, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, borderColor: Brand.border, alignItems: 'center', justifyContent: 'center' },
   pillActive: { borderColor: Brand.primary, backgroundColor: Brand.primary },
