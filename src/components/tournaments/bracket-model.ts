@@ -12,7 +12,7 @@ export function validateParticipantCount(count: number): string | null {
 }
 
 export type Entrant = { id: number; name: string; rating: number };
-export type Slot = { name: string; entry?: 'Directo' | 'Preliminar'; seed?: number };
+export type Slot = { name: string; entry?: 'Directo' | 'Preliminar'; seed?: number; won?: boolean };
 export type Bout = { id: string; title: string; slots: [Slot, Slot]; feeds?: string };
 export type Round = { title: string; bouts: Bout[] };
 

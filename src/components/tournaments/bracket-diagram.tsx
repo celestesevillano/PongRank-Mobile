@@ -21,11 +21,11 @@ function bound(value: number, viewport: number, content: number, zoom: number) {
 
 function BoutCard({ bout, final }: { bout: Bout; final?: boolean }) {
   return (
-    <View style={[styles.card, final && styles.final]}>
+    <View style={[styles.card, bout.slots.some(({ won }) => won) && styles.decided, final && styles.final]}>
       <Text style={[styles.boutTitle, final && styles.gold]}>{bout.title}</Text>
       {bout.slots.map((slot, i) => (
         <View key={i} style={styles.slot}>
-          <Text numberOfLines={2} style={styles.name}>{slot.name}</Text>
+          <Text numberOfLines={2} style={[styles.name, slot.won && (final ? styles.gold : styles.winner)]}>{slot.name}</Text>
           {slot.entry ? <Text style={styles.entry}>{slot.entry}</Text> : null}
         </View>
       ))}
@@ -115,6 +115,8 @@ const styles = StyleSheet.create({
   header: { position: 'absolute', top: 10, width: CARD, textAlign: 'center', color: Brand.text, fontSize: 13, fontWeight: '700' },
   node: { position: 'absolute', width: CARD },
   card: { minHeight: HEIGHT, borderWidth: 1, borderColor: Brand.secondaryBorder, backgroundColor: Brand.background, borderRadius: 10, padding: 8, gap: 4 },
+  decided: { borderColor: '#66CF97' },
+  winner: { color: '#66CF97', fontWeight: '700' },
   final: { borderColor: GOLD },
   gold: { color: GOLD, fontWeight: '700' },
   finalTrophy: { position: 'absolute', bottom: '100%', left: 0, right: 0, alignItems: 'center', marginBottom: 9 },

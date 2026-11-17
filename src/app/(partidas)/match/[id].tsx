@@ -22,6 +22,7 @@ import { useToast } from '@/context/toast';
 import { useFetch } from '@/hooks/use-fetch';
 import { useMatchAddress } from '@/hooks/use-match-address';
 import { matchesService } from '@/services/matches.service';
+import { tournamentsService } from '@/services/tournaments.service';
 import type { MatchDetail, SetScore } from '@/types/api';
 import { toApiError } from '@/utils/api-error';
 import { setsWon } from '@/utils/scoring';
@@ -33,7 +34,7 @@ export default function MatchDetailScreen() {
   const { id, origin, place } = useLocalSearchParams<{ id: string; origin?: string; place?: string }>();
   const matchId = Number(id);
   const { data, loading, error, refetch } = useFetch((signal) => matchesService.get(matchId, signal), [matchId]);
-  const awaitingChange = (data?.status === 'CREATED' && !data.player2) || data?.status === 'PROPOSED_P1' || data?.status === 'PROPOSED_P2';
+  const awaitingChange = (data?.status === 'CREATED' && (!data.player2 || !!data.tournamentId)) || data?.status === 'PROPOSED_P1' || data?.status === 'PROPOSED_P2';
   useFocusEffect(useCallback(() => {
     if (!awaitingChange) return;
     const timer = setInterval(refetch, 10000);
@@ -107,6 +108,9 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
   </>;
   let body;
   let actions: React.ReactNode | null | undefined;
+  const openDiagram = match.tournamentId ? () => router.push({
+    pathname: '/social/tournament', params: { id: match.tournamentId!, diagram: 'yes' },
+  }) : null;
   let centered = false;
 
   if (canPlay && opponent && stage === 'confirmation') {
@@ -125,7 +129,7 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
     const ready = !!myReady;
     body = <>
       <Text accessibilityRole="header" style={styles.heading}>Antes de jugar</Text>
-      <MatchBanner title={match.tournamentName ?? 'Partida amistosa'}>{matchInfo}</MatchBanner>
+      <MatchBanner tournament={!!match.tournamentId} title={match.tournamentName ?? 'Partida amistosa'}>{matchInfo}</MatchBanner>
       <View style={styles.vsBoard}>
         <Image source={matchArt.versus} style={styles.vsArt} contentFit="cover" contentPosition="bottom center" accessible={false} />
         <View style={styles.vsPlayers}>
@@ -185,20 +189,23 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
   } else if (match.status === 'DISPUTED') {
     body = <>
       <Text accessibilityRole="header" style={styles.heading}>Resultado en disputa</Text>
-      <MatchNotice icon={Flag} title="Resultado pendiente" message="El marcador reportado sigue en revisión." />
+      <MatchNotice icon={Flag} title="Resultado pendiente" message={openDiagram
+        ? 'La llave avanzará cuando se confirme el resultado.'
+        : 'El marcador reportado sigue en revisión.'} />
       {!!match.disputeReason && <Text style={styles.muted}>{match.disputeReason}</Text>}
       <Text style={styles.label}>Marcador reportado</Text>
       <View style={styles.panel}>{match.sets.map((set) => <View key={set.setNumber} style={styles.reportRow}>
         <Text style={styles.label}>Set {set.setNumber}</Text><Text style={styles.label}>{set.scorePlayer1}–{set.scorePlayer2}</Text>
       </View>)}</View>
     </>;
+    if (openDiagram) actions = <AuthButton label="Diagrama" onPress={openDiagram} />;
   } else if (final || proposed) {
     centered = true;
     const title = final ? (didWin ? '¡Ganaste la partida!' : 'Partida finalizada') : myProposal ? 'Resultado enviado'
       : proposedWinner ? `${proposedWinner} ganó la partida` : 'Revisar resultado';
     const message = final ? (winner ? `Ganó ${winner} · Resultado confirmado` : 'Resultado confirmado')
       : myProposal ? 'Tu rival puede confirmar o disputar el marcador.' : 'Revisa los sets antes de confirmar el resultado.';
-    body = <View ref={shareCard} collapsable={false}><MatchResult title={title} message={message} art={final ? (didWin ? matchArt.win : matchArt.loss) : myProposal ? matchArt.sent : matchArt.review}
+    body = <View ref={shareCard} collapsable={false}><MatchResult title={title} message={message} art={final ? (didWin ? (openDiagram ? matchArt.tournamentWin : matchArt.win) : matchArt.loss) : myProposal ? matchArt.sent : matchArt.review}
       score={score} sets={match.sets} reverse={participating && !first} gold={didWin && final} /></View>;
     if (mayReview) actions = <ActionRow>
       <AuthButton label="Confirmar" loading={busy} onPress={() => run(() => matchesService.confirm(match.id))} />
@@ -206,12 +213,15 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
     </ActionRow>;
     if (final && didWin) actions = <ActionRow>
       <AuthButton label="Compartir" icon={Share2} variant="secondary" onPress={() => share(`¡Gané ${score ?? ''} en PongRank! 🏓`)} />
-      <AuthButton label="Ver historial" onPress={() => router.replace({ pathname: '/matches', params: { section: 'history' } })} />
+      <AuthButton label={openDiagram ? 'Diagrama' : 'Ver historial'}
+        onPress={openDiagram ?? (() => router.replace({ pathname: '/matches', params: { section: 'history' } }))} />
     </ActionRow>;
+    else if (openDiagram && (final || myProposal)) actions = <AuthButton label="Diagrama" onPress={openDiagram} />;
   } else {
     centered = true;
     body = <MatchState title={match.status === 'WALKOVER' ? 'Partida finalizada por incomparecencia' : 'Detalle de la partida'}
       message={match.tournamentName ?? match.communityName ?? name} />;
+    if (openDiagram) actions = <AuthButton label="Diagrama" onPress={openDiagram} />;
   }
 
   return <>
@@ -227,8 +237,11 @@ function MatchContent({ match, origin, initialPlace, onChanged }: { match: Match
     {actions !== null && <View style={styles.footer}>{actions ?? <AuthButton label={final ? 'Ver historial' : 'Ver mis partidas'}
       onPress={final ? () => router.replace({ pathname: '/matches', params: { section: 'history' } }) : toMatches} />}</View>}
     <ConfirmDialog busy={busy} onCancel={() => setCancelPrompt(false)} confirmation={cancelPrompt ? {
-      title: '¿Cancelar la partida?', message: 'La partida dejará de estar activa.', label: 'Cancelar partida',
-      cancelLabel: 'Volver', Icon: X, destructive: true, onConfirm: () => { void run(() => matchesService.cancel(match.id)); },
+      title: openDiagram ? '¿Rechazar la partida?' : '¿Cancelar la partida?',
+      message: openDiagram ? 'Tu rival avanzará en la llave.' : 'La partida dejará de estar activa.',
+      label: openDiagram ? 'Rechazar partida' : 'Cancelar partida',
+      cancelLabel: 'Volver', Icon: X, destructive: true,
+      onConfirm: () => { void run(() => openDiagram ? tournamentsService.withdraw(match.id) : matchesService.cancel(match.id)); },
     } : null} />
   </>;
 }

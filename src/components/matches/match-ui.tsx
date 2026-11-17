@@ -18,6 +18,8 @@ export const matchArt = {
   rival: require('../../../assets/images/partidas-rival.webp'),
   confirmed: require('../../../assets/images/partidas-confirmed.webp'),
   tournaments: require('../../../assets/images/partidas-tournament.webp'),
+  tournamentBanner: require('../../../assets/images/torneo-copa-banner.webp'),
+  tournamentWin: require('../../../assets/images/torneo-copa-victoria.webp'),
   versus: require('../../../assets/images/partidas-versus.webp'),
   sent: require('../../../assets/images/partidas-waiting.webp'),
   review: require('../../../assets/images/partidas-review.webp'),
@@ -33,7 +35,7 @@ export function matchPlace(match: MatchResponse) {
   return match.communityName ?? (match.latitude != null && match.longitude != null ? 'Lugar de encuentro' : null);
 }
 
-export function MatchBanner({ title, children, prominent = false }: { title: string; children?: ReactNode; prominent?: boolean }) {
+export function MatchBanner({ title, children, prominent = false, tournament = false }: { title: string; children?: ReactNode; prominent?: boolean; tournament?: boolean }) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const glow = `match-banner-glow-${id}`;
   const fade = `match-banner-fade-${id}`;
@@ -50,7 +52,7 @@ export function MatchBanner({ title, children, prominent = false }: { title: str
         </Defs>
         <Rect width="400" height="135" fill={`url(#${glow})`} />
       </Svg>}
-      <Image source={matchArt.banner} style={prominent ? styles.prominentArt : styles.bannerImage} contentFit="cover" contentPosition="right center" accessible={false} />
+      <Image source={tournament ? matchArt.tournamentBanner : matchArt.banner} style={tournament ? StyleSheet.absoluteFill : prominent ? styles.prominentArt : styles.bannerImage} contentFit="cover" contentPosition="right center" accessible={false} />
       {prominent && <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 400 135" preserveAspectRatio="none" pointerEvents="none">
         <Defs>
           <LinearGradient id={fade} x1="0%" y1="0%" x2="100%" y2="0%">
