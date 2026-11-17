@@ -22,7 +22,10 @@ import { useLocation } from '@/hooks/use-location';
 import { useMatchAddress } from '@/hooks/use-match-address';
 import { circleOptions, matchRivals, type Circle, type MatchRival } from '@/services/match-circles.service';
 import { matchesService, type Coordinates, type MatchCreateInput } from '@/services/matches.service';
-import { placesAvailable, placesService, type PlaceSuggestion } from '@/services/places.service';
+import { placesService, type PlaceSuggestion } from '@/services/places.service';
+
+// Siempre se usa el geocodificador del teléfono (sin Google Places).
+const placesAvailable = false;
 import { toApiError } from '@/utils/api-error';
 
 const formats = (Object.keys(formatLabels) as MatchCreateInput['format'][]).map((key) => ({ key, label: formatLabels[key] }));
