@@ -80,6 +80,7 @@ export type MatchResponse = {
   ratingDeltaP1: number | null;
   ratingDeltaP2: number | null;
   createdAt: string;
+  scheduledAt?: string | null;
   confirmedAt: string | null;
 };
 

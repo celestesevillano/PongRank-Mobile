@@ -25,6 +25,7 @@ function RootNavigator() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={showApp}>
         <Stack.Screen name="(app)" />
+        <Stack.Screen name="(partidas)" />
       </Stack.Protected>
       <Stack.Protected guard={!showApp}>
         <Stack.Screen name="(auth)" />

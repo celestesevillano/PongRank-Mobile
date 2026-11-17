@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
-import { ActionRow } from '@/components/common/action-row';
+import { MatchSchedule, matchTime } from '@/components/matches/match-schedule';
 import { LocationNotice } from '@/components/common/location-notice';
 import { PillTabs } from '@/components/common/pill-tabs';
 import { ScreenContainer } from '@/components/common/screen-container';
@@ -40,7 +40,7 @@ export default function NewMatchScreen() {
   const [placeQuery, setPlaceQuery] = useState('');
   const [place, setPlace] = useState<{ name: string; coords: Coordinates }>();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
-  const [time, setTime] = useState(() => new Date());
+  const [time, setTime] = useState<Date | null>(null);
   const [busy, setBusy] = useState(false);
   const [resolvingPlace, setResolvingPlace] = useState(false);
 
@@ -82,11 +82,16 @@ export default function NewMatchScreen() {
 
   async function submit() {
     if (busy || (needsLocation && !chosenCoordinates)) return;
+    if (time && time.getTime() <= Date.now()) {
+      showToast('Elige una hora futura o selecciona Ahora mismo.', 'error');
+      setStep(3);
+      return;
+    }
     const context = !opponent || circle === 'club' ? 'LOCATION' : circle === 'community' ? 'COMMUNITY' : 'FRIEND';
     setBusy(true);
     try {
       const match = await matchesService.create({
-        matchType: context, format, opponentId: opponent?.id,
+        matchType: context, format, opponentId: opponent?.id, scheduledAt: time?.toISOString(),
         communityId: context === 'COMMUNITY' ? opponent?.groupId : undefined,
         ...(chosenCoordinates ?? {}),
       });
@@ -165,8 +170,8 @@ export default function NewMatchScreen() {
         {coords || place ? <Text style={styles.muted}>{address}</Text>
           : <LocationNotice status={status === 'ready' ? 'unavailable' : status} onRetry={retry} />}
         <Text style={styles.label}>Hora</Text>
-        <ActionRow><AuthButton label="Ahora mismo" variant="secondary" icon={Clock} onPress={() => setTime(new Date())} />
-          <View style={styles.field}><Text style={styles.label}>{clockText(time)}</Text></View></ActionRow>
+        <MatchSchedule value={time} onChange={setTime} />
+        {!time && <Text style={styles.muted}>{clockText(new Date())}</Text>}
       </ScrollView>
       <View style={styles.footer}><AuthButton label="Continuar" onPress={() => setStep(4)}
         disabled={(needsLocation && !chosenCoordinates) || resolvingPlace} /></View>
@@ -183,7 +188,7 @@ export default function NewMatchScreen() {
           <View style={styles.identity}>{opponent?.player ? <PlayerIdentity player={opponent.player} showRating />
             : <Text style={styles.label}>{opponent?.name ?? 'Partida abierta'}</Text>}</View>
           <MatchMeta icon={MapPin} text={address} />
-          <MatchMeta icon={Clock} text={clockText(time)} />
+          <MatchMeta icon={Clock} text={time ? matchTime(time) : clockText(new Date())} />
           <MatchMeta icon={Swords} text={formatLabels[format]} />
         </View>
       </ScrollView>

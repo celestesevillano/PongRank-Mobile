@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
-import { MapPin, UserRound } from 'lucide-react-native';
+import { Clock, MapPin, UserRound } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { matchTime } from '@/components/matches/match-schedule';
 import { formatLabels, matchPlace, MatchMeta } from '@/components/matches/match-ui';
 import { PlayerIdentity } from '@/components/pongmigos/pongmigos-ui';
 import { Brand, Spacing } from '@/constants/theme';
@@ -40,6 +41,7 @@ export function MatchCard({ match, playerId }: { match: MatchResponse; playerId:
         <Text style={styles.action}>{final ? 'Ver resultado' : proposed && !mine ? 'Revisar resultado' : 'Ver partida'}</Text>
       </View>
       {!!place && !final && <MatchMeta icon={MapPin} text={place} />}
+      {!!match.scheduledAt && !final && <MatchMeta icon={Clock} text={matchTime(match.scheduledAt)} />}
     </Pressable>
   );
 }
