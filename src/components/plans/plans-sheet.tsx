@@ -14,9 +14,9 @@ import type { MembershipPlan } from '@/types/api';
 import { toApiError } from '@/utils/api-error';
 
 const DETAIL: Record<PaidPlan, string> = {
-  BASIC: 'Para entender cómo te va en la mesa y ver tu progreso entre partidas.',
-  PRO: 'Para seguir tu progreso y entrenar tu técnica de ping pong.',
-  ENTERPRISE: 'Para abrir un club de ping pong y organizar a sus jugadores.',
+  BASIC: 'Sigue tu progreso entre partidas.',
+  PRO: 'Progreso y entrenamiento con Coach.',
+  ENTERPRISE: 'Abre un club y organiza a tus jugadores.',
 };
 
 export function PlansSheet({ visible, currentPlan, onClose }: {
