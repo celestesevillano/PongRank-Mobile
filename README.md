@@ -53,12 +53,11 @@ tests/          pruebas de la lógica del cuadro de torneos
 
 ## Equipo y participación
 
-| Integrante | Principales aportes | Participación |
-| --- | --- | --- |
-| Adriana Celeste Sevillano Común | Backend, sistema de diseño, pantallas y flujos de Mobile, pruebas y coordinación | _completar_ % |
-| Treicy Calsina Gutiérrez | Despliegue (API y EAS) y Web | _completar_ % |
-| Adriana Celeste Alvarado León | Coach (análisis de postura), Web y correcciones de navegación | _completar_ % |
-| Andrea Alejandra Vidal Coello | _completar_ | _completar_ % |
-| Emiliano Efraín Jesús Chambi Mamani | _completar_ | _completar_ % |
+| Integrante | Código | Correo | Principales aportes | Participación |
+| --- | --- | --- | --- | --- |
+| Adriana Celeste Sevillano Común | 202310146 | adriana.sevillano@utec.edu.pe | Backend, sistema de diseño, pantallas y flujos de Mobile, pruebas y coordinación | 100 % |
+| Treicy Calsina Gutiérrez | 202520007 | _completar_ | Despliegue (API y EAS) y Web | 100 % |
+| Adriana Celeste Alvarado León | 202420154 | _completar_ | Coach (análisis de postura), Web y correcciones de navegación | 100 % |
+| Andrea Alejandra Vidal Coello | 202410193 | _completar_ | _completar_ | 100 % |
 
-> La tabla debe completarse con los aportes y los porcentajes reales de cada integrante antes de la entrega.
+> Cada integrante cumplió completamente sus responsabilidades (100 %).
