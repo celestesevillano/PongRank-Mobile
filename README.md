@@ -55,10 +55,10 @@ tests/          pruebas de la lógica del cuadro de torneos
 
 | Integrante | Principales aportes | Participación |
 | --- | --- | --- |
-| Celeste Sevillano | Backend, sistema de diseño, pantallas y flujos de Mobile, pruebas y coordinación | _completar_ % |
-| Treicy Calsina | Despliegue (API, EAS), Web | _completar_ % |
-| Adriana Alvarado | Coach (análisis de postura), Web y correcciones de navegación | _completar_ % |
-| Andrea | _completar_ | _completar_ % |
-| Emiliano | _completar_ | _completar_ % |
+| Adriana Celeste Sevillano Común | Backend, sistema de diseño, pantallas y flujos de Mobile, pruebas y coordinación | _completar_ % |
+| Treicy Calsina Gutiérrez | Despliegue (API y EAS) y Web | _completar_ % |
+| Adriana Celeste Alvarado León | Coach (análisis de postura), Web y correcciones de navegación | _completar_ % |
+| Andrea Alejandra Vidal Coello | _completar_ | _completar_ % |
+| Emiliano Efraín Jesús Chambi Mamani | _completar_ | _completar_ % |
 
 > La tabla debe completarse con los aportes y los porcentajes reales de cada integrante antes de la entrega.
