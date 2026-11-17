@@ -13,12 +13,6 @@ import { membershipsService } from '@/services/memberships.service';
 import type { MembershipPlan } from '@/types/api';
 import { toApiError } from '@/utils/api-error';
 
-const DETAIL: Record<PaidPlan, string> = {
-  BASIC: 'Para entender cómo te va en la mesa y ver tu progreso entre partidas.',
-  PRO: 'Para seguir tu progreso y entrenar tu técnica de ping pong.',
-  ENTERPRISE: 'Para abrir un club de ping pong y organizar a sus jugadores.',
-};
-
 export function PlansSheet({ visible, currentPlan, onClose }: {
   visible: boolean; currentPlan: MembershipPlan; onClose: () => void;
 }) {
@@ -62,7 +56,7 @@ export function PlansSheet({ visible, currentPlan, onClose }: {
             ) : (
               <View style={styles.flex}>
                 <Text accessibilityRole="header" style={styles.title}>Elige tu plan</Text>
-                <Text style={styles.secondary}>Cada comunidad o club que creas o al que te unes usa un espacio.</Text>
+                <Text style={styles.secondary}>Cada comunidad o club usa 1 espacio.</Text>
               </View>
             )}
             <Pressable accessibilityRole="button" accessibilityLabel="Cerrar planes" style={styles.close} onPress={close} disabled={loading}><X color={Brand.text} size={24} /></Pressable>
@@ -79,13 +73,15 @@ export function PlansSheet({ visible, currentPlan, onClose }: {
                   </View>
                   <Price price={offer.price} />
                 </View>
-                <Text style={styles.secondary}>{DETAIL[offer.plan]}</Text>
                 {planBenefits(offer.plan).map(({ Icon, title, description, availability }) => (
                   <View key={title} style={styles.benefit}>
                     <Icon size={17} color={art.accent} />
                     <View style={styles.flex}>
-                      <Text style={styles.name}>{title}</Text>
-                      <Text style={[styles.secondary, availability && styles.availability]}>{description}</Text>
+                      <View style={styles.nameRow}>
+                        <Text style={styles.name}>{title}</Text>
+                        {availability ? <Text style={styles.soon}>Próximamente</Text> : null}
+                      </View>
+                      <Text style={styles.secondary}>{description}</Text>
                     </View>
                   </View>
                 ))}
@@ -158,5 +154,5 @@ const styles = StyleSheet.create({
   art: { width: '100%', aspectRatio: 1.6, borderRadius: 14 },
   detailHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
   benefit: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.two },
-  availability: { color: '#FFD278' },
+  soon: { color: Brand.textSecondary, fontSize: 11, fontWeight: '700', borderWidth: 1, borderColor: Brand.border, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 1, overflow: 'hidden' },
 });
