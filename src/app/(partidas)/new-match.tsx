@@ -17,6 +17,7 @@ import { Brand, Spacing } from '@/constants/theme';
 import { useSession } from '@/context/session';
 import { useToast } from '@/context/toast';
 import { useFetch } from '@/hooks/use-fetch';
+import { useLocation } from '@/hooks/use-location';
 import { useMatchAddress } from '@/hooks/use-match-address';
 import { circleOptions, matchRivals, type Circle, type MatchRival } from '@/services/match-circles.service';
 import { matchesService, type Coordinates, type MatchCreateInput } from '@/services/matches.service';
