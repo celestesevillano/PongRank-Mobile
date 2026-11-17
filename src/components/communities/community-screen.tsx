@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import type { PropsWithChildren, ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BackButton } from '@/components/common/back-button';
 import { ScreenContainer } from '@/components/common/screen-container';
 import { Brand, Spacing } from '@/constants/theme';
 
@@ -9,10 +10,7 @@ export function CommunityScreen({ title, onBack, action, scrollable, children }:
   return (
     <ScreenContainer title={title} scrollable={scrollable}>
       <View style={styles.toolbar}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.back}>
-          <ArrowLeft color={Brand.textSecondary} size={20} />
-          <Text style={styles.label}>Volver</Text>
-        </Pressable>
+        <BackButton onPress={onBack} />
         {action}
       </View>
       {children}
