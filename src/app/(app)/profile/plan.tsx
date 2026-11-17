@@ -57,7 +57,7 @@ export default function MyPlanRoute() {
                 <View style={[styles.fill, { width: `${ratio}%`, backgroundColor: art.accent }]} />
               </View>
             ) : <Text style={styles.secondary}>El uso de espacios no está disponible.</Text>}
-            <Text style={styles.secondary}>Cada comunidad o club que creas o al que te unes usa un espacio.</Text>
+            <Text style={styles.secondary}>Cada comunidad o club usa 1 espacio.</Text>
           </View>
           <View style={[styles.card, { borderLeftColor: art.accent, borderLeftWidth: 2 }]}>
             <Text accessibilityRole="header" style={styles.title}>Qué incluye</Text>
@@ -65,8 +65,11 @@ export default function MyPlanRoute() {
               <View key={title} style={styles.benefit}>
                 <Icon color={art.accent} size={18} />
                 <View style={styles.benefitCopy}>
-                  <Text style={styles.benefitTitle}>{title}</Text>
-                  <Text style={[styles.secondary, availability && styles.availability]}>{description}</Text>
+                  <View style={styles.benefitName}>
+                    <Text style={styles.benefitTitle}>{title}</Text>
+                    {availability ? <Text style={styles.soon}>Próximamente</Text> : null}
+                  </View>
+                  <Text style={styles.secondary}>{description}</Text>
                 </View>
               </View>
             ))}
@@ -93,5 +96,6 @@ const styles = StyleSheet.create({
   benefit: { flexDirection: 'row', gap: Spacing.two },
   benefitCopy: { flex: 1, gap: 3 },
   benefitTitle: { color: Brand.text, fontWeight: '700', fontSize: 14 },
-  availability: { color: '#FFD278' },
+  benefitName: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 },
+  soon: { color: Brand.textSecondary, fontSize: 11, fontWeight: '700', borderWidth: 1, borderColor: Brand.border, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 1, overflow: 'hidden' },
 });
