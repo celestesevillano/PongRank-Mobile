@@ -24,7 +24,7 @@ const statistics: Benefit = {
   description: 'Rating, victorias, racha y mejor victoria.',
 };
 const coach: Benefit = {
-  Icon: Bot, title: 'Coach Pongi', description: 'Próximamente en la app.', availability: true,
+  Icon: Bot, title: 'Coach Pongi', description: 'Entrena tu postura y tus golpes con la cámara.',
 };
 const club = (maximum: number): Benefit => ({
   Icon: Shield,
