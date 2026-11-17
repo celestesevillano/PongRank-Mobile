@@ -1,56 +1,64 @@
-# Welcome to your Expo app 👋
+# PongRank Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil de **PongRank**, la plataforma de tenis de mesa para jugadores de UTEC: partidas con marcador en vivo, ranking, comunidades, clubes, Pongmigos (amigos), planes de membresía y un coach de postura. Proyecto de CS2031 Desarrollo Basado en Plataformas (Proyecto 2).
 
-## Get started
+Construida con **React Native + Expo** (Expo Router, TypeScript) y conectada al backend REST de PongRank.
 
-1. Install dependencies
+## Enlaces
 
-   ```bash
-   npm install
-   ```
+| Componente | URL |
+| --- | --- |
+| API (Spring Boot, AWS) | https://pongrank-api.duckdns.org |
+| Documentación de la API (Swagger) | https://pongrank-api.duckdns.org/swagger-ui.html |
+| Web (Vercel) | https://pong-rank-web.vercel.app |
+| App móvil (build EAS) | https://expo.dev/accounts/pongrank-team/projects/pongrank-mobile |
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Cómo ejecutarla
 
 ```bash
-npm run reset-project
+npm ci
+npx expo start --go
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+La URL de la API se toma de `EXPO_PUBLIC_API_URL` (ver `.env.example`); por defecto apunta al backend desplegado. Para generar el APK se usa EAS (`eas.json`).
 
-### Other setup steps
+## Funcionalidades
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+- Registro e inicio de sesión con JWT (refresh automático) y registro en cuatro pasos con nivel inicial y categoría FDPTM sugerida.
+- Partidas: crear (contra Pongmigos, comunidades o clubes, o abierta), buscar partidas cerca, marcador en vivo, confirmación y disputa del resultado, historial y estadísticas.
+- Social: comunidades, clubes (registro con revisión), Pongmigos (solicitudes, lista y perfil público).
+- Planes y pagos (Mercado Pago), perfil editable con foto, redes y WhatsApp.
+- Coach Pongi: análisis de postura y golpes con la cámara y retroalimentación por voz.
 
-## Learn more
+## Arquitectura
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+src/
+  app/          pantallas y rutas (Expo Router)
+  components/   componentes reutilizables (auth, common, communities, clubs, matches, plans, profile...)
+  context/      estado global: sesión, plan, registro y avisos
+  hooks/        lógica reutilizable (useFetch, usePaginated, useLocation, useDebouncedValue, ...)
+  services/     capa de API: cliente axios con interceptores y un servicio por recurso
+  utils/        validaciones, errores de API, estadísticas, puntuación
+  constants/    tema, planes y textos
+  types/        tipos de la API
+docs/           sistema de diseño y visores de pantallas
+tests/          pruebas de la lógica del cuadro de torneos
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- **Integración con el backend:** un único cliente `axios` con `baseURL`, cabeceras por defecto, interceptor de autenticación (Bearer) y renovación del token ante un 401. Los tokens se guardan con `expo-secure-store`. Las lecturas usan `AbortController` y reintentos con espera exponencial para errores recuperables.
+- **Sensores y APIs externas:** ubicación (`expo-location`) para partidas cercanas y direcciones, cámara (`expo-camera`) para el Coach, galería (`expo-image-picker`) para la foto de perfil, voz (`expo-speech`); pagos con Mercado Pago. Los permisos tienen mensajes claros y alternativas cuando no se conceden.
+- **Errores y carga:** los mensajes de error son amigables (no técnicos), hay indicadores de carga, estados vacíos, pantalla sin conexión con «Reintentar», validaciones antes de enviar y avisos de éxito o error como ventanas emergentes.
+- **Diseño:** ver [`docs/pongrank-sistema-de-diseno.md`](docs/pongrank-sistema-de-diseno.md).
 
-## Join the community
+## Equipo y participación
 
-Join our community of developers creating universal apps.
+| Integrante | Principales aportes | Participación |
+| --- | --- | --- |
+| Celeste Sevillano | Backend, sistema de diseño, pantallas y flujos de Mobile, pruebas y coordinación | _completar_ % |
+| Treicy Calsina | Despliegue (API, EAS), Web | _completar_ % |
+| Adriana Alvarado | Coach (análisis de postura), Web y correcciones de navegación | _completar_ % |
+| Andrea | _completar_ | _completar_ % |
+| Emiliano | _completar_ | _completar_ % |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> La tabla debe completarse con los aportes y los porcentajes reales de cada integrante antes de la entrega.
