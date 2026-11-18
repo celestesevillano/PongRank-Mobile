@@ -31,6 +31,7 @@ export default function ClubAnnouncementsScreen() {
   const isAdmin = !!player && club.data?.admin?.id === player.id;
   const canPublish = isAdmin && plan?.plan === 'ENTERPRISE';
   const valid = !!title.trim() && !!body.trim();
+  const hasNotices = (notices.data?.content.length ?? 0) > 0;
   const back = () => {
     // Si se abrió directo en «Nuevo aviso» desde el club, Volver regresa al club y no a la lista de avisos
     if (composing && create !== 'yes') setComposing(false);
@@ -84,7 +85,7 @@ export default function ClubAnnouncementsScreen() {
                 <Text style={styles.body}>{item.body}</Text>
               </View>} />
           )}
-          {canPublish && notices.data.content.length > 0 && <View style={styles.footer}><AuthButton label="Nuevo aviso" icon={Plus} onPress={() => setComposing(true)} /></View>}
+          {canPublish && hasNotices && <View style={styles.footer}><AuthButton label="Nuevo aviso" icon={Plus} onPress={() => setComposing(true)} /></View>}
         </>
       )}
     </CommunityScreen>
