@@ -40,6 +40,7 @@ function ClubPeople({ clubId, pending }: { clubId: number; pending: boolean }) {
   const entries = usePaginated((params, signal) => clubsService.people(clubId, pending ? 'pending' : 'members', params, signal), [clubId, pending], 20);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [busy, setBusy] = useState(false);
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
 
   function ask(title: string, name: string, label: string, Icon: LucideIcon, operation: () => Promise<unknown>) {
     setConfirmation({ title, message: name, label, Icon, onConfirm: () => {
@@ -60,17 +61,19 @@ function ClubPeople({ clubId, pending }: { clubId: number; pending: boolean }) {
         <PongiState error={entries.error} errorMessage="No pudimos conectar con PongRank." retry={entries.refetch} />
       </View> : <ScreenState loading={entries.loading} error={entries.error} errorMessage="No pudimos cargar la lista." onRetry={entries.refetch} />}
       {entries.data && !entries.loading && !entries.error && (
-        <FlatList data={entries.data.content} keyExtractor={(item) => String(item.id)}
+        <FlatList data={entries.data.content} keyExtractor={(item) => String(item.id)} extraData={openMenu}
+          onScrollBeginDrag={() => setOpenMenu(null)}
           contentContainerStyle={[styles.list, entries.data.content.length === 0 && styles.centered]}
           ListHeaderComponent={!pending
             ? <Text style={styles.meta}>{entries.data.totalElements} miembros</Text> : undefined}
           ListEmptyComponent={<PongiState artwork={pongiArt.inbox} text={pending ? 'No tienes solicitudes pendientes.' : 'Aún no hay miembros para mostrar.'} />}
-          ListFooterComponent={entries.data.totalPages > 1 ? <PaginationBar page={entries.data} onPageChange={entries.setPage} /> : undefined}
+          ListFooterComponent={entries.data.totalPages > 1 ? <PaginationBar page={entries.data} onPageChange={(page) => { setOpenMenu(null); entries.setPage(page); }} /> : undefined}
           renderItem={({ item }) => {
             const person = item.player;
             const name = person?.name ?? 'Jugador';
+            const open = !!person && openMenu === person.id;
             return (
-              <View style={[styles.card, item.role === 'CLUB_ADMIN' && styles.adminCard]}>
+              <View style={[styles.card, item.role === 'CLUB_ADMIN' && styles.adminCard, open && styles.openCard]}>
                 <View style={styles.identity}>
                   {person && <ClubPlayerAvatar player={person} admin={item.role === 'CLUB_ADMIN'} />}
                   <View style={styles.identityText}>
@@ -79,7 +82,7 @@ function ClubPeople({ clubId, pending }: { clubId: number; pending: boolean }) {
                     {pending && person && <Text style={styles.meta}>{Math.round(person.ratingGlicko)} de rating</Text>}
                   </View>
                   {pending && person && <AuthButton label="Ver perfil" variant="text" onPress={() => openPlayer(person)} />}
-                  {!pending && person && person.id !== player?.id && <MemberActions player={person} />}
+                  {!pending && person && person.id !== player?.id && <MemberActions player={person} open={open} onToggle={() => setOpenMenu(open ? null : person.id)} onClose={() => setOpenMenu(null)} />}
                 </View>
                 {pending && <ActionRow>
                   <AuthButton label="Aceptar" icon={Check} onPress={() => ask('¿Aceptar solicitud?', name, 'Aceptar', Check, () => clubsService.reviewMembership(item.id, 'approve'))} />
@@ -160,15 +163,14 @@ function ClubPlayerAvatar({ player, admin }: { player: PlayerSummary; admin?: bo
   </View>;
 }
 
-function MemberActions({ player }: { player: PlayerSummary }) {
-  const [open, setOpen] = useState(false);
+function MemberActions({ player, open, onToggle, onClose }: { player: PlayerSummary; open: boolean; onToggle: () => void; onClose: () => void }) {
   const { showToast } = useToast();
   const [sending, setSending] = useState(false);
-  const act = (action: () => void) => { setOpen(false); action(); };
+  const act = (action: () => void) => { onClose(); action(); };
 
-  return <View>
+  return <View style={styles.actions}>
     <Pressable accessibilityRole="button" accessibilityLabel={`Acciones para ${player.name}`} accessibilityState={{ expanded: open }}
-      onPress={() => setOpen((value) => !value)} style={styles.kebab}><Ellipsis color={Brand.textSecondary} size={20} /></Pressable>
+      onPress={onToggle} style={styles.kebab}><Ellipsis color={Brand.textSecondary} size={20} /></Pressable>
     {open && <View style={styles.menu}>
       <AuthButton label="Ver perfil" variant="text" onPress={() => act(() => openPlayer(player))} />
       <AuthButton label="Retar a una partida" variant="text" onPress={() => act(() => challengePlayer(player))} />
@@ -178,7 +180,7 @@ function MemberActions({ player }: { player: PlayerSummary }) {
         try {
           await friendshipsService.send(player.id);
           showToast('Solicitud de Pongmigo enviada.', 'success');
-          setOpen(false);
+          onClose();
         } catch {
           showToast('No pudimos enviar la solicitud. Revisa el estado en su perfil.', 'error');
         } finally {
@@ -223,8 +225,14 @@ const styles = StyleSheet.create({
   adminCard: { backgroundColor: '#32181E', borderColor: '#9D3742' },
   admin: { color: '#FFB3B7', fontSize: 13 },
   shield: { position: 'absolute', width: 22, height: 22, bottom: -3, right: -4 },
+  actions: { zIndex: 10 },
   kebab: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
-  menu: { alignSelf: 'flex-end', alignItems: 'flex-start', borderWidth: 1, borderColor: Brand.border, borderRadius: 12, backgroundColor: '#1E1E20' },
+  menu: {
+    position: 'absolute', top: 46, right: 0, zIndex: 10, elevation: 8, minWidth: 220, alignItems: 'flex-start',
+    borderWidth: 1, borderColor: Brand.border, borderRadius: 12, backgroundColor: '#1E1E20',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+  },
+  openCard: { zIndex: 5, elevation: 5 },
   list: { gap: Spacing.two, paddingVertical: 12 },
   centered: { flexGrow: 1, justifyContent: 'center' },
   card: { borderWidth: 1, borderColor: Brand.border, borderRadius: 14, backgroundColor: Brand.surface, padding: 12, gap: Spacing.two },
