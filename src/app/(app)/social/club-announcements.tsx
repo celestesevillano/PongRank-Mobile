@@ -84,7 +84,7 @@ export default function ClubAnnouncementsScreen() {
                 <Text style={styles.body}>{item.body}</Text>
               </View>} />
           )}
-          {canPublish && notices.data.content.length > 0 && <View style={styles.footer}><AuthButton label="Nuevo aviso" icon={Plus} onPress={() => setComposing(true)} /></View>}
+          {canPublish && (notices.data?.content.length ?? 0) > 0 && <View style={styles.footer}><AuthButton label="Nuevo aviso" icon={Plus} onPress={() => setComposing(true)} /></View>}
         </>
       )}
     </CommunityScreen>
