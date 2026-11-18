@@ -31,10 +31,15 @@ export default function ClubAnnouncementsScreen() {
   const isAdmin = !!player && club.data?.admin?.id === player.id;
   const canPublish = isAdmin && plan?.plan === 'ENTERPRISE';
   const valid = !!title.trim() && !!body.trim();
-  const back = () => {
-    if (composing) setComposing(false);
-    else if (router.canGoBack()) router.back();
+  // Si se llegó directo a crear un aviso, Volver regresa a la pantalla anterior (el club), no a la lista de avisos.
+  const openedToCompose = create === 'yes';
+  const leave = () => {
+    if (router.canGoBack()) router.back();
     else router.replace('/social');
+  };
+  const back = () => {
+    if (composing && !openedToCompose) setComposing(false);
+    else leave();
   };
 
   async function publish() {
@@ -45,6 +50,10 @@ export default function ClubAnnouncementsScreen() {
       await clubsService.publish(clubId, { title: title.trim(), body: body.trim() });
       setTitle('');
       setBody('');
+      if (openedToCompose) {
+        leave();
+        return;
+      }
       setComposing(false);
       notices.setPage(0);
       notices.refetch();
@@ -54,6 +63,8 @@ export default function ClubAnnouncementsScreen() {
       setSaving(false);
     }
   }
+
+  const hasNotices = (notices.data?.content.length ?? 0) > 0;
 
   return (
     <CommunityScreen title={composing ? 'Nuevo aviso' : 'Avisos'} onBack={back}>
@@ -83,7 +94,7 @@ export default function ClubAnnouncementsScreen() {
                 <Text style={styles.body}>{item.body}</Text>
               </View>} />
           )}
-          {canPublish && <View style={styles.footer}><AuthButton label="Nuevo aviso" icon={Plus} onPress={() => setComposing(true)} /></View>}
+          {canPublish && hasNotices && <View style={styles.footer}><AuthButton label="Nuevo aviso" icon={Plus} onPress={() => setComposing(true)} /></View>}
         </>
       )}
     </CommunityScreen>
